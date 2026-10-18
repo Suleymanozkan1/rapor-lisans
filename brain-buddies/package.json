@@ -1,0 +1,22 @@
+{
+  "name": "zihin-molasi",
+  "version": "1.0.0",
+  "description": "Kişisel kullanım için tek oyunculu, çevrimdışı beyin egzersizi oyunu (Brain Buddies'ten ilham alan özgün yeniden yapım).",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.mjs\"",
+    "build": "node tools/build.mjs",
+    "start": "node tools/serve.mjs",
+    "check": "node tools/check-syntax.mjs",
+    "lint": "eslint .",
+    "ui": "node tools/build.mjs && node tools/ui-check.mjs",
+    "verify": "npm run check && npm test && npm run build"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
