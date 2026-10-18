@@ -3,6 +3,7 @@
 import { h } from './dom.js';
 import { s } from './svg.js';
 import { mascotSvg, speech } from './mascot.js';
+import { labBackground, PREVIEWS } from './scenes.js';
 import { createRng } from '../core/rng.js';
 import { TEST_CATEGORIES, STEP_MS, BONUS_EVERY, BONUS_MS, scoringFor, unlockedGames, pickGame, summarizeTest, TROPHIES, weightComment, stepComment, categoryById } from '../core/brainTest.js';
 import { gameById } from '../games/index.js';
@@ -21,32 +22,31 @@ export function createBrainScreens({ repo, show, play, audio, reducedMotion, ope
       el.append(
         h(
           'section',
-          { class: 'bt-hero' },
+          { class: 'lab', 'aria-labelledby': 'lab-title' },
+          labBackground(),
+          h('header', { class: 'lab-head' }, h('h1', { class: 'lab-title', id: 'lab-title' }, 'Zihin Molası'), h('p', { class: 'lab-tagline' }, 'Ne kadar zekisin?')),
           h(
             'div',
-            { class: 'bt-window' },
-            h('div', { class: 'bt-sky', 'aria-hidden': 'true' }),
-            h('div', { class: 'bt-host' }, mascotSvg({ size: 132, mood: 'happy' })),
-            h(
-              'div',
-              { class: 'bt-hero-text' },
-              h('p', { class: 'speech' }, b.tests ? 'Tekrar hoş geldin! Beynini bir kez daha tartalım mı?' : 'Merhaba, ben Profesör Gram! Beynini tartmaya hazır mısın?'),
-              h('h1', { class: 'bt-title' }, 'Beynin kaç gram?'),
-              h(
-                'p',
-                { class: 'bt-record' },
-                b.best ? ['Rekorun: ', h('strong', { id: 'record-weight' }, g(b.best.total))] : 'Henüz tartılmadın.',
-              ),
+            { class: 'lab-tiles' },
+            TEST_CATEGORIES.map((cat) =>
               h(
                 'div',
-                { class: 'row-actions' },
-                h('button', { type: 'button', class: 'btn btn-primary btn-lg', id: 'start-test', onclick: startTest }, 'Testi başlat'),
-                h('button', { type: 'button', class: 'btn btn-secondary', id: 'open-trophies', onclick: trophies }, `Kupalar ${earned}/${TROPHIES.length}`),
+                { class: `lab-tile cat-${cat.id}` },
+                h('p', { class: 'lab-tile-name' }, h('span', { class: 'lab-tile-icon', 'aria-hidden': 'true' }, cat.icon), cat.name),
+                PREVIEWS[cat.id](),
               ),
-              h('p', { class: 'bt-sub' }, '4 oyun × 60 saniye: Hafıza, Mantık, Hesap, Görsel.'),
             ),
           ),
+          h(
+            'div',
+            { class: 'lab-side' },
+            h('button', { type: 'button', class: 'lab-start', id: 'start-test', onclick: startTest }, 'Testi başlat'),
+            h('p', { class: 'lab-record' }, b.best ? ['Beynin: ', h('strong', { id: 'record-weight' }, g(b.best.total))] : 'Henüz tartılmadın'),
+            h('button', { type: 'button', class: 'lab-small', id: 'open-trophies', onclick: trophies }, `🏆 Kupalar ${earned}/${TROPHIES.length}`),
+          ),
+          h('div', { class: 'lab-host' }, mascotSvg({ size: 150, mood: 'happy' })),
         ),
+        h('p', { class: 'lab-note' }, '4 oyun × 60 saniye: Hafıza, Mantık, Hesap, Görsel. Hata yapmadan hızlı ol; art arda 10 doğru ek süre kazandırır.'),
         h(
           'section',
           { class: 'bt-cats', 'aria-labelledby': 'cats-h' },
@@ -100,7 +100,43 @@ export function createBrainScreens({ repo, show, play, audio, reducedMotion, ope
     const rng = createRng(seed);
     const plan = TEST_CATEGORIES.map((cat) => ({ category: cat.id, gameId: pickGame(cat.id, b.tests, b.choice[cat.id], rng) }));
     audio.play('start');
-    stepIntro({ plan, steps: [] }, 0);
+    welcome({ plan, steps: [] });
+  }
+
+  // Testten önce karşılama ve kısa yükleme (orijinaldeki "Prepare to have your brain tested" anı)
+  function welcome(state) {
+    const name = repo.settings.name.trim();
+    show((el) => {
+      const count = h('span', { id: 'loading-count' }, '0');
+      const go = () => {
+        if (el.isConnected && el.querySelector('#loading-count') === count) stepIntro(state, 0);
+      };
+      el.append(
+        h(
+          'section',
+          { class: 'lab lab-welcome', 'aria-labelledby': 'welcome-h' },
+          labBackground(),
+          h(
+            'div',
+            { class: 'welcome-box' },
+            h('p', { class: 'speech', id: 'welcome-h' }, `Hoş geldin${name ? `, ${name}` : ''}!`, h('br'), 'Beynin test edilmeye hazırlansın.'),
+            h('p', { class: 'lab-loading' }, 'Yükleniyor ', count),
+            h('button', { type: 'button', class: 'lab-small', id: 'skip-welcome', onclick: go }, 'Hemen başla'),
+          ),
+          h('div', { class: 'lab-host' }, mascotSvg({ size: 150, mood: 'think' })),
+        ),
+      );
+      const total = reducedMotion() ? 300 : 1400;
+      const t0 = performance.now();
+      const tick = (t) => {
+        if (!count.isConnected) return;
+        const k = Math.min(1, (t - t0) / total);
+        count.textContent = String(Math.round(k * 100));
+        if (k < 1) requestAnimationFrame(tick);
+        else setTimeout(go, 250);
+      };
+      requestAnimationFrame(tick);
+    });
   }
 
   function progress(state, current) {

@@ -87,9 +87,12 @@ try {
   {
     const { context, page, errors } = await newPage({ width: 360, height: 760 });
     log((await overflow(page)) <= 0, 'telefon: Beyin Testi ana sayfasında yatay taşma yok');
-    log((await page.textContent('h1')).includes('Beynin kaç gram'), 'ana sayfa Beyin Testi');
+    log(await page.locator('.lab #start-test').count() === 1 && (await page.locator('.lab-tile').count()) === 4, 'ana sayfa: laboratuvar sahnesi, 4 kategori kartı ve Testi başlat');
     await shot(page, 'home-phone');
     await page.click('#start-test');
+    log((await page.textContent('#welcome-h')).includes('Hoş geldin'), 'testten önce karşılama ekranı');
+    await page.clock.runFor(2000);
+    await page.waitForSelector('#start-step', { timeout: 3000 });
     for (let i = 0; i < 4; i++) {
       const name = await page.textContent('.intro-title');
       await page.click('#start-step');
@@ -110,7 +113,7 @@ try {
     log((await overflow(page)) <= 0, 'final ekranında yatay taşma yok');
     await shot(page, 'final-phone');
     await page.reload();
-    log((await page.textContent('.bt-record')).includes('Rekorun'), 'yeniden açınca rekor beyin ağırlığı korunuyor');
+    log((await page.textContent('.lab-record')).includes('Beynin'), 'yeniden açınca rekor beyin ağırlığı korunuyor');
     // Antrenman: kilitli ve açık oyunlar
     await page.click('#nav-settings');
     await page.check('#set-relaxed');
@@ -143,7 +146,8 @@ try {
     await page.click('#import-confirm');
     log((await page.textContent('#data-msg')).includes('içe aktarıldı'), 'onaydan sonra veriler içe aktarıldı');
     await page.setInputFiles('#import-file', { name: 'kotu.json', mimeType: 'application/json', buffer: Buffer.from('{bozuk') });
-    await page.clock.runFor(200);
+    // dosya okuma eşzamansızdır ve sahte saate bağlı değildir; mesajı bekle
+    await page.waitForFunction(() => document.querySelector('#data-msg')?.textContent.startsWith('İçe aktarılamadı'), null, { timeout: 3000 }).catch(() => {});
     log((await page.textContent('#data-msg')).startsWith('İçe aktarılamadı'), 'bozuk dosya reddediliyor');
     await page.click('#nav-home');
     const unnamed = await page.$$eval('button', (bs) => bs.filter((b) => !(b.getAttribute('aria-label') || b.textContent.trim())).length);
@@ -209,6 +213,7 @@ try {
     const { context, page, errors } = await newPage({ width: 740, height: 360 });
     log((await overflow(page)) <= 0, 'telefon yatay: ana sayfada yatay taşma yok');
     await page.click('#start-test');
+    await page.click('#skip-welcome');
     await page.click('#start-step');
     await page.clock.runFor(2500);
     log((await overflow(page)) <= 0, 'telefon yatay: oyun ekranında yatay taşma yok');

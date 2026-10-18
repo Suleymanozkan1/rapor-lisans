@@ -6,6 +6,7 @@ Görsel) 60'ar saniyelik mini oyunlarla test eder ve sonunda **beyninin kaç gra
 Hiçbir orijinal kod, görsel, ses veya metin kullanılmadı; karakter ve çizimler özgündür.
 
 - **Beyin Testi:** 4 × 60 sn, gram puanı, toplam beyin ağırlığı, rekor yalnızca toplamı geçince kaydedilir
+- Orijinal menünün yerleşimi: laboratuvar sahnesi, 2×2 kategori kartı, büyük "Testi başlat", adınla karşılama
 - 8 test oyunu (her kategoride 2; ikincisi testleri bitirdikçe açılır), art arda 10 doğruya ek süre, 8 kupa
 - **Serbest antrenman:** test oyunları + 9 ek beyin oyunu, Uyarlanabilir Mücadele
 - Otomatik zorluk, alıştırma turu, süre baskısını kapatma (antrenmanda)

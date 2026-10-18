@@ -9,7 +9,7 @@ Projede **hiç dış asset dosyası yoktur** (görsel, ses, font, ikon dosyası 
 | Oklar, ızgara parçaları, grafikler | Kodla çizilen SVG (`svg.js`, `app.js`) | Bu proje | Proje ile aynı |
 | Oyun ikonları (▦ ◈ ∑ ◐ ⇄ ⊻ ⋯ Aa ⟳ ⚙ ❄ ◯) | Unicode karakterleri | Unicode standardı | Serbest |
 | Nesne simgeleri (🦋 🍄 🔔 🔑 …, `src/core/icons.js`) | Cihazın emoji yazı tipi | İşletim sistemi | Dağıtılmaz; cihazdaki emoji kullanılır |
-| Profesör Gram (sunucu karakter), terazi, uzaylılar, dişliler | Kodla çizilen SVG (`src/ui/mascot.js`, `brainScreens.js`, `freezeAlien.js`, `gearWheel.js`) | Bu proje | Proje ile aynı |
+| Profesör Gram (sunucu karakter), laboratuvar sahnesi, kategori önizlemeleri, terazi, uzaylılar, dişliler | Kodla çizilen SVG (`src/ui/mascot.js`, `scenes.js`, `brainScreens.js`, `freezeAlien.js`, `gearWheel.js`) | Bu proje | Proje ile aynı |
 | Sesler | Web Audio osilatörleriyle sentez (`src/ui/audio.js`) | Bu proje | Proje ile aynı |
 | Yazı tipleri | Cihazın sistem yazı tipleri (`ui-rounded`, `system-ui`, `ui-monospace`) | İşletim sistemi | Yüklenmez, dağıtılmaz |
 | Kelime listeleri | Yaygın Türkçe adlar (`src/games/wordSort.js`) | Bu proje | Proje ile aynı |

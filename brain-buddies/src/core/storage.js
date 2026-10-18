@@ -27,6 +27,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   durationSec: 60,
   theme: 'auto', // 'auto' | 'light' | 'dark'
   seed: '', // boş değilse içerik deterministik
+  name: '', // karşılama ekranındaki ad (isteğe bağlı)
 });
 
 export function defaultData() {
@@ -95,6 +96,7 @@ export function sanitize(data) {
     if (!['auto', 'light', 'dark'].includes(s.theme)) s.theme = 'auto';
     if (s.startLevel !== 'auto' && !Number.isInteger(s.startLevel)) s.startLevel = 'auto';
     s.seed = s.seed.slice(0, 40);
+    s.name = s.name.slice(0, 20);
   }
   if (isObj(data.games)) {
     for (const [id, rec] of Object.entries(data.games)) {

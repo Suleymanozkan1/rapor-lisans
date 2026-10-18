@@ -7,7 +7,8 @@ Ayrıntı: `REFERENCE_GAPS.md`. Kod karşılıkları parantez içinde.
 ## 0. Beyin Testi — ana mod (`src/core/brainTest.js`, `src/ui/brainScreens.js`)
 
 ```
-Ana sayfa (Profesör Gram, rekor beyin ağırlığı) → Testi başlat →
+Ana sayfa (laboratuvar: başlık, 2×2 kategori kartı, Testi başlat, Profesör Gram) → Testi başlat →
+  Karşılama ("Hoş geldin, <ad>!", Yükleniyor 0–100; "Hemen başla" ile geçilebilir) →
   4 kez: kategori girişi → 60 sn mini oyun → kategori sonucu (gram)
 → Final tartısı (beyin ağırlığı, kategori dağılımı, rekor, kupalar, açılan oyunlar)
 ```

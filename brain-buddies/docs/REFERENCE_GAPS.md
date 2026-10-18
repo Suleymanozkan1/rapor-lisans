@@ -76,6 +76,13 @@ Ekran görüntüleri yalnızca inceleme için kullanıldı; depoya eklenmedi (te
 - Sunucu karakter ve laboratuvar havası korundu ama çizimler özgün: yeşil uzaylı yerine "Profesör Gram"
   (önlüklü pembe beyin). Orijinal görseller, adlar ve metinler kopyalanmadı.
 - İlk sürümün 9 oyunu "Serbest antrenman" altında kaldı.
+- Üçüncü tur ("birebir aynısı" isteği): ana ekran, orijinal menü görüntüsündeki yerleşime göre kuruldu
+  (ortada başlık + "Ne kadar zekisin?", solda 2×2 kategori kartı ve önizleme çizimleri, sağda büyük
+  "Testi başlat", sağ altta sunucu, arkada gün batımı görünen pencereli laboratuvar) ve testten önce adınla
+  karşılayan yükleme ekranı eklendi. Hesap sahnesine altın yığını ve hesap makinesi tuş takımı, Görsel sahnesine
+  mor gezegen eklendi. Bu turda yeni kanıt bulunamadı (ek web aramaları sonuçsuz).
+- Sınır: wooga'nın karakteri, logosu ve çizimleri telifli olduğu için kopyalanmaz; görüntüsü olmayan ekranlar ve
+  bilinmeyen kurallar "birebir" yapılamaz. Bunlar için kullanıcıdan ayrıntı ya da görüntü gerekir.
 
 ## 4. Senden gelebilecek kanıt
 
