@@ -28,13 +28,16 @@ export function createSession({
   practiceRounds = 0,
   options = {},
   best = null,
+  scoring, // puanlama ayarı (ör. Beyin Testi gram puanlaması); yoksa varsayılan
+  bonusEvery = 0, // art arda bu kadar doğruda ek süre (0 = kapalı)
+  bonusMs = 5000,
   now = () => performance.now(),
   clock = () => Date.now(),
 }) {
   const def = game.definition;
   const timed = Number.isFinite(durationMs);
   const timer = createTimer({ durationMs: timed ? durationMs : Infinity, now });
-  const score = createScoreCalculator();
+  const score = createScoreCalculator(scoring);
   const difficulty = createDifficultyController({ startLevel, adaptive });
   const gameState = game.createState({ rng, options });
 
@@ -61,7 +64,62 @@ export function createSession({
     return roundNumber >= rounds;
   };
 
+  let bonusTotal = 0;
+
+  function apply(input) {
+    const rtMs = input && Number.isFinite(input.rtMs) ? input.rtMs : presentedAt == null ? null : now() - presentedAt;
+    const verdict = game.evaluate(gameState, round, { ...input, rtMs });
+    const outcome = verdict.outcome;
+    const wasPractice = practiceLeft > 0;
+    let scored = { points: 0, applied: 0, breakdown: null };
+    let levelChange = { level: difficulty.level, changed: 0, reason: '' };
+    let bonusTime = 0;
+
+    if (wasPractice) {
+      practiceLeft -= 1;
+      if (practiceLeft === 0) timer.start();
+    } else {
+      scored = score.record({
+        outcome,
+        level: difficulty.level,
+        rtMs: verdict.rtMs ?? rtMs,
+        targetRtMs: verdict.targetRtMs ?? def.targetRtMs,
+        extraBonus: verdict.extraBonus || 0,
+      });
+      if (outcome !== OUTCOME.IGNORE) {
+        roundNumber += 1;
+        levelChange = difficulty.record({
+          correct: outcome === OUTCOME.CORRECT,
+          rtMs: verdict.rtMs ?? rtMs,
+          targetRtMs: verdict.targetRtMs ?? def.targetRtMs,
+        });
+      }
+      if (outcome === OUTCOME.CORRECT && bonusEvery > 0 && timed && score.streak % bonusEvery === 0) {
+        bonusTime = bonusMs;
+        bonusTotal += bonusMs;
+        timer.extend(bonusMs);
+      }
+    }
+
+    lastResult = {
+      ...verdict,
+      outcome,
+      rtMs: verdict.rtMs ?? rtMs,
+      practice: wasPractice,
+      points: scored.applied,
+      breakdown: scored.breakdown,
+      levelChange,
+      bonusTime,
+      round,
+    };
+    log.push({ key: round?.key, outcome, rtMs: lastResult.rtMs, level: levelChange.level, practice: wasPractice });
+    return lastResult;
+  }
+
   const session = {
+    get bonusTotal() {
+      return bonusTotal;
+    },
     get phase() {
       return phase;
     },
@@ -130,48 +188,16 @@ export function createSession({
     // input oyuna özeldir. { timeout: true } tur süresi dolduğunda gönderilir.
     submit(input) {
       assertPhase(PHASE.AWAITING, PHASE.PRESENTING);
-      const rtMs = input && Number.isFinite(input.rtMs) ? input.rtMs : presentedAt == null ? null : now() - presentedAt;
-      const verdict = game.evaluate(gameState, round, { ...input, rtMs });
-      const outcome = verdict.outcome;
-      const wasPractice = practiceLeft > 0;
-      let scored = { points: 0, applied: 0, breakdown: null };
-      let levelChange = { level: difficulty.level, changed: 0, reason: '' };
-
-      if (wasPractice) {
-        practiceLeft -= 1;
-        if (practiceLeft === 0) timer.start();
-      } else {
-        const level = difficulty.level;
-        scored = score.record({
-          outcome,
-          level,
-          rtMs: verdict.rtMs ?? rtMs,
-          targetRtMs: verdict.targetRtMs ?? def.targetRtMs,
-          extraBonus: verdict.extraBonus || 0,
-        });
-        if (outcome !== OUTCOME.IGNORE) {
-          roundNumber += 1;
-          levelChange = difficulty.record({
-            correct: outcome === OUTCOME.CORRECT,
-            rtMs: verdict.rtMs ?? rtMs,
-            targetRtMs: verdict.targetRtMs ?? def.targetRtMs,
-          });
-        }
-      }
-
-      lastResult = {
-        ...verdict,
-        outcome,
-        rtMs: verdict.rtMs ?? rtMs,
-        practice: wasPractice,
-        points: scored.applied,
-        breakdown: scored.breakdown,
-        levelChange,
-        round,
-      };
-      log.push({ key: round?.key, outcome, rtMs: lastResult.rtMs, level: levelChange.level, practice: wasPractice });
+      const result = apply(input);
       phase = PHASE.FEEDBACK;
-      return lastResult;
+      return result;
+    },
+
+    // Sürekli akan oyunlar (ör. düşen toplar) için: tur bitmeden tek bir olayı puanlar.
+    // Aşama değişmez; oyun süresi dolana kadar aynı "tur" sürer.
+    record(input) {
+      assertPhase(PHASE.AWAITING);
+      return apply(input);
     },
 
     pause() {
@@ -201,7 +227,7 @@ export function createSession({
       return buildResult({
         gameId: def.id,
         summary,
-        durationMs: timed ? Math.min(durationMs, timer.elapsed()) : timer.elapsed(),
+        durationMs: timed ? Math.min(timer.durationMs, timer.elapsed()) : timer.elapsed(),
         startedAt: startedAtWall,
         level: difficulty.level,
         maxLevel: difficulty.maxLevel,

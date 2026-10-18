@@ -1,63 +1,84 @@
 # REFERENCE_GAPS — Referans kanıtları ve boşluklar
 
-Etiketler: **GÖZLEMLENDİ** (oynanış/ekran görüntüsünde görüldü), **KAYNAKTA DOĞRULANDI**
-(yazılı bir kaynakta geçiyor), **TAHMİN** (makul varsayım), **BİLİNMİYOR**.
+Etiketler: **GÖZLEMLENDİ** (orijinal oyunun ekran görüntüsünde görüldü), **OYUNCU ANLATIMI**
+(dönemin oyuncularının yazılı anlatımı), **KAYNAKTA DOĞRULANDI** (geliştirici/basın metni),
+**TAHMİN** (makul varsayım), **BİLİNMİYOR**.
+
+Güncelleme (2026-10-18, ikinci tur): Kullanıcı ilk sürümün Brain Buddies'e "yakın bile olmadığını"
+söyledi. Kaynak araması derinleştirildi; aşağıdaki kanıtlar bulundu ve oyunun ana modu buna göre
+yeniden kuruldu (Beyin Testi).
 
 ## 1. Erişilen kaynaklar
 
-| Kaynak | Durum |
+| Kaynak | Ne sağladı |
 |---|---|
-| Depodaki `references/` klasörü | Yok |
-| Kullanıcının sağladığı ekran görüntüsü / video | Yok |
-| Brain Buddies kaynak kodu | Yok (kapalı kaynak Facebook uygulamasıydı) |
-| deutsche-startups.de, "wooga wiegt Gehirne" (14.07.2009) | Okundu |
-| openpr.de basın bülteni "Brain Buddies: 1 Million Nutzer in drei Wochen" | Sayfa 403 döndü; yalnızca arama özeti görüldü |
-| Web arşivi (Wayback) | Dizin API'si 4 anlık görüntü gösteriyor (`apps.facebook.com/brainbuddies` 2010-06-30, `wooga.com/games/brain-buddies/` 2010-09-29, `facebook.com/BrainBuddies` 2010-01-20, `wooga.com/games/` 2010-05-25). İçerikleri okunamadı: bu ortamın ağ politikası `web.archive.org`'u engelliyor |
-| Oynanış videosu | Bulunamadı; oyun Flash tabanlıydı ve artık çalışmıyor (TAHMİN) |
+| doublegames.com Brain Buddies sayfası ve 3 ekran görüntüsü (640×480) | Ana menü, karşılama ekranı, tanıtım metni, kategori görselleri |
+| comunio.de forumu, "Brain Buddies (Studi + Schüler VZ App)", 4 sayfa, Aralık 2009–2010 | Oyun adları, gram değerleri, kurallar, kupalar, açılma koşulları |
+| facebookspiele.spielen.de Brain Buddies tanıtımı | Tur süresi, kategori yapısı, rekor kuralı |
+| game-factory.eu proje sayfası (oyunu yapan stüdyo) | Flash teknolojisi, "4 tür kısa mini oyun" |
+| Adweek (2009), wooga blogu, deutsche-startups.de, triplepointpr blogu | Genel tanım, "en ağır beyin" yarışı, gizli oyunlar |
+| Wayback Machine dizin API'si | 4 arşiv kaydı var; içerikleri okunamadı (ortam `web.archive.org`'u engelliyor) |
 
-Hiçbir erişim engeli aşılmaya çalışılmadı.
+Ekran görüntüleri yalnızca inceleme için kullanıldı; depoya eklenmedi (telif wooga'ya ait).
 
 ## 2. Bulgular
 
+### 2.1 Oturum ve puan
+
 | # | Bulgu | Etiket | Kaynak |
 |---|---|---|---|
-| 1 | Geliştirici Berlin'deki wooga; Facebook uygulaması, Temmuz 2009 başında 8 dilde çıktı | KAYNAKTA DOĞRULANDI | deutsche-startups.de |
-| 2 | Oyuncu, "az ya da çok zorlayıcı" küçük oyunlarda arkadaşlarıyla yarışır | KAYNAKTA DOĞRULANDI | deutsche-startups.de |
-| 3 | Big Brain Academy ve "Who has the biggest brain?" beyin testine ilham oldu | KAYNAKTA DOĞRULANDI | deutsche-startups.de |
-| 4 | Bir oyun beş dakikadan uzun sürmemeli (wooga'nın genel ilkesi) | KAYNAKTA DOĞRULANDI | deutsche-startups.de |
-| 5 | Arkadaş skor tabloları (Hitlisten), kupalar (Pokale), "hemen önündeki arkadaş" ipuçları | KAYNAKTA DOĞRULANDI | deutsche-startups.de |
-| 6 | Grafikler çekici, kullanıcı yönlendirmesi basit | KAYNAKTA DOĞRULANDI | deutsche-startups.de |
-| 7 | 8 mini oyun vardı, 4 tane daha geliştiriliyordu | KAYNAKTA DOĞRULANDI (yalnızca arama özetinden) | openpr.de |
-| 8 | 3 haftada 1 milyon kullanıcı, Facebook'ta ilk 40 | KAYNAKTA DOĞRULANDI (yalnızca arama özetinden) | openpr.de |
-| 9 | Sanal eşya ve ileride premium hesap planı | KAYNAKTA DOĞRULANDI | deutsche-startups.de |
-| 10 | Mini oyunların adları ve kuralları | **BİLİNMİYOR** | — |
-| 11 | Tur süresi, oturum süresi, geri sayım | **BİLİNMİYOR** (yalnızca "≤ 5 dk" ilkesi) | — |
-| 12 | Puan formülü, seri/hız bonusu | **BİLİNMİYOR** | — |
-| 13 | Zorluk eğrisi | **BİLİNMİYOR** | — |
-| 14 | Ekran akışı, menü, sonuç ekranı | **BİLİNMİYOR** | — |
-| 15 | Ses ve animasyon geri bildirimi | **BİLİNMİYOR** | — |
-| 16 | Kategoriler Big Brain Academy'ye benzer (düşünme, hafıza, hesap, analiz, tanıma) | TAHMİN (bulgu 3'ten) | — |
-| 17 | Kısa, zamanlı oturumlar (≈ 1 dk / oyun) | TAHMİN (bulgu 4 ve 3'ten) | — |
+| 1 | Ana menü: "Brain Buddies — How smart are you?", dört kategori kartı (Memory, Logic, Calculation, Visual), "Start game" | GÖZLEMLENDİ | doublegames ekran 1 |
+| 2 | Tanıtım: "Train your brain in 60 seconds. Compete with your friends. Unlock trophies and new mini games." | GÖZLEMLENDİ | doublegames ekran 2 |
+| 3 | Karşılama: "Welcome, Jenny! Prepare to have your brain tested", yükleme göstergesi | GÖZLEMLENDİ | doublegames ekran 3 |
+| 4 | Sunucu: beyaz saçlı, gözlüklü, laboratuvar önlüklü, dokunaçlı yeşil uzaylı bilim insanı ("Doctor Octopus"); sıcak turuncu gün batımlı laboratuvar | GÖZLEMLENDİ / KAYNAKTA DOĞRULANDI | ekranlar, doublegames, Adweek |
+| 5 | Bir tur ≈ 5 dakika; her turda 4 kategori, her kategori için bir mini oyun | KAYNAKTA DOĞRULANDI | spielen.de |
+| 6 | Her kategori ayrı puan alır; puanlar gram ("g"); toplam = beyin ağırlığı | OYUNCU ANLATIMI | comunio (ör. 4072 g = Hafıza 1057 + Mantık 926 + Hesap 1151 + Görsel 938) |
+| 7 | Tipik toplam 2000–4000 g; iyi oyuncular 4500–5300 g; kategori başına ~700–2000 g | OYUNCU ANLATIMI | comunio |
+| 8 | Yeni sonuç yalnızca kişisel toplam rekor geçilirse kaydedilir | KAYNAKTA DOĞRULANDI | spielen.de |
+| 9 | Oyunlar arasında kategori sonuçları arkadaşlarla karşılaştırılır; beyin ağırlığı Facebook duvarında paylaşılabilir | KAYNAKTA DOĞRULANDI | spielen.de, doublegames |
+| 10 | Hatalar puanı çok düşürür; hatasız oynamak, hızlı ama hatalı oynamaktan iyidir | OYUNCU ANLATIMI | comunio |
+| 11 | Art arda 10 ya da 20 doğru ek süre kazandırır | OYUNCU ANLATIMI | comunio |
+| 12 | Hesap ve bazı mantık oyunlarında sayılar tuş takımıyla yazılır; fareyle yaklaşık yarı puan | OYUNCU ANLATIMI | comunio |
+| 13 | Her kategoride 2 oyun; yeni oyunlar zamanla açılır; açılmayınca oyun rastgele seçilir; açılınca seçilebilir | OYUNCU ANLATIMI | comunio |
+| 14 | Açılma koşulu belirsiz: ~12 oyun, arkadaş sayısı (ör. "12 arkadaş daha"), kupalar | OYUNCU ANLATIMI (çelişkili) | comunio |
+| 15 | Kupalar: "2500 fehlerlos" (hatasız 2500), "30 mal gespielt" (30 kez), "Netzwerkpokal" | OYUNCU ANLATIMI | comunio |
 
-Not: Bazı arama sonuçları başka bir oyunla, "Who Has The Biggest Brain?" ile ilgiliydi.
-O oyunun kategorileri Brain Buddies'e mal edilmedi.
+### 2.2 Mini oyunlar
 
-## 3. Bu boşluklar uygulamayı nasıl etkiledi
+| Kategori | Orijinal ad / tarif | Ne yapılıyor | Etiket |
+|---|---|---|---|
+| Hafıza | "Shoot the Pattern", "Kästen anklicken" | Izgarada nesnelerin yerini ezberle, karelere tıkla; ezberleyince beklemeden tıklamak süre kazandırır | GÖZLEMLENDİ (ızgara + nesneler) + OYUNCU ANLATIMI |
+| Hafıza | "fehlendes Symbol" | Eksik sembole tıkla | OYUNCU ANLATIMI (ayrıntı yok) |
+| Mantık | "Gear Wheel" / "Zahnrad" / "Drehrad" | Üç şekli karşılaştır; "sondan başla"; dönen çark | GÖZLEMLENDİ (dişli makine) + OYUNCU ANLATIMI |
+| Mantık | "Alphabetisch sortieren, von A–Z" | Harfleri alfabe sırasına koy | OYUNCU ANLATIMI |
+| Mantık? | Düşen bloklar, tuş takımı | Blokları temizle | OYUNCU ANLATIMI (kategori belirsiz) |
+| Hesap | Düşen kırmızı toplarda "2+4", "5+8"; yanda tuş takımı ("Don't Drop It" olabilir) | Sonucu yaz, top yere düşmeden | GÖZLEMLENDİ + OYUNCU ANLATIMI |
+| Hesap | "Number Shootout", "die Summe vorgeschrieben" | Verilen toplamı oluştur | OYUNCU ANLATIMI |
+| Görsel | Mor gezegende ellerinde nesne tutan uzaylılar; "Freeze an Alien"; "iki sırayı görmek için ortaya bak" | Hedef uzaylıları dondur | GÖZLEMLENDİ + OYUNCU ANLATIMI |
+| Görsel | "Luftblasen", "mit den Kugeln" | Baloncuklarla bir görev | OYUNCU ANLATIMI (kural bilinmiyor) |
+| ? | "Tile Terror", "Kästchen zählen" | Kutu sayma | OYUNCU ANLATIMI (ayrıntı yok) |
 
-- Brain Buddies'in hiçbir mini oyunu "birebir" yeniden kurulmadı; kuralları bilinmiyor.
-  Oyunlar master prompt'taki kategorilere ve özgün oyun tanımlarına göre tasarlandı.
-- Bilinen tek somut davranışlar uygulandı: kısa oyunlar (varsayılan 60 sn, en fazla 90 sn),
-  basit menü akışı, kişisel rekorlar.
-- Tek oyunculu kişisel kullanım nedeniyle arkadaş skor tablosu ve "hemen önündeki arkadaş"
-  ipucu, **kendi rekorunla yarış** biçimine çevrildi: sonuç ekranında rekora kalan fark
-  gösterilir. Kupaların yerine her oyun için rozet seviyeleri yok; bu bir sonraki adım
-  olarak `IMPLEMENTATION_PLAN.md`'de duruyor.
-- Tüm süre, puan ve zorluk değerleri **TAHMİN / özgün tasarım** olarak `GAMEPLAY_SPEC.md`'de
-  belgelendi ve tek bir yerden (`src/games/*` tanımları ve `src/core/score.js`) değiştirilebilir.
+### 2.3 Hâlâ bilinmeyenler
 
-## 4. Kullanıcıdan alınabilecek kanıt
+| Konu | Durum |
+|---|---|
+| Gram formülü (doğru başına kaç gram) | BİLİNMİYOR → tahmin, iyi oyuncunun kategori başına ~1000 g alacağı şekilde ayarlandı |
+| Dişli Çark'ın tam kuralı (eşleştirme mi, farklıyı bulma mı) | BİLİNMİYOR → "üç dişliden farklı olanı bul" (TAHMİN; "üç şekli karşılaştır" anlatımına dayanır) |
+| Kayıp Sembol ve Baloncuklar'ın tam kuralı | BİLİNMİYOR → TAHMİN |
+| Oyunların açılma koşulu | Çelişkili → test sayısına bağlandı (tek oyunculu; arkadaş yok) |
+| Arkadaş karşılaştırması | Tek oyunculu kişisel kullanımda yok → kendi rekor testinle karşılaştırma |
 
-Eğer ekran görüntüsü, oynanış videosu veya o döneme ait notların varsa
-`brain-buddies/references/` klasörüne koy. Ya da ortamın ağ ayarlarında `web.archive.org`'a izin ver;
-yukarıdaki arşiv sayfaları REA ile incelenir (bkz. `REA_ANALYSIS.md`). Hangi mini oyunun neye benzediğini görürsem
-o oyunun kurallarını, süresini ve puanını ona göre ayarlayabilirim.
+## 3. Bu kanıtların uygulamaya etkisi
+
+- Ana mod artık **Beyin Testi**: 4 kategori × 60 sn, gram puanı, toplam beyin ağırlığı, rekor yalnızca
+  toplam geçilince, ek süre, kupalar, açılan oyunlar, kategori başına oyun seçimi (`src/core/brainTest.js`).
+- 8 mini oyun yukarıdaki tablodan türetildi (`docs/GAMEPLAY_SPEC.md §1`).
+- Sunucu karakter ve laboratuvar havası korundu ama çizimler özgün: yeşil uzaylı yerine "Profesör Gram"
+  (önlüklü pembe beyin). Orijinal görseller, adlar ve metinler kopyalanmadı.
+- İlk sürümün 9 oyunu "Serbest antrenman" altında kaldı.
+
+## 4. Senden gelebilecek kanıt
+
+Hatırladığın kurallar (ör. Dişli Çark'ta tam olarak ne yapılıyordu, baloncuk oyunu nasıldı) ya da elinde
+ekran görüntüsü/video varsa söyle veya `brain-buddies/references/` klasörüne koy; ilgili oyunu ona göre
+düzeltirim. Ortamın ağ ayarlarında `web.archive.org`'a izin verirsen arşiv sayfalarını da incelerim.

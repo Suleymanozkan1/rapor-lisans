@@ -1,11 +1,14 @@
 # Zihin Molası
 
-Kişisel kullanım için tek oyunculu, çevrimdışı çalışan bir beyin egzersizi oyunu. wooga'nın 2009
-Facebook oyunu Brain Buddies'in "kısa, hızlı, tekrar oynanabilir zihin oyunları" hissinden ilham alan
-**özgün** bir yeniden yapım. Hiçbir orijinal kod, görsel, ses veya metin kullanılmadı.
+Kişisel kullanım için tek oyunculu, çevrimdışı çalışan bir beyin oyunu. wooga'nın 2009 Facebook oyunu
+**Brain Buddies**'in yapısını yeniden kurar: Profesör Gram beynini 4 kategoride (Hafıza, Mantık, Hesap,
+Görsel) 60'ar saniyelik mini oyunlarla test eder ve sonunda **beyninin kaç gram olduğunu** söyler.
+Hiçbir orijinal kod, görsel, ses veya metin kullanılmadı; karakter ve çizimler özgündür.
 
-- 9 mini oyun, 8 beyin kategorisi, Uyarlanabilir Mücadele modu
-- Puanlama, seri ve hız bonusu, otomatik zorluk (kapatılabilir), alıştırma turu
+- **Beyin Testi:** 4 × 60 sn, gram puanı, toplam beyin ağırlığı, rekor yalnızca toplamı geçince kaydedilir
+- 8 test oyunu (her kategoride 2; ikincisi testleri bitirdikçe açılır), art arda 10 doğruya ek süre, 8 kupa
+- **Serbest antrenman:** test oyunları + 9 ek beyin oyunu, Uyarlanabilir Mücadele
+- Otomatik zorluk, alıştırma turu, süre baskısını kapatma (antrenmanda)
 - Kişisel rekorlar, günlük/haftalık istatistikler, güçlü alanlar
 - Açık/koyu tema, klavyeyle tam oynanış, hareket azaltma, sesler aç/kapat
 - Hiçbir veri dışarı gönderilmez; kayıt yalnızca tarayıcıda (localStorage)
@@ -21,7 +24,7 @@ Gereken tek şey Node.js 20+ (ücretsiz). `npm install` gerekmez; projede bağı
 
 ```bash
 cd brain-buddies
-npm test          # 75 otomatik test (node:test)
+npm test          # 92 otomatik test (node:test)
 npm run check     # tüm .js/.mjs dosyalarında sözdizimi denetimi
 npm run build     # dist/zihin-molasi.html üretir (tek dosya)
 npm start         # http://localhost:8080 — ES modülleriyle geliştirme sunucusu
@@ -32,7 +35,16 @@ npm run lint      # ESLint (MIT)
 npm run ui        # Playwright + Chromium ile uçtan uca arayüz kontrolü (Apache-2.0)
 ```
 
-## Oyunlar
+## Beyin Testi oyunları
+
+| Kategori | Oyun 1 (başta açık) | Oyun 2 (sonra açılır) |
+|---|---|---|
+| Hafıza | Deseni Vur: nesnelerin yerini ezberle, karelere tıkla | Kayıp Sembol: eksik nesneyi bul |
+| Mantık | Dişli Çark: üç dişliden farklı olanı bul | ABC Sırala: harflere alfabe sırasıyla tıkla |
+| Hesap | Düşürme!: düşen toplardaki işlemi tuş takımıyla çöz | Sayı Avı: hedef toplamı veren sayıları seç |
+| Görsel | Uzaylıyı Dondur: hedef nesneyi tutan uzaylıları dondur | Baloncuklar: küçükten büyüğe dokun |
+
+## Serbest antrenmandaki ek oyunlar
 
 | Oyun | Kategori | Özet |
 |---|---|---|

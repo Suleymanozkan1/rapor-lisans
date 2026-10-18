@@ -17,8 +17,20 @@ import * as logicCircuit from './logicCircuit.js';
 import * as sequenceDetective from './sequenceDetective.js';
 import * as wordSort from './wordSort.js';
 import * as mentalRotation from './mentalRotation.js';
+import * as patternShoot from './patternShoot.js';
+import * as missingSymbol from './missingSymbol.js';
+import * as gearWheel from './gearWheel.js';
+import * as alphaSort from './alphaSort.js';
+import * as dontDrop from './dontDrop.js';
+import * as numberHunt from './numberHunt.js';
+import * as freezeAlien from './freezeAlien.js';
+import * as bubbles from './bubbles.js';
 
-export const GAMES = [
+// Beyin Testi oyunları (Brain Buddies'in dört kategorisi; bkz. src/core/brainTest.js)
+export const TEST_GAMES = [patternShoot, missingSymbol, gearWheel, alphaSort, dontDrop, numberHunt, freezeAlien, bubbles];
+
+// Serbest antrenmandaki ek oyunlar
+export const EXTRA_GAMES = [
   memoryGrid,
   quickMatch,
   mentalMath,
@@ -30,6 +42,8 @@ export const GAMES = [
   mentalRotation,
 ];
 
+export const GAMES = [...TEST_GAMES, ...EXTRA_GAMES];
+
 export const CATEGORIES = {
   memory: { name: 'Hafıza' },
   match: { name: 'Hızlı eşleştirme' },
@@ -39,6 +53,7 @@ export const CATEGORIES = {
   verbal: { name: 'Sözel' },
   spatial: { name: 'Mekânsal' },
   logic: { name: 'Mantık' },
+  visual: { name: 'Görsel algı' },
 };
 
 export const CATEGORY_IDS = Object.keys(CATEGORIES);

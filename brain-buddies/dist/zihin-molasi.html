@@ -6,26 +6,34 @@
     <title>Zihin Molası</title>
     <meta name="description" content="Kısa turlu, çevrimdışı beyin egzersizi oyunu." />
     <style>
-/* Zihin Molası — "test defteri": soğuk kareli kâğıt, mürekkep mavisi, fosforlu kalem sarısı.
+/* Zihin Molası — "gün batımı laboratuvarı": turuncu gökyüzü, laboratuvar yeşili, beyin pembesi.
    Düzen: tek sütun, en fazla 760px; oyun ekranında üstte gösterge, ortada sahne. */
 :root {
-  --paper: #eef2f7;
-  --grid-line: #dde4ee;
-  --surface: #ffffff;
-  --ink: #18264a;
-  --muted: #56648a;
-  --line: #cdd6e4;
-  --primary: #2a55c4;
+  --paper: #fdf0e1;
+  --surface: #fffaf4;
+  --ink: #2a1733;
+  --muted: #6a4f6e;
+  --line: #ecd3bc;
+  --primary: #23803c;
   --primary-ink: #ffffff;
-  --highlight: #ffd84a;
-  --highlight-ink: #18264a;
-  --good: #137a4c;
-  --good-bg: #dff4e9;
-  --bad: #bd3030;
-  --bad-bg: #fbe3e3;
-  --shape-bg: #ffffff;
-  --cell: #e3e9f3;
-  --cell-lit: #ffd84a;
+  --highlight: #ffcf3a;
+  --highlight-ink: #2a1733;
+  --good: #1b7a3a;
+  --good-bg: #ddf3e2;
+  --bad: #b5302a;
+  --bad-bg: #fbe1dc;
+  --shape-bg: #fffaf4;
+  --cell: #f4e2cf;
+  --cell-lit: #ffcf3a;
+  --sky-top: #f08a3e;
+  --sky-mid: #f7b267;
+  --sky-low: #fde2bf;
+  --lab: #7a3f2a;
+  --coat: #ffffff;
+  --brain: #f6a5b9;
+  --brain-line: #c4577a;
+  --tube: #6fd77f;
+  --gear: #8c7a92;
 
   --font-display: ui-rounded, 'SF Pro Rounded', 'Nunito', 'Varela Round', 'Arial Rounded MT Bold', system-ui, sans-serif;
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
@@ -46,45 +54,61 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --paper: #0f1420;
-    --grid-line: #172033;
-    --surface: #172034;
-    --ink: #e6ecf8;
-    --muted: #a0aecb;
-    --line: #2b3854;
-    --primary: #7ea4ff;
-    --primary-ink: #0f1420;
-    --highlight: #ffd84a;
-    --highlight-ink: #18264a;
-    --good: #46d59a;
-    --good-bg: #123526;
-    --bad: #ff8080;
-    --bad-bg: #3d1a1e;
-    --shape-bg: #172034;
-    --cell: #22304b;
-    --cell-lit: #ffd84a;
+    --paper: #170f24;
+    --surface: #241838;
+    --ink: #f6edff;
+    --muted: #bba7d2;
+    --line: #3d2c57;
+    --primary: #63d684;
+    --primary-ink: #0f2414;
+    --highlight: #ffcf3a;
+    --highlight-ink: #2a1733;
+    --good: #63d684;
+    --good-bg: #163a22;
+    --bad: #ff8a80;
+    --bad-bg: #441f22;
+    --shape-bg: #241838;
+    --cell: #33264b;
+    --cell-lit: #ffcf3a;
+    --sky-top: #3a1f5c;
+    --sky-mid: #5b2f6e;
+    --sky-low: #2a1a40;
+    --lab: #120b1d;
+    --coat: #efe8f7;
+    --brain: #f6a5b9;
+    --brain-line: #c4577a;
+    --tube: #63d684;
+    --gear: #a996bd;
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --paper: #0f1420;
-  --grid-line: #172033;
-  --surface: #172034;
-  --ink: #e6ecf8;
-  --muted: #a0aecb;
-  --line: #2b3854;
-  --primary: #7ea4ff;
-  --primary-ink: #0f1420;
-  --highlight: #ffd84a;
-  --highlight-ink: #18264a;
-  --good: #46d59a;
-  --good-bg: #123526;
-  --bad: #ff8080;
-  --bad-bg: #3d1a1e;
-  --shape-bg: #172034;
-  --cell: #22304b;
-  --cell-lit: #ffd84a;
+  --paper: #170f24;
+  --surface: #241838;
+  --ink: #f6edff;
+  --muted: #bba7d2;
+  --line: #3d2c57;
+  --primary: #63d684;
+  --primary-ink: #0f2414;
+  --highlight: #ffcf3a;
+  --highlight-ink: #2a1733;
+  --good: #63d684;
+  --good-bg: #163a22;
+  --bad: #ff8a80;
+  --bad-bg: #441f22;
+  --shape-bg: #241838;
+  --cell: #33264b;
+  --cell-lit: #ffcf3a;
+  --sky-top: #3a1f5c;
+  --sky-mid: #5b2f6e;
+  --sky-low: #2a1a40;
+  --lab: #120b1d;
+  --coat: #efe8f7;
+  --brain: #f6a5b9;
+  --brain-line: #c4577a;
+  --tube: #63d684;
+  --gear: #a996bd;
   color-scheme: dark;
 }
 
@@ -102,10 +126,8 @@ body {
   margin: 0;
   min-height: 100%;
   background-color: var(--paper);
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image: linear-gradient(180deg, var(--sky-low) 0, var(--paper) 480px);
+  background-repeat: no-repeat;
   color: var(--ink);
   font-family: var(--font-body);
   font-size: var(--step-0);
@@ -1409,7 +1431,7 @@ table.data .num {
   }
 }
 
-.reduce-motion *,
+.reduce-motion *:not(.dd-ball):not(.fa-alien),
 .reduce-motion *::before,
 .reduce-motion *::after {
   animation: none !important;
@@ -1417,7 +1439,7 @@ table.data .num {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html:not(.motion-ok) *,
+  html:not(.motion-ok) *:not(.dd-ball):not(.fa-alien),
   html:not(.motion-ok) *::before,
   html:not(.motion-ok) *::after {
     animation-duration: 1ms !important;
@@ -1453,6 +1475,16 @@ table.data .num {
   .game-row {
     grid-template-columns: 44px 1fr auto;
     gap: 10px;
+  }
+}
+
+/* Çok dar ekran: üst çubukta yalnızca logo ve gezinme */
+@media (max-width: 460px) {
+  .brand-name {
+    display: none;
+  }
+  .nav-btn {
+    padding: 0 9px;
   }
 }
 
@@ -1502,6 +1534,907 @@ table.data .num {
     width: min(100%, 300px);
   }
 }
+
+/* =====================================================================
+   Beyin Testi (ana sayfa, adımlar, final tartısı, kupalar)
+   ===================================================================== */
+:root {
+  --cat-memory: #8e5bd6;
+  --cat-logic: #2f7ae5;
+  --cat-numeric: #e0701f;
+  --cat-visual: #1f9d63;
+}
+
+.btn-lg {
+  min-height: 56px;
+  padding: 0 28px;
+  font-size: var(--step-1);
+}
+
+.bt-window {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  gap: 8px 20px;
+  padding: 24px 24px 0;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 45%, var(--sky-low) 100%);
+}
+
+.bt-sky {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 42%;
+  background:
+    linear-gradient(transparent 70%, var(--lab) 70%),
+    repeating-linear-gradient(90deg, transparent 0 18px, color-mix(in srgb, var(--lab) 55%, transparent) 18px 40px, transparent 40px 64px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.bt-host {
+  position: relative;
+  align-self: end;
+}
+
+.bt-hero-text {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 22px;
+  min-width: 0;
+}
+
+.speech {
+  position: relative;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  font-weight: 600;
+  max-width: 46ch;
+}
+
+.speech-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.speech-row .speech::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  bottom: 14px;
+  border: 8px solid transparent;
+  border-right-color: var(--ink);
+}
+
+.bt-title {
+  font-size: clamp(2rem, 8vw, 3.2rem);
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.bt-record {
+  margin: 0;
+  font-size: var(--step-1);
+  color: var(--ink);
+}
+
+.bt-record strong {
+  font-family: var(--font-num);
+}
+
+.bt-sub {
+  margin: 0;
+  color: var(--ink);
+  opacity: 0.85;
+  font-size: var(--step--1);
+}
+
+.bt-cats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bt-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.bt-cat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 6px solid var(--cat, var(--primary));
+  border-radius: var(--radius);
+  min-width: 0;
+}
+
+.cat-memory { --cat: var(--cat-memory); }
+.cat-logic { --cat: var(--cat-logic); }
+.cat-numeric { --cat: var(--cat-numeric); }
+.cat-visual { --cat: var(--cat-visual); }
+
+.bt-cat-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bt-cat-head h3 {
+  font-size: var(--step-1);
+}
+
+.bt-cat-icon {
+  font: 700 1.2rem / 1 var(--font-display);
+}
+
+.bt-game,
+.bt-cat-best,
+.bt-lock {
+  margin: 0;
+}
+
+.bt-game {
+  font-weight: 700;
+}
+
+.bt-cat-best {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-num);
+}
+
+.bt-lock {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.bt-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bt-choice select {
+  min-height: 40px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  max-width: 100%;
+}
+
+.bt-training {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.bt-progress {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bt-progress li {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  min-width: 0;
+}
+
+.bt-progress li.is-current {
+  border: 2px solid var(--ink);
+  background: var(--highlight);
+  color: var(--highlight-ink);
+}
+
+.bt-progress li.is-done {
+  border-color: var(--good);
+}
+
+.bt-progress-name {
+  font: 700 var(--step--1) / 1.2 var(--font-display);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bt-progress-val {
+  font: 600 0.78rem / 1.2 var(--font-num);
+}
+
+.bt-step,
+.bt-final {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bt-grams {
+  font: 800 clamp(3rem, 15vw, 5rem) / 1 var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.bt-weigh {
+  display: grid;
+  grid-template-columns: minmax(120px, 220px) minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+}
+
+.bt-scale {
+  width: 100%;
+  height: auto;
+}
+
+.bt-total {
+  display: flex;
+  flex-direction: column;
+  font: 800 clamp(2.8rem, 13vw, 5rem) / 1 var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.bt-total small {
+  font: 700 var(--step--1) / 1.2 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.bt-breakdown {
+  margin: 0;
+  padding: 16px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.bt-breakdown li {
+  display: grid;
+  grid-template-columns: minmax(0, 9rem) 1fr 5.5rem;
+  align-items: center;
+  gap: 10px;
+}
+
+.bt-breakdown small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.bar-fill.cat-memory,
+.bar-fill.cat-logic,
+.bar-fill.cat-numeric,
+.bar-fill.cat-visual {
+  background: var(--cat);
+}
+
+.bt-trend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+ul.plain {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.trophy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trophy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px dashed var(--line);
+  background: var(--surface);
+}
+
+.trophy.is-earned {
+  border: 2px solid var(--ink);
+  background: var(--highlight);
+  color: var(--highlight-ink);
+}
+
+.trophy.is-earned .muted {
+  color: var(--highlight-ink);
+}
+
+.trophy-icon {
+  font-size: 1.8rem;
+}
+
+.trophy-state {
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.game-row.is-locked {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.game-row.is-locked:hover {
+  transform: none;
+  border-color: var(--line);
+}
+
+.test-step-label {
+  margin: 0;
+  font: 700 var(--step--1) / 1.2 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.feedback.is-flash {
+  min-height: 2.4rem;
+  padding: 4px 10px;
+}
+
+.fb-inline {
+  font-size: var(--step--1);
+  color: var(--ink);
+}
+
+.fb-bonus {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--highlight);
+  color: var(--highlight-ink);
+}
+
+/* Profesör Gram */
+.mascot {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.pg-coat { fill: var(--coat); stroke: var(--ink); stroke-width: 2; }
+.pg-lapel { fill: none; stroke: var(--gear); stroke-width: 2; }
+.pg-pen { fill: var(--cat-logic); }
+.pg-arm { fill: none; stroke: var(--brain-line); stroke-width: 6; stroke-linecap: round; }
+.pg-tube { fill: var(--coat); stroke: var(--ink); stroke-width: 2; }
+.pg-liquid { fill: var(--tube); }
+.pg-brain circle { fill: var(--brain); stroke: var(--brain-line); stroke-width: 2.5; }
+.pg-fold { fill: none; stroke: var(--brain-line); stroke-width: 2.5; stroke-linecap: round; }
+.pg-glass { fill: color-mix(in srgb, var(--coat) 55%, transparent); stroke: #2a1733; stroke-width: 2.5; }
+.pg-eye { fill: #2a1733; }
+.pg-line { fill: none; stroke: #2a1733; stroke-width: 2.5; stroke-linecap: round; }
+.pg-mouth { fill: #2a1733; }
+
+.sc-base { fill: var(--lab); }
+.sc-post { fill: var(--gear); }
+.sc-plate { fill: var(--highlight); stroke: var(--ink); stroke-width: 2; }
+.sc-brain circle { fill: var(--brain); stroke: var(--brain-line); stroke-width: 2.5; }
+.sc-fold { fill: none; stroke: var(--brain-line); stroke-width: 2.5; }
+
+/* Duraklatınca oyun animasyonları durur */
+.stage.is-paused *,
+.stage.is-paused {
+  animation-play-state: paused !important;
+}
+
+/* =====================================================================
+   Beyin Testi oyunları
+   ===================================================================== */
+
+/* Deseni Vur */
+.ps-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  gap: 6px;
+  width: min(100%, 420px);
+  padding: 10px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tube) 35%, var(--surface)), var(--surface));
+  border: 2px solid var(--ink);
+  transform: perspective(700px) rotateX(10deg);
+}
+
+.ps-cell {
+  aspect-ratio: 1;
+  max-width: 100%;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 2px solid var(--line);
+  background: var(--cell);
+  cursor: pointer;
+  font-size: clamp(1.1rem, 5vw, 1.8rem);
+  padding: 0;
+}
+
+.ps-grid.is-hidden .ps-obj {
+  visibility: hidden;
+}
+
+.ps-grid.is-revealed .ps-obj {
+  visibility: visible;
+  opacity: 0.75;
+}
+
+.ps-cell.is-ok {
+  background: var(--good-bg);
+  border-color: var(--good);
+  box-shadow: inset 0 0 0 3px var(--good);
+}
+
+.ps-cell.is-wrong {
+  background: var(--bad-bg);
+  border-color: var(--bad);
+}
+
+.ps-cell.is-missed {
+  border: 3px dashed var(--ink);
+  background: var(--cell-lit);
+}
+
+/* Kayıp Sembol */
+.ms-board {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  min-height: 120px;
+  max-width: 460px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+}
+
+.ms-board.is-second {
+  border-style: dashed;
+}
+
+.ms-obj {
+  font-size: clamp(1.8rem, 8vw, 2.6rem);
+  line-height: 1.2;
+}
+
+.ms-opt {
+  font-size: 2rem;
+}
+
+/* Dişli Çark */
+.gw-machine {
+  width: 100%;
+  max-width: 520px;
+  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--cell), var(--surface));
+  border: 2px solid var(--ink);
+}
+
+.gw-gear {
+  width: 100%;
+  max-width: 120px;
+  height: auto;
+}
+
+.gw-body { fill: var(--gear); stroke: var(--ink); stroke-width: 1.5; stroke-linejoin: round; }
+.gw-hub { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
+
+.gw-spin {
+  transform-box: view-box;
+  transform-origin: 50px 50px;
+  animation: gw-rot linear infinite;
+}
+
+@keyframes gw-rot {
+  to { transform: rotate(360deg); }
+}
+
+/* ABC Sırala */
+.as-field {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(3, auto);
+  gap: 10px;
+  width: min(100%, 420px);
+}
+
+.as-letter {
+  aspect-ratio: 1;
+  max-width: 100%;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--surface);
+  color: var(--ink);
+  font: 800 clamp(1.4rem, 7vw, 2.2rem) / 1 var(--font-display);
+  cursor: pointer;
+}
+
+.as-letter.is-ok {
+  background: var(--good-bg);
+  border-color: var(--good);
+  color: var(--good);
+}
+
+.as-letter.is-wrong {
+  background: var(--bad-bg);
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+/* Düşürme! */
+.dd-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  gap: 14px;
+  width: 100%;
+}
+
+.dd-play {
+  position: relative;
+  height: 340px;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 2px solid var(--ink);
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-low));
+}
+
+.dd-sky {
+  position: absolute;
+  inset: 0;
+}
+
+.dd-ground {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 16px;
+  background: var(--lab);
+}
+
+.dd-ball {
+  position: absolute;
+  top: -70px;
+  width: 22%;
+  min-width: 64px;
+  max-width: 96px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff9b8a, #d23b2b 70%);
+  color: #ffffff;
+  border: 2px solid #5a1410;
+  font: 800 clamp(0.95rem, 3.6vw, 1.25rem) / 1 var(--font-num);
+  animation: dd-fall linear forwards;
+}
+
+@keyframes dd-fall {
+  from { top: -70px; }
+  to { top: calc(100% - 80px); }
+}
+
+.dd-ball.is-popped {
+  animation-play-state: paused;
+  transform: scale(1.4);
+  opacity: 0;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.dd-ball.is-dropped {
+  animation-play-state: paused;
+  background: var(--gear);
+  border-color: var(--ink);
+  opacity: 0.6;
+}
+
+.dd-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dd-display {
+  display: block;
+  min-height: 56px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 2px solid var(--ink);
+  background: var(--surface);
+  text-align: right;
+  font: 800 2rem / 1.2 var(--font-num);
+}
+
+.dd-display.is-wrong {
+  animation: shake 0.3s;
+  border-color: var(--bad);
+}
+
+.dd-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.dd-key {
+  min-height: 48px;
+  border-radius: 8px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font: 700 var(--step-1) / 1 var(--font-num);
+  cursor: pointer;
+}
+
+.dd-key:active {
+  background: var(--highlight);
+  color: var(--highlight-ink);
+}
+
+@keyframes shake {
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* Sayı Avı */
+.nh-target {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 10px 20px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+}
+
+.nh-target strong {
+  font: 800 2.6rem / 1 var(--font-num);
+}
+
+.nh-now {
+  color: var(--muted);
+  font-family: var(--font-num);
+}
+
+.nh-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: min(100%, 420px);
+}
+
+.nh-num {
+  min-height: 60px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font: 800 var(--step-2) / 1 var(--font-num);
+  cursor: pointer;
+}
+
+.nh-num[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--highlight);
+  color: var(--highlight-ink);
+}
+
+.nh-num.is-solution {
+  box-shadow: inset 0 0 0 3px var(--good);
+}
+
+/* Uzaylıyı Dondur */
+.fa-target {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+}
+
+.fa-target.is-new {
+  background: var(--highlight);
+  color: var(--highlight-ink);
+}
+
+.fa-target.is-new .label {
+  color: var(--highlight-ink);
+}
+
+.fa-target-icon {
+  font-size: 1.8rem;
+}
+
+.fa-field {
+  width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  background: linear-gradient(180deg, #4a2468, #8e3f8f);
+}
+
+.fa-lane {
+  position: relative;
+  height: 118px;
+}
+
+.fa-lane-a {
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.35);
+}
+
+.fa-alien {
+  position: absolute;
+  top: 6px;
+  width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.fa-alien.go-right { left: -70px; animation-name: fa-right; }
+.fa-alien.go-left { left: 100%; animation-name: fa-left; }
+
+@keyframes fa-right {
+  from { left: -70px; }
+  to { left: 100%; }
+}
+
+@keyframes fa-left {
+  from { left: 100%; }
+  to { left: -70px; }
+}
+
+.fa-held {
+  font-size: 1.5rem;
+  line-height: 1;
+  margin-bottom: -4px;
+}
+
+.fa-stalk { stroke: #2a1733; stroke-width: 2; }
+.fa-skin { stroke: #2a1733; stroke-width: 2; }
+.fa-eye { fill: #ffffff; stroke: #2a1733; stroke-width: 1.5; }
+.fa-pupil { fill: #2a1733; }
+.fa-mouth { fill: none; stroke: #2a1733; stroke-width: 2; stroke-linecap: round; }
+
+.fa-alien.is-frozen,
+.fa-alien.is-wrong {
+  animation-play-state: paused;
+}
+
+.fa-alien.is-frozen {
+  filter: saturate(0.2) brightness(1.4) drop-shadow(0 0 6px #9be7ff);
+}
+
+.fa-alien.is-wrong {
+  filter: drop-shadow(0 0 6px #ff6b6b);
+}
+
+/* Baloncuklar */
+.bb-field {
+  position: relative;
+  width: min(100%, 560px);
+  aspect-ratio: 10 / 7;
+  max-width: 100%;
+  border-radius: 14px;
+  border: 2px solid var(--ink);
+  background: linear-gradient(180deg, #1b5e8c, #2aa3c9);
+  overflow: hidden;
+}
+
+.bb-bubble {
+  position: absolute;
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.25) 40%, rgba(255, 255, 255, 0.08) 70%);
+  cursor: pointer;
+}
+
+.bb-bubble.is-popped {
+  opacity: 0.25;
+}
+
+.bb-bubble.is-wrong {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 0 3px #ff6b6b;
+}
+
+.bb-bubble[data-n]::after {
+  content: attr(data-n);
+  color: #ffffff;
+  font: 800 1rem / 1 var(--font-num);
+}
+
+@media (max-width: 560px) {
+  .bt-window {
+    grid-template-columns: 1fr;
+    padding: 18px 16px 0;
+  }
+  .bt-host {
+    order: 2;
+    justify-self: center;
+  }
+  .bt-hero-text {
+    padding-bottom: 0;
+  }
+  .dd-wrap {
+    grid-template-columns: 1fr;
+  }
+  .dd-play {
+    height: 260px;
+  }
+  .dd-side {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr);
+    align-items: start;
+  }
+  .dd-key {
+    min-height: 42px;
+  }
+  .bt-weigh {
+    grid-template-columns: 1fr;
+  }
+  .bt-scale {
+    max-width: 220px;
+  }
+  .bt-breakdown li {
+    grid-template-columns: 1fr 5.5rem;
+  }
+  .bt-breakdown .bar-track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .bt-progress-val {
+    font-size: 0.7rem;
+  }
+}
 </style>
   </head>
   <body>
@@ -1509,10 +2442,11 @@ table.data .num {
       <header class="topbar">
         <div class="topbar-inner">
           <button type="button" class="brand" id="nav-home" aria-label="Zihin Molası, ana menü">
-            <span class="brand-mark" aria-hidden="true">ZM</span>
+            <span class="brand-mark" aria-hidden="true">g</span>
             <span class="brand-name">Zihin Molası</span>
           </button>
           <nav class="nav" aria-label="Ana gezinme">
+            <button type="button" class="nav-btn" id="nav-training">Antrenman</button>
             <button type="button" class="nav-btn" id="nav-stats">İstatistik</button>
             <button type="button" class="nav-btn" id="nav-settings">Ayarlar</button>
           </nav>
@@ -1525,13 +2459,158 @@ table.data .num {
     <script>
 (() => {
 'use strict';
+// ---- src/core/brainTest.js ----
+const __m2 = (() => {
+// Beyin Testi: Brain Buddies'in ana döngüsü.
+// Bir test = 4 kategori × 1 mini oyun × 60 sn. Her oyun gram cinsinden puan verir;
+// toplam "beyin ağırlığı"dır. Rekor yalnızca toplam rekor geçildiğinde kaydedilir.
+// Kaynaklar ve hangi kuralın gözlemlendiği/tahmin edildiği: docs/REFERENCE_GAPS.md
+
+const STEP_MS = 60000;
+const BONUS_EVERY = 10; // art arda 10 doğru → ek süre (oyuncu anlatımı)
+const BONUS_MS = 5000;
+const HISTORY_LIMIT = 50;
+
+const TEST_CATEGORIES = Object.freeze([
+  { id: 'memory', name: 'Hafıza', icon: '🧠', games: ['patternShoot', 'missingSymbol'], unlockAfter: [0, 2] },
+  { id: 'logic', name: 'Mantık', icon: '⚙', games: ['gearWheel', 'alphaSort'], unlockAfter: [0, 3] },
+  { id: 'numeric', name: 'Hesap', icon: '123', games: ['dontDrop', 'numberHunt'], unlockAfter: [0, 4] },
+  { id: 'visual', name: 'Görsel', icon: '👁', games: ['freezeAlien', 'bubbles'], unlockAfter: [0, 5] },
+]);
+
+const CATEGORY_IDS = TEST_CATEGORIES.map((c) => c.id);
+const categoryById = (id) => TEST_CATEGORIES.find((c) => c.id === id);
+
+// Gram puanlaması: doğru cevap oyunun gram değeri kadar (seviyeyle %5 artar, hızla en fazla %25 bonus),
+// hatalar doğru cevabın 1,5 katı kadar düşürür ("hatalar puanı çok düşürür").
+function scoringFor(definition) {
+  const base = definition.gramsPerCorrect;
+  return {
+    base,
+    levelStep: 0.05,
+    speedBonusMax: 0.25,
+    streakStep: 0,
+    streakCap: 0,
+    extraBonusMax: 0,
+    penalties: {
+      wrong: Math.round(base * 1.5),
+      falseAlarm: Math.round(base * 1.5),
+      miss: base,
+      timeout: base,
+      skip: 0,
+    },
+  };
+}
+
+function defaultBrain() {
+  return {
+    tests: 0,
+    best: null, // { total, cats: { memory, logic, numeric, visual }, at }
+    catBest: Object.fromEntries(CATEGORY_IDS.map((c) => [c, 0])),
+    history: [],
+    choice: Object.fromEntries(CATEGORY_IDS.map((c) => [c, 'random'])),
+    trophies: {},
+  };
+}
+
+function unlockedGames(categoryId, testsDone) {
+  const cat = categoryById(categoryId);
+  return cat.games.filter((_, i) => testsDone >= cat.unlockAfter[i]);
+}
+
+// Seçim yapılmamışsa veya seçilen oyun kilitliyse açık oyunlardan rastgele biri (orijinaldeki gibi).
+function pickGame(categoryId, testsDone, choice, rng) {
+  const open = unlockedGames(categoryId, testsDone);
+  if (choice && choice !== 'random' && open.includes(choice)) return choice;
+  return rng.pick(open);
+}
+
+function newlyUnlocked(before, after) {
+  const out = [];
+  for (const cat of TEST_CATEGORIES) {
+    cat.games.forEach((g, i) => {
+      if (before < cat.unlockAfter[i] && after >= cat.unlockAfter[i]) out.push({ category: cat.id, gameId: g });
+    });
+  }
+  return out;
+}
+
+// steps: [{ category, gameId, result }] — result session.result()'tan gelir; score = gram
+function summarizeTest(steps) {
+  const cats = Object.fromEntries(CATEGORY_IDS.map((c) => [c, 0]));
+  let errors = 0;
+  let bestStreak = 0;
+  for (const s of steps) {
+    cats[s.category] = Math.round(s.result.score);
+    const c = s.result.counts;
+    errors += c.wrong + c.falseAlarm + c.miss + c.timeout;
+    bestStreak = Math.max(bestStreak, s.result.bestStreak || 0);
+  }
+  const total = CATEGORY_IDS.reduce((sum, c) => sum + cats[c], 0);
+  return { total, cats, errors, bestStreak, complete: steps.length === CATEGORY_IDS.length };
+}
+
+const TROPHIES = Object.freeze([
+  { id: 'first', name: 'İlk tartı', desc: 'İlk beyin testini bitir.', check: ({ brain }) => brain.tests >= 1 },
+  { id: 'g3000', name: '3 kiloluk beyin', desc: 'Bir testte 3000 g’a ulaş.', check: ({ test }) => test.total >= 3000 },
+  { id: 'g4000', name: '4 kiloluk beyin', desc: 'Bir testte 4000 g’a ulaş.', check: ({ test }) => test.total >= 4000 },
+  { id: 'g5000', name: 'Dev beyin', desc: 'Bir testte 5000 g’a ulaş.', check: ({ test }) => test.total >= 5000 },
+  { id: 'flawless2500', name: 'Hatasız 2500', desc: 'Hiç hata yapmadan 2500 g’a ulaş.', check: ({ test }) => test.total >= 2500 && test.errors === 0 },
+  { id: 'all1000', name: 'Dengeli beyin', desc: 'Aynı testte her kategoride 1000 g’a ulaş.', check: ({ test }) => CATEGORY_IDS.every((c) => test.cats[c] >= 1000) },
+  { id: 'streak20', name: 'Seri', desc: 'Bir oyunda art arda 20 doğru yap.', check: ({ test }) => test.bestStreak >= 20 },
+  { id: 'played30', name: 'Müdavim', desc: '30 test bitir.', check: ({ brain }) => brain.tests >= 30 },
+]);
+
+// Testi beyin kaydına işler (yalnızca tamamlanan testler). Kaydı yerinde değiştirir.
+function recordTest(brain, test, at = Date.now()) {
+  if (!test.complete) return { isRecord: false, previousBest: brain.best, newTrophies: [], unlocked: [] };
+  const before = brain.tests;
+  brain.tests += 1;
+  const previousBest = brain.best ? { ...brain.best, cats: { ...brain.best.cats } } : null;
+  const isRecord = !brain.best || test.total > brain.best.total;
+  if (isRecord) brain.best = { total: test.total, cats: { ...test.cats }, at };
+  for (const c of CATEGORY_IDS) brain.catBest[c] = Math.max(brain.catBest[c] || 0, test.cats[c]);
+  brain.history.push({ at, total: test.total, cats: { ...test.cats } });
+  if (brain.history.length > HISTORY_LIMIT) brain.history.splice(0, brain.history.length - HISTORY_LIMIT);
+  const newTrophies = [];
+  for (const t of TROPHIES) {
+    if (!brain.trophies[t.id] && t.check({ brain, test })) {
+      brain.trophies[t.id] = at;
+      newTrophies.push(t);
+    }
+  }
+  return { isRecord, previousBest, newTrophies, unlocked: newlyUnlocked(before, brain.tests) };
+}
+
+// Profesör Gram'ın yorumları (özgün metin)
+function weightComment(total) {
+  if (total >= 5000) return 'İnanılmaz! Bu beyin terazimi zorluyor.';
+  if (total >= 4000) return 'Ağır sıklet bir beyin! Arkadaşların seni kıskanacak.';
+  if (total >= 3000) return 'Sağlam bir beyin. Biraz daha antrenmanla 4 kiloyu geçersin.';
+  if (total >= 2000) return 'Fena değil! Her test beynini biraz daha ağırlaştırır.';
+  if (total >= 1000) return 'Isınma turu sayılır. Tekrar dene, daha hızlı olacaksın.';
+  return 'Terazi daha yeni uyanıyor. Hadi bir daha!';
+}
+
+function stepComment(grams, catBest) {
+  if (catBest > 0 && grams > catBest) return 'Bu kategoride yeni rekor!';
+  if (grams >= 1000) return 'Harika bir sonuç!';
+  if (grams >= 600) return 'İyi gidiyorsun.';
+  return 'Sonraki oyunda telafi edersin.';
+}
+
+return { STEP_MS, BONUS_EVERY, BONUS_MS, HISTORY_LIMIT, TEST_CATEGORIES, CATEGORY_IDS, categoryById, scoringFor, defaultBrain, unlockedGames, pickGame, newlyUnlocked, summarizeTest, TROPHIES, recordTest, weightComment, stepComment };
+})();
+
 // ---- src/core/storage.js ----
 const __m0 = (() => {
 // ProgressRepository: ayarlar, kişisel rekorlar, istatistikler. Yalnızca yerel kayıt.
 // Şema sürümlüdür; eski kayıt migrate() ile dönüştürülür, bozuk kayıt yedeklenip
 // varsayılana dönülür. Hiçbir veri dış servise gönderilmez.
 
-const SCHEMA_VERSION = 1;
+const { defaultBrain, CATEGORY_IDS: BRAIN_CATS, TEST_CATEGORIES, TROPHIES, recordTest } = __m2;
+
+const SCHEMA_VERSION = 2;
 const STORAGE_KEY = 'zihin-molasi:v';
 const HISTORY_LIMIT = 30;
 const SESSION_LIMIT = 500;
@@ -1557,7 +2636,7 @@ const DEFAULT_SETTINGS = Object.freeze({
 });
 
 function defaultData() {
-  return { version: SCHEMA_VERSION, settings: { ...DEFAULT_SETTINGS }, games: {}, sessions: [], options: {} };
+  return { version: SCHEMA_VERSION, settings: { ...DEFAULT_SETTINGS }, games: {}, sessions: [], options: {}, brain: defaultBrain() };
 }
 
 function defaultGameRecord() {
@@ -1579,6 +2658,10 @@ const MIGRATIONS = {
     }
     data.version = 1;
     return data;
+  },
+  // 1 → 2: Beyin Testi kaydı eklendi; diğer alanlar aynen korunur.
+  1(old) {
+    return { ...old, brain: defaultBrain(), version: 2 };
   },
 };
 
@@ -1671,7 +2754,36 @@ function sanitize(data) {
       );
     }
   }
+  if (isObj(data.brain)) clean.brain = sanitizeBrain(data.brain);
   return clean;
+}
+
+const gramOf = (v, max = 10000) => (Number.isFinite(v) ? Math.round(clamp(v, 0, max)) : 0);
+const catGrams = (cats) => Object.fromEntries(BRAIN_CATS.map((c) => [c, gramOf(isObj(cats) ? cats[c] : 0)]));
+
+function sanitizeBrain(b) {
+  const out = defaultBrain();
+  out.tests = Number.isInteger(b.tests) ? clamp(b.tests, 0, 1e6) : 0;
+  if (isObj(b.best) && Number.isFinite(b.best.total)) {
+    out.best = { total: gramOf(b.best.total, 40000), cats: catGrams(b.best.cats), at: finiteOrNull(b.best.at) ?? 0 };
+  }
+  out.catBest = catGrams(b.catBest);
+  if (Array.isArray(b.history)) {
+    out.history = b.history
+      .filter((x) => isObj(x) && Number.isFinite(x.total) && Number.isFinite(x.at))
+      .slice(-50)
+      .map((x) => ({ at: x.at, total: gramOf(x.total, 40000), cats: catGrams(x.cats) }));
+  }
+  if (isObj(b.choice)) {
+    for (const cat of TEST_CATEGORIES) {
+      const v = b.choice[cat.id];
+      if (v === 'random' || cat.games.includes(v)) out.choice[cat.id] = v;
+    }
+  }
+  if (isObj(b.trophies)) {
+    for (const t of TROPHIES) if (Number.isFinite(b.trophies[t.id])) out.trophies[t.id] = b.trophies[t.id];
+  }
+  return out;
 }
 
 function createMemoryStore() {
@@ -1842,6 +2954,16 @@ function createProgressRepository(store = createMemoryStore()) {
       data = { ...defaultData(), settings: data.settings };
       save();
     },
+    // Tamamlanan Beyin Testini işler; rekor, kupa ve yeni açılan oyunları döner.
+    recordBrainTest(test, at = Date.now()) {
+      const outcome = recordTest(data.brain, test, at);
+      save();
+      return outcome;
+    },
+    setBrainChoice(categoryId, value) {
+      data.brain = sanitizeBrain({ ...data.brain, choice: { ...data.brain.choice, [categoryId]: value } });
+      save();
+    },
     exportJson() {
       return JSON.stringify(data, null, 2);
     },
@@ -1859,11 +2981,11 @@ function createProgressRepository(store = createMemoryStore()) {
   };
 }
 
-return { SCHEMA_VERSION, STORAGE_KEY, HISTORY_LIMIT, SESSION_LIMIT, MAX_IMPORT_BYTES, DEFAULT_SETTINGS, defaultData, defaultGameRecord, MIGRATIONS, migrate, sanitize, createMemoryStore, createBrowserStore, createProgressRepository };
+return { SCHEMA_VERSION, STORAGE_KEY, HISTORY_LIMIT, SESSION_LIMIT, MAX_IMPORT_BYTES, DEFAULT_SETTINGS, defaultData, defaultGameRecord, MIGRATIONS, migrate, sanitize, sanitizeBrain, createMemoryStore, createBrowserStore, createProgressRepository };
 })();
 
 // ---- src/core/rng.js ----
-const __m2 = (() => {
+const __m3 = (() => {
 // Tohumlu, deterministik rastgele sayı üreteci (mulberry32) ve yardımcılar.
 // Aynı tohum her zaman aynı soruları üretir; testler buna dayanır.
 
@@ -1952,7 +3074,7 @@ return { createRng, hashSeed, createRepeatGuard };
 })();
 
 // ---- src/core/score.js ----
-const __m4 = (() => {
+const __m5 = (() => {
 // Puanlama: arayüzden bağımsız, saf fonksiyonlar. Formül GAMEPLAY_SPEC.md'de anlatılır.
 
 const OUTCOME = Object.freeze({
@@ -2118,7 +3240,7 @@ return { OUTCOME, COUNTED_OUTCOMES, DEFAULT_SCORING, levelMultiplier, speedFract
 })();
 
 // ---- src/core/difficulty.js ----
-const __m12 = (() => {
+const __m14 = (() => {
 // Zorluk ayarı: yalnızca toplam skora değil; son cevapların doğruluğuna ve
 // tepki süresine bakar. Her değişiklik bir açıklama (reason) ile döner.
 
@@ -2202,11 +3324,12 @@ return { MIN_LEVEL, MAX_LEVEL, DEFAULT_DIFFICULTY, createDifficultyController };
 })();
 
 // ---- src/core/timer.js ----
-const __m5 = (() => {
+const __m6 = (() => {
 // Geri sayım zamanlayıcısı. Saat enjekte edilebilir (testlerde sahte saat).
 // Zamanlayıcı kendi kendine tik atmaz; arayüz döngüsü remaining()/expired() sorar.
 
 function createTimer({ durationMs, now = () => performance.now() }) {
+  let duration = durationMs;
   let startedAt = null;
   let pausedAt = null;
   let pausedTotal = 0;
@@ -2245,14 +3368,21 @@ function createTimer({ durationMs, now = () => performance.now() }) {
     elapsed,
     remaining() {
       if (unlimited) return Infinity;
-      return Math.max(0, durationMs - elapsed());
+      return Math.max(0, duration - elapsed());
     },
     expired() {
-      return !unlimited && startedAt != null && elapsed() >= durationMs;
+      return !unlimited && startedAt != null && elapsed() >= duration;
     },
     fraction() {
       if (unlimited) return 1;
-      return Math.max(0, Math.min(1, 1 - elapsed() / durationMs));
+      return Math.max(0, Math.min(1, 1 - elapsed() / duration));
+    },
+    // Ek süre (ör. art arda 10 doğru). Gösterge oranı yeni toplam süreye göre hesaplanır.
+    extend(ms) {
+      if (!unlimited && ms > 0) duration += ms;
+    },
+    get durationMs() {
+      return duration;
     },
   };
 }
@@ -2264,7 +3394,7 @@ return { createTimer, createRoundTimer };
 })();
 
 // ---- src/core/session.js ----
-const __m3 = (() => {
+const __m4 = (() => {
 // GameSession: tek bir mini oyun oturumunun durum makinesi. DOM bilmez.
 //
 // Durumlar:  ready → (start) → playing:presenting → (presented) → playing:awaiting
@@ -2272,9 +3402,9 @@ const __m3 = (() => {
 // Süreli modda süre dolunca, turlu modda tur sayısı bitince oturum biter.
 // Alıştırma turları puanlanmaz, zorluğu etkilemez ve süreyi başlatmaz.
 
-const { createScoreCalculator, buildResult, OUTCOME } = __m4;
-const { createDifficultyController } = __m12;
-const { createTimer } = __m5;
+const { createScoreCalculator, buildResult, OUTCOME } = __m5;
+const { createDifficultyController } = __m14;
+const { createTimer } = __m6;
 
 const PHASE = Object.freeze({
   READY: 'ready',
@@ -2295,13 +3425,16 @@ function createSession({
   practiceRounds = 0,
   options = {},
   best = null,
+  scoring, // puanlama ayarı (ör. Beyin Testi gram puanlaması); yoksa varsayılan
+  bonusEvery = 0, // art arda bu kadar doğruda ek süre (0 = kapalı)
+  bonusMs = 5000,
   now = () => performance.now(),
   clock = () => Date.now(),
 }) {
   const def = game.definition;
   const timed = Number.isFinite(durationMs);
   const timer = createTimer({ durationMs: timed ? durationMs : Infinity, now });
-  const score = createScoreCalculator();
+  const score = createScoreCalculator(scoring);
   const difficulty = createDifficultyController({ startLevel, adaptive });
   const gameState = game.createState({ rng, options });
 
@@ -2328,7 +3461,62 @@ function createSession({
     return roundNumber >= rounds;
   };
 
+  let bonusTotal = 0;
+
+  function apply(input) {
+    const rtMs = input && Number.isFinite(input.rtMs) ? input.rtMs : presentedAt == null ? null : now() - presentedAt;
+    const verdict = game.evaluate(gameState, round, { ...input, rtMs });
+    const outcome = verdict.outcome;
+    const wasPractice = practiceLeft > 0;
+    let scored = { points: 0, applied: 0, breakdown: null };
+    let levelChange = { level: difficulty.level, changed: 0, reason: '' };
+    let bonusTime = 0;
+
+    if (wasPractice) {
+      practiceLeft -= 1;
+      if (practiceLeft === 0) timer.start();
+    } else {
+      scored = score.record({
+        outcome,
+        level: difficulty.level,
+        rtMs: verdict.rtMs ?? rtMs,
+        targetRtMs: verdict.targetRtMs ?? def.targetRtMs,
+        extraBonus: verdict.extraBonus || 0,
+      });
+      if (outcome !== OUTCOME.IGNORE) {
+        roundNumber += 1;
+        levelChange = difficulty.record({
+          correct: outcome === OUTCOME.CORRECT,
+          rtMs: verdict.rtMs ?? rtMs,
+          targetRtMs: verdict.targetRtMs ?? def.targetRtMs,
+        });
+      }
+      if (outcome === OUTCOME.CORRECT && bonusEvery > 0 && timed && score.streak % bonusEvery === 0) {
+        bonusTime = bonusMs;
+        bonusTotal += bonusMs;
+        timer.extend(bonusMs);
+      }
+    }
+
+    lastResult = {
+      ...verdict,
+      outcome,
+      rtMs: verdict.rtMs ?? rtMs,
+      practice: wasPractice,
+      points: scored.applied,
+      breakdown: scored.breakdown,
+      levelChange,
+      bonusTime,
+      round,
+    };
+    log.push({ key: round?.key, outcome, rtMs: lastResult.rtMs, level: levelChange.level, practice: wasPractice });
+    return lastResult;
+  }
+
   const session = {
+    get bonusTotal() {
+      return bonusTotal;
+    },
     get phase() {
       return phase;
     },
@@ -2397,48 +3585,16 @@ function createSession({
     // input oyuna özeldir. { timeout: true } tur süresi dolduğunda gönderilir.
     submit(input) {
       assertPhase(PHASE.AWAITING, PHASE.PRESENTING);
-      const rtMs = input && Number.isFinite(input.rtMs) ? input.rtMs : presentedAt == null ? null : now() - presentedAt;
-      const verdict = game.evaluate(gameState, round, { ...input, rtMs });
-      const outcome = verdict.outcome;
-      const wasPractice = practiceLeft > 0;
-      let scored = { points: 0, applied: 0, breakdown: null };
-      let levelChange = { level: difficulty.level, changed: 0, reason: '' };
-
-      if (wasPractice) {
-        practiceLeft -= 1;
-        if (practiceLeft === 0) timer.start();
-      } else {
-        const level = difficulty.level;
-        scored = score.record({
-          outcome,
-          level,
-          rtMs: verdict.rtMs ?? rtMs,
-          targetRtMs: verdict.targetRtMs ?? def.targetRtMs,
-          extraBonus: verdict.extraBonus || 0,
-        });
-        if (outcome !== OUTCOME.IGNORE) {
-          roundNumber += 1;
-          levelChange = difficulty.record({
-            correct: outcome === OUTCOME.CORRECT,
-            rtMs: verdict.rtMs ?? rtMs,
-            targetRtMs: verdict.targetRtMs ?? def.targetRtMs,
-          });
-        }
-      }
-
-      lastResult = {
-        ...verdict,
-        outcome,
-        rtMs: verdict.rtMs ?? rtMs,
-        practice: wasPractice,
-        points: scored.applied,
-        breakdown: scored.breakdown,
-        levelChange,
-        round,
-      };
-      log.push({ key: round?.key, outcome, rtMs: lastResult.rtMs, level: levelChange.level, practice: wasPractice });
+      const result = apply(input);
       phase = PHASE.FEEDBACK;
-      return lastResult;
+      return result;
+    },
+
+    // Sürekli akan oyunlar (ör. düşen toplar) için: tur bitmeden tek bir olayı puanlar.
+    // Aşama değişmez; oyun süresi dolana kadar aynı "tur" sürer.
+    record(input) {
+      assertPhase(PHASE.AWAITING);
+      return apply(input);
     },
 
     pause() {
@@ -2468,7 +3624,7 @@ function createSession({
       return buildResult({
         gameId: def.id,
         summary,
-        durationMs: timed ? Math.min(durationMs, timer.elapsed()) : timer.elapsed(),
+        durationMs: timed ? Math.min(timer.durationMs, timer.elapsed()) : timer.elapsed(),
         startedAt: startedAtWall,
         level: difficulty.level,
         maxLevel: difficulty.maxLevel,
@@ -2483,7 +3639,7 @@ return { PHASE, createSession };
 })();
 
 // ---- src/core/stats.js ----
-const __m6 = (() => {
+const __m7 = (() => {
 // İstatistik hesapları: günlük/haftalık oturum sayısı, oyun bazında gelişim, güçlü alanlar.
 
 // Son 7 günün (bugün dahil) gün gün oturum sayısı, en eski gün başta.
@@ -2544,12 +3700,12 @@ return { dailyCounts, sessionSummary, trend, categoryStrengths };
 })();
 
 // ---- src/core/adaptive.js ----
-const __m7 = (() => {
+const __m8 = (() => {
 // F. Adaptive Challenge — Uyarlanabilir Mücadele planlayıcısı.
 // Güçlü ve zayıf alanları dengeli sınayan kısa bir oyun listesi seçer ve
 // her seçimin nedenini oyuncuya gösterilecek biçimde açıklar.
 
-const { categoryStrengths } = __m6;
+const { categoryStrengths } = __m7;
 
 const CHALLENGE_STEPS = 5;
 const STEP_DURATION_MS = 30000;
@@ -2625,7 +3781,7 @@ return { CHALLENGE_STEPS, STEP_DURATION_MS, planChallenge, summarizeChallenge };
 })();
 
 // ---- src/ui/dom.js ----
-const __m9 = (() => {
+const __m10 = (() => {
 // Küçük DOM yardımcıları. innerHTML kullanılmaz; metin her zaman textContent ile yazılır.
 
 function h(tag, attrs = {}, ...children) {
@@ -2709,13 +3865,13 @@ return { h, append, clear, choiceGrid };
 })();
 
 // ---- src/games/memoryGrid.js ----
-const __m13 = (() => {
+const __m15 = (() => {
 // B. Memory Grid — Hafıza Izgarası
 // Kısa süre yanan hücreleri hatırla ve aynı hücreleri seç. "Sıra" varyantında aynı sırayla.
 
-const { OUTCOME } = __m4;
-const { createRepeatGuard } = __m2;
-const { h } = __m9;
+const { OUTCOME } = __m5;
+const { createRepeatGuard } = __m3;
+const { h } = __m10;
 
 // [ızgara kenarı, yanan hücre sayısı] — seviye 1..10
 const LEVELS = [
@@ -2907,7 +4063,7 @@ return { LEVELS, definition, levelConfig, createState, nextRound, checkPicks, ev
 })();
 
 // ---- src/core/shapes.js ----
-const __m22 = (() => {
+const __m32 = (() => {
 // Ortak şekil ve renk kataloğu. Her rengin kendine ait bir dolgu deseni vardır;
 // böylece renk körlüğünde de iki öğe yalnızca renkle ayırt edilmek zorunda kalmaz.
 
@@ -2947,10 +4103,10 @@ return { SHAPES, COLORS, SHAPE_IDS, COLOR_IDS, shapeName, colorInfo, colorName, 
 })();
 
 // ---- src/ui/svg.js ----
-const __m10 = (() => {
+const __m11 = (() => {
 // Kodla çizilen özgün SVG görselleri: şekiller, oklar, ızgara parçaları.
 
-const { colorInfo, describeItem } = __m22;
+const { colorInfo, describeItem } = __m32;
 
 const NS = 'http://www.w3.org/2000/svg';
 let uid = 0;
@@ -3092,14 +4248,14 @@ return { s, shapeSvg, arrowSvg, pieceSvg };
 })();
 
 // ---- src/games/quickMatch.js ----
-const __m14 = (() => {
+const __m16 = (() => {
 // Hızlı Eşleştirme: üstte gösterilen şeklin aynısını (şekil + renk/desen) bul.
 
-const { OUTCOME } = __m4;
-const { createRepeatGuard } = __m2;
-const { SHAPE_IDS, COLOR_IDS, describeItem } = __m22;
-const { h, choiceGrid } = __m9;
-const { shapeSvg } = __m10;
+const { OUTCOME } = __m5;
+const { createRepeatGuard } = __m3;
+const { SHAPE_IDS, COLOR_IDS, describeItem } = __m32;
+const { h, choiceGrid } = __m10;
+const { shapeSvg } = __m11;
 
 const OPTION_COUNTS = [4, 4, 6, 6, 6, 9, 9, 9, 12, 12];
 
@@ -3197,12 +4353,12 @@ return { definition, levelConfig, createState, nextRound, evaluate, render };
 })();
 
 // ---- src/games/mentalMath.js ----
-const __m15 = (() => {
+const __m17 = (() => {
 // Sayısal akıl yürütme: zihinden hesap. Dört seçenekten doğru sonucu seç.
 
-const { OUTCOME } = __m4;
-const { createRepeatGuard } = __m2;
-const { h, choiceGrid } = __m9;
+const { OUTCOME } = __m5;
+const { createRepeatGuard } = __m3;
+const { h, choiceGrid } = __m10;
 
 const definition = {
   id: 'mentalMath',
@@ -3322,15 +4478,15 @@ return { definition, levelConfig, buildProblem, makeOptions, createState, nextRo
 })();
 
 // ---- src/games/dualFocus.js ----
-const __m16 = (() => {
+const __m18 = (() => {
 // A. Dual Focus — Çift Odak
 // Solda şekil, sağda sayı akar. Yalnızca kural sağlandığında BAS'a bas.
 // İlk seviyeler tek koşulla öğretir, sonra iki koşul ve dikkat dağıtıcılar gelir.
 
-const { OUTCOME } = __m4;
-const { SHAPE_IDS, COLOR_IDS, shapeName, colorName, describeItem } = __m22;
-const { h } = __m9;
-const { shapeSvg } = __m10;
+const { OUTCOME } = __m5;
+const { SHAPE_IDS, COLOR_IDS, shapeName, colorName, describeItem } = __m32;
+const { h } = __m10;
+const { shapeSvg } = __m11;
 
 const definition = {
   id: 'dualFocus',
@@ -3522,16 +4678,16 @@ return { definition, TARGET_PROBABILITY, levelConfig, matches, isTarget, makeRul
 })();
 
 // ---- src/games/patternShift.js ----
-const __m17 = (() => {
+const __m19 = (() => {
 // C. Pattern Shift — Değişen Örüntü
 // Kart, gizli bir kurala göre (renk, şekil, adet, boyut) eşleştirilir. Kural, birkaç
 // doğru cevaptan sonra değişir; oyuncu eski kurala takılmadan yenisini bulmalıdır.
 // Her seçenek hedefle TAM OLARAK bir özellikte eşleşir; bu yüzden her kuralın tek cevabı vardır.
 
-const { OUTCOME } = __m4;
-const { SHAPE_IDS, COLOR_IDS, describeItem } = __m22;
-const { h, choiceGrid } = __m9;
-const { shapeSvg } = __m10;
+const { OUTCOME } = __m5;
+const { SHAPE_IDS, COLOR_IDS, describeItem } = __m32;
+const { h, choiceGrid } = __m10;
+const { shapeSvg } = __m11;
 
 const DIMENSIONS = {
   color: { name: 'Renk', values: COLOR_IDS.slice(0, 4) },
@@ -3686,14 +4842,14 @@ return { DIMENSIONS, SWITCH_BONUS, definition, levelConfig, makeCards, matchingC
 })();
 
 // ---- src/games/logicCircuit.js ----
-const __m18 = (() => {
+const __m20 = (() => {
 // D. Logic Circuit — Mantık Devresi
 // Basit mantık kapılarından oluşan bir devrenin çıkışını, eksik girişini veya
 // ÇIKIŞ=1 yapan giriş ikilisini bul. Üretilen her sorunun tek doğru cevabı doğrulanır.
 
-const { OUTCOME } = __m4;
-const { createRepeatGuard } = __m2;
-const { h, choiceGrid } = __m9;
+const { OUTCOME } = __m5;
+const { createRepeatGuard } = __m3;
+const { h, choiceGrid } = __m10;
 
 const GATES = {
   AND: { name: 'VE', arity: 2, fn: (a, b) => a & b, hint: 'İkisi de 1 ise 1' },
@@ -3880,16 +5036,16 @@ return { GATES, definition, levelConfig, evaluateCircuit, explain, makeCircuit, 
 })();
 
 // ---- src/games/sequenceDetective.js ----
-const __m19 = (() => {
+const __m21 = (() => {
 // E. Sequence Detective — Dizi Dedektifi
 // Sayı, ok veya şekil dizisindeki kuralı bul ve eksik öğeyi seç.
 // Doğrulama: çeldiricilerin hiçbiri, desteklenen HİÇBİR kurala uyan bir dizi oluşturmaz.
 
-const { OUTCOME } = __m4;
-const { createRepeatGuard } = __m2;
-const { SHAPE_IDS, shapeName } = __m22;
-const { h, choiceGrid } = __m9;
-const { arrowSvg, shapeSvg } = __m10;
+const { OUTCOME } = __m5;
+const { createRepeatGuard } = __m3;
+const { SHAPE_IDS, shapeName } = __m32;
+const { h, choiceGrid } = __m10;
+const { arrowSvg, shapeSvg } = __m11;
 
 const definition = {
   id: 'sequenceDetective',
@@ -4120,13 +5276,13 @@ return { definition, NUMBER_RULES, fitsAnyNumberRule, fitsArrowRule, fitsShapeRu
 })();
 
 // ---- src/games/wordSort.js ----
-const __m20 = (() => {
+const __m22 = (() => {
 // Sözel kategori: kelimeyi doğru gruba ayır; ileri seviyede "hangisi farklı?" sorulur.
 // Kelime listeleri birbirinden ayrıktır; her kelimenin tek bir kategorisi vardır (testle doğrulanır).
 
-const { OUTCOME } = __m4;
-const { createRepeatGuard } = __m2;
-const { h, choiceGrid } = __m9;
+const { OUTCOME } = __m5;
+const { createRepeatGuard } = __m3;
+const { h, choiceGrid } = __m10;
 
 const CATEGORIES = {
   meyve: { name: 'Meyve', words: ['elma', 'armut', 'kiraz', 'muz', 'çilek', 'karpuz', 'kavun', 'şeftali', 'erik', 'üzüm', 'incir', 'nar', 'ayva', 'vişne'] },
@@ -4252,16 +5408,16 @@ return { CATEGORIES, CLOSE_PAIRS, CATEGORY_IDS, categoryOf, definition, levelCon
 })();
 
 // ---- src/games/mentalRotation.js ----
-const __m21 = (() => {
+const __m23 = (() => {
 // Mekânsal akıl yürütme: döndürme mi, ayna mı?
 // Seçeneklerden yalnızca biri parçanın DÖNDÜRÜLMÜŞ hâlidir; diğerleri ayna görüntüsünün
 // döndürülmüş hâlleridir. Parça "kiral" seçilir (ayna görüntüsü hiçbir dönüşüne eşit değildir),
 // bu yüzden doğru cevap tektir.
 
-const { OUTCOME } = __m4;
-const { createRepeatGuard } = __m2;
-const { h, choiceGrid } = __m9;
-const { pieceSvg } = __m10;
+const { OUTCOME } = __m5;
+const { createRepeatGuard } = __m3;
+const { h, choiceGrid } = __m10;
+const { pieceSvg } = __m11;
 
 const definition = {
   id: 'mentalRotation',
@@ -4381,8 +5537,1034 @@ function render(ctx) {
 return { definition, levelConfig, normalize, keyOf, rotate, mirror, rotations, isChiral, growPiece, boxSize, makeQuestion, createState, nextRound, evaluate, render };
 })();
 
+// ---- src/core/icons.js ----
+const __m33 = (() => {
+// Beyin Testi oyunlarında kullanılan nesne simgeleri (Unicode emoji; ayrı görsel dosyası yok).
+// Ad, ekran okuyucu ve renk/şekil dışı ipucu içindir.
+
+const OBJECTS = Object.freeze([
+  { id: 'butterfly', icon: '🦋', name: 'kelebek' },
+  { id: 'mushroom', icon: '🍄', name: 'mantar' },
+  { id: 'bell', icon: '🔔', name: 'zil' },
+  { id: 'key', icon: '🔑', name: 'anahtar' },
+  { id: 'apple', icon: '🍎', name: 'elma' },
+  { id: 'fish', icon: '🐟', name: 'balık' },
+  { id: 'star', icon: '⭐', name: 'yıldız' },
+  { id: 'moon', icon: '🌙', name: 'ay' },
+  { id: 'gem', icon: '💎', name: 'elmas' },
+  { id: 'rocket', icon: '🚀', name: 'roket' },
+  { id: 'clover', icon: '🍀', name: 'yonca' },
+  { id: 'balloon', icon: '🎈', name: 'balon' },
+  { id: 'cherry', icon: '🍒', name: 'kiraz' },
+  { id: 'snail', icon: '🐌', name: 'salyangoz' },
+  { id: 'flower', icon: '🌻', name: 'ayçiçeği' },
+  { id: 'crown', icon: '👑', name: 'taç' },
+  { id: 'cactus', icon: '🌵', name: 'kaktüs' },
+  { id: 'umbrella', icon: '☂️', name: 'şemsiye' },
+]);
+
+const OBJECT_IDS = OBJECTS.map((o) => o.id);
+const objectInfo = (id) => OBJECTS.find((o) => o.id === id);
+
+return { OBJECTS, OBJECT_IDS, objectInfo };
+})();
+
+// ---- src/games/patternShoot.js ----
+const __m24 = (() => {
+// Beyin Testi · Hafıza 1 — Deseni Vur
+// Izgaradaki bazı karelerde nesneler belirir; kaybolunca aynı karelere tıkla.
+// Ezberlediğin anda tıklamaya başlayabilirsin; ilk tıklama nesneleri gizler (süre kazanırsın).
+
+const { OUTCOME } = __m5;
+const { createRepeatGuard } = __m3;
+const { OBJECT_IDS, objectInfo } = __m33;
+const { h } = __m10;
+
+// [kenar, nesne sayısı] — seviye 1..10
+const LEVELS = [[4, 3], [4, 4], [4, 5], [5, 5], [5, 6], [5, 7], [6, 7], [6, 8], [6, 9], [6, 10]];
+
+const definition = {
+  id: 'patternShoot',
+  name: 'Deseni Vur',
+  category: 'memory',
+  icon: '▦',
+  description: 'Nesnelerin yerini ezberle, kaybolunca aynı karelere tıkla.',
+  howTo: [
+    'Izgarada birkaç nesne belirir.',
+    'Nesneler kaybolunca onların olduğu karelere tıkla.',
+    'Ezberlediysen beklemeden tıklamaya başla; böylece süre kazanırsın.',
+    'Yanlış kare turu bitirir.',
+  ],
+  targetRtMs: 3500,
+  gramsPerCorrect: 110,
+};
+
+const levelConfig = (level) => {
+  const [size, count] = LEVELS[Math.min(10, Math.max(1, level)) - 1];
+  return { size, count, showMs: 900 + 260 * count };
+};
+
+const createState = () => ({ guard: createRepeatGuard({ memory: 20 }) });
+
+function nextRound(state, { rng, level }) {
+  const cfg = levelConfig(level);
+  return state.guard.take(
+    () => {
+      const cells = rng.sample([...Array(cfg.size * cfg.size).keys()], cfg.count).sort((a, b) => a - b);
+      const objects = rng.sample(OBJECT_IDS, cfg.count);
+      return { ...cfg, cells, objects, key: `${cfg.size}:${cells.join('-')}` };
+    },
+    (r) => r.key,
+  );
+}
+
+// 'continue' | 'correct' | 'wrong'
+function checkPicks(round, picks) {
+  if (new Set(picks).size !== picks.length) return 'wrong';
+  if (!picks.every((p) => round.cells.includes(p))) return 'wrong';
+  return picks.length === round.cells.length ? 'correct' : 'continue';
+}
+
+function evaluate(_state, round, input) {
+  if (input.timeout) return { outcome: OUTCOME.TIMEOUT };
+  const status = checkPicks(round, input.picks || []);
+  if (status === 'correct') return { outcome: OUTCOME.CORRECT, targetRtMs: 800 + 500 * round.count };
+  if (status === 'continue') return { outcome: OUTCOME.SKIP };
+  return { outcome: OUTCOME.WRONG, explanation: 'Bu karede nesne yoktu.' };
+}
+
+function render(ctx) {
+  const { round } = ctx;
+  const picks = [];
+  let hidden = false;
+  let done = false;
+  const cells = [];
+  const grid = h('div', { class: 'ps-grid', style: { '--n': round.size }, role: 'grid', 'aria-label': 'Desen ızgarası' });
+  for (let i = 0; i < round.size * round.size; i++) {
+    const idx = round.cells.indexOf(i);
+    const obj = idx >= 0 ? objectInfo(round.objects[idx]) : null;
+    const cell = h(
+      'button',
+      { type: 'button', class: 'ps-cell', 'aria-label': `Kare ${i + 1}`, onclick: () => tap(i) },
+      obj ? h('span', { class: 'ps-obj', 'aria-hidden': 'true' }, obj.icon) : null,
+    );
+    cells.push(cell);
+    grid.append(cell);
+  }
+  ctx.root.append(grid);
+
+  const hide = () => {
+    if (hidden) return;
+    hidden = true;
+    grid.classList.add('is-hidden');
+    ctx.status(`${round.count} kareyi bul`);
+  };
+
+  function tap(i) {
+    if (done || picks.includes(i)) return;
+    hide();
+    picks.push(i);
+    const status = checkPicks(round, picks);
+    cells[i].classList.add(status === 'wrong' ? 'is-wrong' : 'is-ok');
+    if (status === 'continue') {
+      ctx.sound('tick');
+      return;
+    }
+    done = true;
+    if (status === 'wrong') round.cells.forEach((c) => !picks.includes(c) && cells[c].classList.add('is-missed'));
+    grid.classList.add('is-revealed');
+    ctx.answer({ picks: picks.slice() });
+  }
+
+  ctx.status('Ezberle!');
+  ctx.presented();
+  ctx.later(hide, ctx.relaxed ? round.showMs * 2 : round.showMs);
+}
+
+return { LEVELS, definition, levelConfig, createState, nextRound, checkPicks, evaluate, render };
+})();
+
+// ---- src/games/missingSymbol.js ----
+const __m25 = (() => {
+// Beyin Testi · Hafıza 2 — Kayıp Sembol
+// Bir grup nesne gösterilir. Sonra biri eksik olarak yeniden gösterilir.
+// Alttaki seçeneklerden eksik olanı seç. Seçeneklerin yalnızca biri ilk grupta vardı.
+
+const { OUTCOME } = __m5;
+const { createRepeatGuard } = __m3;
+const { OBJECT_IDS, objectInfo } = __m33;
+const { h, choiceGrid } = __m10;
+
+const definition = {
+  id: 'missingSymbol',
+  name: 'Kayıp Sembol',
+  category: 'memory',
+  icon: '?',
+  description: 'Nesneleri ezberle; biri kaybolunca hangisi olduğunu bul.',
+  howTo: [
+    'Birkaç nesne gösterilir; hepsini ezberle.',
+    'Nesneler bir kez daha gösterilir ama biri eksiktir.',
+    'Alttaki dört seçenekten eksik olanı seç.',
+    'Ezberlediysen "Hazırım"a basarak süre kazan.',
+  ],
+  targetRtMs: 2500,
+  gramsPerCorrect: 100,
+};
+
+const levelConfig = (level) => {
+  const l = Math.min(10, Math.max(1, level));
+  const count = Math.min(10, 3 + Math.ceil(l * 0.7));
+  return { count, showMs: 1000 + 350 * count };
+};
+
+const createState = () => ({ guard: createRepeatGuard({ memory: 20 }) });
+
+function nextRound(state, { rng, level }) {
+  const cfg = levelConfig(level);
+  return state.guard.take(
+    () => {
+      const shown = rng.sample(OBJECT_IDS, cfg.count);
+      const missing = rng.pick(shown);
+      const remaining = rng.shuffle(shown.filter((o) => o !== missing));
+      // Çeldiriciler ilk grupta hiç olmayan nesnelerdir; böylece tek doğru cevap vardır.
+      const unseen = OBJECT_IDS.filter((o) => !shown.includes(o));
+      const options = rng.shuffle([missing, ...rng.sample(unseen, 3)]);
+      return { ...cfg, shown, remaining, missing, options, answer: options.indexOf(missing), key: shown.slice().sort().join(',') + ':' + missing };
+    },
+    (r) => r.key,
+  );
+}
+
+function evaluate(_state, round, input) {
+  if (input.timeout) return { outcome: OUTCOME.TIMEOUT };
+  return input.choice === round.answer
+    ? { outcome: OUTCOME.CORRECT }
+    : { outcome: OUTCOME.WRONG, explanation: `Eksik olan: ${objectInfo(round.missing).name}.` };
+}
+
+const objEl = (id, cls = 'ms-obj') => h('span', { class: cls, role: 'img', 'aria-label': objectInfo(id).name }, objectInfo(id).icon);
+
+function render(ctx) {
+  const { round } = ctx;
+  const board = h('div', { class: 'ms-board' }, round.shown.map((id) => objEl(id)));
+  const ready = h('button', { type: 'button', class: 'btn btn-secondary btn-sm', id: 'ms-ready', onclick: () => phase2() }, 'Hazırım');
+  ctx.root.append(board, ready);
+  ctx.status('Ezberle!');
+  let switched = false;
+  function phase2() {
+    if (switched) return;
+    switched = true;
+    ready.remove();
+    board.replaceChildren(...round.remaining.map((id) => objEl(id)));
+    board.classList.add('is-second');
+    const grid = choiceGrid(
+      ctx,
+      round.options.map((id, i) => ({ content: objEl(id, 'ms-opt'), label: objectInfo(id).name, value: i })),
+      (choice, i) => {
+        grid.mark(round.answer, 'is-correct');
+        if (i !== round.answer) grid.mark(i, 'is-wrong');
+        ctx.answer({ choice });
+      },
+      { columns: 4, className: 'ms-choices' },
+    );
+    ctx.root.append(grid.el);
+    ctx.status('Hangisi eksik?');
+    ctx.presented();
+  }
+  ctx.onKey((e) => (e.key === 'Enter' && !switched ? (phase2(), true) : false));
+  ctx.later(phase2, ctx.relaxed ? round.showMs * 2 : round.showMs);
+}
+
+return { definition, levelConfig, createState, nextRound, evaluate, render };
+})();
+
+// ---- src/games/gearWheel.js ----
+const __m26 = (() => {
+// Beyin Testi · Mantık 1 — Dişli Çark
+// Üç dişli döner. İkisi aynı dişlinin döndürülmüş hâlidir; biri tek bir dişte farklıdır.
+// Farklı olanı bul. Tek bir dişin değişmesi uzun diş sayısını değiştirdiği için
+// farklı dişli hiçbir döndürmeyle ötekilere eşitlenemez (cevap tektir).
+
+const { OUTCOME } = __m5;
+const { createRepeatGuard } = __m3;
+const { s } = __m11;
+const { h, choiceGrid } = __m10;
+
+const TEETH = [8, 8, 10, 10, 12, 12, 14, 14, 16, 16];
+
+const definition = {
+  id: 'gearWheel',
+  name: 'Dişli Çark',
+  category: 'logic',
+  icon: '⚙',
+  description: 'Üç dişliden farklı olanı bul.',
+  howTo: [
+    'Üç dişli döner. İkisi tıpatıp aynıdır, yalnızca farklı açıyla durur.',
+    'Birinde tek bir diş farklıdır (uzun yerine kısa ya da tersi).',
+    'Farklı dişliyi seç (1–3 tuşları).',
+    'İpucu: bir dişliden başlayıp dişleri sırayla karşılaştır.',
+  ],
+  targetRtMs: 4000,
+  gramsPerCorrect: 85,
+};
+
+const levelConfig = (level) => {
+  const l = Math.min(10, Math.max(1, level));
+  return { teeth: TEETH[l - 1], spinSec: l <= 2 ? 0 : Math.max(6, 22 - l * 1.6), opposite: l >= 7 };
+};
+
+const rotateBits = (bits, k) => bits.map((_, i) => bits[(i + k) % bits.length]);
+// Döndürmeden bağımsız kanonik biçim (en küçük döndürme)
+const canonical = (bits) => {
+  let best = null;
+  for (let k = 0; k < bits.length; k++) {
+    const s2 = rotateBits(bits, k).join('');
+    if (best === null || s2 < best) best = s2;
+  }
+  return best;
+};
+
+const createState = () => ({ guard: createRepeatGuard({ memory: 20 }) });
+
+function nextRound(state, { rng, level }) {
+  const cfg = levelConfig(level);
+  return state.guard.take(
+    () => {
+      let base;
+      do base = Array.from({ length: cfg.teeth }, () => rng.int(0, 1));
+      while (base.filter(Boolean).length < 2 || base.filter((b) => !b).length < 2);
+      const odd = base.slice();
+      const flip = rng.int(0, cfg.teeth - 1);
+      odd[flip] = 1 - odd[flip];
+      const gears = rng.shuffle([
+        { bits: rotateBits(base, rng.int(0, cfg.teeth - 1)), odd: false },
+        { bits: rotateBits(base, rng.int(0, cfg.teeth - 1)), odd: false },
+        { bits: rotateBits(odd, rng.int(0, cfg.teeth - 1)), odd: true },
+      ]);
+      return { ...cfg, gears, answer: gears.findIndex((g) => g.odd), key: canonical(base) };
+    },
+    (r) => r.key,
+  );
+}
+
+function evaluate(_state, round, input) {
+  if (input.timeout) return { outcome: OUTCOME.TIMEOUT };
+  return input.choice === round.answer
+    ? { outcome: OUTCOME.CORRECT }
+    : { outcome: OUTCOME.WRONG, explanation: `Farklı olan ${round.answer + 1}. dişliydi.` };
+}
+
+function gearSvg(bits, { size = 96, spinSec = 0, reverse = false } = {}) {
+  const n = bits.length;
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const r = bits[i] ? 46 : 36;
+    const a0 = (i / n) * Math.PI * 2;
+    const a1 = ((i + 0.55) / n) * Math.PI * 2;
+    const a2 = ((i + 1) / n) * Math.PI * 2;
+    pts.push([50 + 30 * Math.cos(a0), 50 + 30 * Math.sin(a0)]);
+    pts.push([50 + r * Math.cos(a0 + 0.04), 50 + r * Math.sin(a0 + 0.04)]);
+    pts.push([50 + r * Math.cos(a1), 50 + r * Math.sin(a1)]);
+    pts.push([50 + 30 * Math.cos(a1 + 0.04), 50 + 30 * Math.sin(a1 + 0.04)]);
+    pts.push([50 + 30 * Math.cos(a2), 50 + 30 * Math.sin(a2)]);
+  }
+  const g = s(
+    'g',
+    { class: spinSec ? 'gw-spin' : null, style: spinSec ? `animation-duration:${spinSec}s;animation-direction:${reverse ? 'reverse' : 'normal'}` : null },
+    s('polygon', { points: pts.map((p) => p.map((v) => v.toFixed(1)).join(',')).join(' '), class: 'gw-body' }),
+    s('circle', { cx: 50, cy: 50, r: 11, class: 'gw-hub' }),
+  );
+  return s('svg', { viewBox: '0 0 100 100', width: size, height: size, class: 'gw-gear', 'aria-hidden': 'true', focusable: 'false' }, g);
+}
+
+function render(ctx) {
+  const { round } = ctx;
+  const grid = choiceGrid(
+    ctx,
+    round.gears.map((g, i) => ({
+      content: gearSvg(g.bits, { spinSec: round.spinSec, reverse: round.opposite && i === 1 }),
+      label: `${i + 1}. dişli, ${g.bits.filter(Boolean).length} uzun diş`,
+      value: i,
+    })),
+    (choice, i) => {
+      grid.mark(round.answer, 'is-correct');
+      if (i !== round.answer) grid.mark(i, 'is-wrong');
+      ctx.answer({ choice });
+    },
+    { columns: 3, className: 'gw-choices' },
+  );
+  ctx.root.append(h('div', { class: 'gw-machine' }, grid.el));
+  ctx.status('Hangi dişli farklı?');
+  ctx.presented();
+}
+
+return { definition, levelConfig, rotateBits, canonical, createState, nextRound, evaluate, gearSvg, render };
+})();
+
+// ---- src/games/alphaSort.js ----
+const __m27 = (() => {
+// Beyin Testi · Mantık 2 — ABC Sırala
+// Dağınık harflere alfabe sırasıyla (A'dan Z'ye, Türk alfabesi) tıkla.
+
+const { OUTCOME } = __m5;
+const { createRepeatGuard } = __m3;
+const { h } = __m10;
+
+const ALPHABET = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ'.split('');
+const COUNTS = [3, 3, 4, 4, 5, 5, 6, 6, 7, 8];
+const SLOTS = 12; // 4 × 3 yerleşim alanı
+
+const definition = {
+  id: 'alphaSort',
+  name: 'ABC Sırala',
+  category: 'logic',
+  icon: 'Ab',
+  description: 'Harflere alfabe sırasıyla tıkla.',
+  howTo: [
+    'Ekranda karışık harfler belirir.',
+    'Harflere Türk alfabesindeki sırayla (A, B, C, Ç, D…) tıkla.',
+    'Yanlış harf turu bitirir.',
+  ],
+  targetRtMs: 3500,
+  gramsPerCorrect: 100,
+};
+
+const levelConfig = (level) => ({ count: COUNTS[Math.min(10, Math.max(1, level)) - 1] });
+
+const sortTr = (letters) => letters.slice().sort((a, b) => ALPHABET.indexOf(a) - ALPHABET.indexOf(b));
+
+const createState = () => ({ guard: createRepeatGuard({ memory: 30 }) });
+
+function nextRound(state, { rng, level }) {
+  const cfg = levelConfig(level);
+  return state.guard.take(
+    () => {
+      const letters = rng.sample(ALPHABET, cfg.count);
+      const slots = rng.sample([...Array(SLOTS).keys()], cfg.count);
+      return { ...cfg, letters, slots, order: sortTr(letters), key: sortTr(letters).join('') };
+    },
+    (r) => r.key,
+  );
+}
+
+// 'continue' | 'correct' | 'wrong'
+function checkPicks(round, picks) {
+  for (let i = 0; i < picks.length; i++) if (picks[i] !== round.order[i]) return 'wrong';
+  return picks.length === round.order.length ? 'correct' : 'continue';
+}
+
+function evaluate(_state, round, input) {
+  if (input.timeout) return { outcome: OUTCOME.TIMEOUT };
+  const status = checkPicks(round, input.picks || []);
+  if (status === 'correct') return { outcome: OUTCOME.CORRECT, targetRtMs: 600 * round.count };
+  if (status === 'continue') return { outcome: OUTCOME.SKIP };
+  return { outcome: OUTCOME.WRONG, explanation: `Doğru sıra: ${round.order.join(' ')}` };
+}
+
+function render(ctx) {
+  const { round } = ctx;
+  const picks = [];
+  let done = false;
+  const field = h('div', { class: 'as-field' });
+  const buttons = round.letters.map((letter, i) => {
+    const btn = h(
+      'button',
+      { type: 'button', class: 'as-letter', style: { gridArea: `${Math.floor(round.slots[i] / 4) + 1} / ${(round.slots[i] % 4) + 1}` }, onclick: () => tap(letter, btn) },
+      letter,
+    );
+    field.append(btn);
+    return btn;
+  });
+  ctx.root.append(field);
+
+  function tap(letter, btn) {
+    if (done || btn.disabled) return;
+    picks.push(letter);
+    const status = checkPicks(round, picks);
+    btn.disabled = true;
+    btn.classList.add(status === 'wrong' ? 'is-wrong' : 'is-ok');
+    if (status === 'continue') {
+      ctx.sound('tick');
+      return;
+    }
+    done = true;
+    buttons.forEach((b) => (b.disabled = true));
+    ctx.answer({ picks: picks.slice() });
+  }
+  // Klavyeden harf yazarak da seçilebilir
+  ctx.onKey((e) => {
+    const key = e.key.length === 1 ? e.key.toLocaleUpperCase('tr') : '';
+    const i = round.letters.indexOf(key);
+    if (i < 0) return false;
+    tap(key, buttons[i]);
+    return true;
+  });
+  ctx.status('Alfabe sırasıyla tıkla');
+  ctx.presented();
+}
+
+return { ALPHABET, definition, levelConfig, sortTr, createState, nextRound, checkPicks, evaluate, render };
+})();
+
+// ---- src/games/dontDrop.js ----
+const __m28 = (() => {
+// Beyin Testi · Hesap 1 — Düşürme!
+// İşlem yazılı toplar yukarıdan düşer. Sonucu tuş takımıyla (ya da klavyeyle) yaz;
+// sonucu tutan top patlar. Yere düşen top hata sayılır. Sürekli akan bir oyundur:
+// tüm süre tek bir "tur"dur, her patlama/düşme ayrı puanlanır.
+
+const { OUTCOME } = __m5;
+const { buildProblem } = __m17;
+const { h } = __m10;
+
+const definition = {
+  id: 'dontDrop',
+  name: 'Düşürme!',
+  category: 'numeric',
+  icon: '123',
+  description: 'Düşen toplardaki işlemleri yere değmeden çöz.',
+  howTo: [
+    'Toplarda işlemler yazılı ve aşağı düşüyorlar.',
+    'Sonucu tuş takımıyla ya da klavyedeki rakamlarla yaz; doğru top hemen patlar.',
+    'Yere düşen top ve yanlış yazılan sayı hata sayılır.',
+    'Art arda 10 doğru ek süre kazandırır.',
+  ],
+  targetRtMs: 3500,
+  gramsPerCorrect: 38,
+  continuous: true,
+};
+
+function levelConfig(level) {
+  const l = Math.min(10, Math.max(1, level));
+  return {
+    fallMs: Math.round(8000 - l * 420),
+    spawnMs: Math.round(2300 - l * 140),
+    maxBalls: Math.min(6, 2 + Math.ceil(l / 3)),
+    // mentalMath seviyeleri daha hızlı zorlaşır; burada yarı hızla ilerler
+    mathLevel: Math.max(1, Math.ceil(l * 0.75)),
+  };
+}
+
+// İki cevap birbirinin öneki olamaz (ör. 1 ve 12); aksi hâlde "1" yazınca hangisi kastedildi belirsizdir.
+const conflicts = (a, b) => {
+  const x = String(a);
+  const y = String(b);
+  return x.startsWith(y) || y.startsWith(x);
+};
+
+function makeBall(rng, level, onScreen = []) {
+  const cfg = levelConfig(level);
+  for (let i = 0; i < 40; i++) {
+    const p = buildProblem(rng, cfg.mathLevel);
+    if (!onScreen.some((v) => conflicts(v, p.value))) return { text: p.text, value: p.value };
+  }
+  return null;
+}
+
+// Yazılan metni ekrandaki cevaplarla karşılaştırır.
+function matchInput(answers, typed) {
+  if (!typed) return { status: 'partial' };
+  const i = answers.findIndex((v) => String(v) === typed);
+  if (i >= 0) return { status: 'pop', index: i };
+  if (answers.some((v) => String(v).startsWith(typed))) return { status: 'partial' };
+  return { status: 'wrong' };
+}
+
+const createState = () => ({ streams: 0 });
+
+function nextRound(state) {
+  state.streams += 1;
+  return { stream: true, key: `stream-${state.streams}` };
+}
+
+function evaluate(_state, _round, input) {
+  if (input.kind === 'pop') return { outcome: OUTCOME.CORRECT, targetRtMs: definition.targetRtMs };
+  if (input.kind === 'drop') return { outcome: OUTCOME.MISS, explanation: 'Bir top yere düştü.' };
+  if (input.timeout) return { outcome: OUTCOME.IGNORE };
+  return { outcome: OUTCOME.WRONG, explanation: 'Ekranda bu sonuçta top yok.' };
+}
+
+function render(ctx) {
+  const sky = h('div', { class: 'dd-sky', 'aria-label': 'Düşen işlemler' });
+  const ground = h('div', { class: 'dd-ground', 'aria-hidden': 'true' });
+  const display = h('output', { class: 'dd-display', 'aria-live': 'polite', 'aria-label': 'Yazdığın sayı' }, '');
+  const balls = []; // { el, value, born, alive }
+  let typed = '';
+  let lane = 0;
+
+  const keypad = h(
+    'div',
+    { class: 'dd-keypad', role: 'group', 'aria-label': 'Tuş takımı' },
+    ['7', '8', '9', '4', '5', '6', '1', '2', '3', '⌫', '0', 'C'].map((k) =>
+      h('button', { type: 'button', class: 'dd-key', 'aria-label': k === '⌫' ? 'Sil' : k === 'C' ? 'Temizle' : k, onclick: () => press(k) }, k),
+    ),
+  );
+  ctx.root.append(h('div', { class: 'dd-wrap' }, h('div', { class: 'dd-play' }, sky, ground), h('div', { class: 'dd-side' }, display, keypad)));
+
+  const alive = () => balls.filter((b) => b.alive);
+  const setTyped = (v) => {
+    typed = v;
+    display.textContent = v;
+  };
+
+  function spawn() {
+    const level = ctx.currentLevel();
+    const cfg = levelConfig(level);
+    if (alive().length < cfg.maxBalls) {
+      const ball = makeBall(ctx.rng, level, alive().map((b) => b.value));
+      if (ball) {
+        lane = (lane + 1 + Math.floor(ctx.rng.next() * 2)) % 4;
+        const el = h('div', { class: 'dd-ball', style: { left: `${4 + lane * 24}%`, animationDuration: `${cfg.fallMs}ms` } }, ball.text);
+        const entry = { ...ball, el, born: ctx.now(), alive: true };
+        balls.push(entry);
+        sky.append(el);
+        ctx.later(() => {
+          if (!entry.alive) return;
+          entry.alive = false;
+          el.classList.add('is-dropped');
+          ctx.later(() => el.remove(), 400);
+          ctx.record({ kind: 'drop' });
+        }, cfg.fallMs);
+      }
+    }
+    ctx.later(spawn, cfg.spawnMs);
+  }
+
+  function press(k) {
+    if (k === 'C') return setTyped('');
+    if (k === '⌫') return setTyped(typed.slice(0, -1));
+    const next = (typed + k).replace(/^0(?=\d)/, '');
+    const live = alive();
+    const m = matchInput(live.map((b) => b.value), next);
+    if (m.status === 'pop') {
+      const b = live[m.index];
+      b.alive = false;
+      b.el.classList.add('is-popped');
+      ctx.later(() => b.el.remove(), 250);
+      setTyped('');
+      ctx.record({ kind: 'pop', rtMs: ctx.now() - b.born });
+    } else if (m.status === 'partial') {
+      setTyped(next);
+    } else {
+      setTyped('');
+      display.classList.remove('is-wrong');
+      void display.offsetWidth;
+      display.classList.add('is-wrong');
+      ctx.record({ kind: 'wrong' });
+    }
+  }
+
+  ctx.onKey((e) => {
+    if (/^[0-9]$/.test(e.key)) press(e.key);
+    else if (e.key === 'Backspace') press('⌫');
+    else if (e.key === 'Delete' || e.key === 'Escape') press('C');
+    else return false;
+    return true;
+  });
+  ctx.status('Sonucu yaz!');
+  ctx.presented();
+  spawn();
+}
+
+return { definition, levelConfig, conflicts, makeBall, matchInput, createState, nextRound, evaluate, render };
+})();
+
+// ---- src/games/numberHunt.js ----
+const __m29 = (() => {
+// Beyin Testi · Hesap 2 — Sayı Avı
+// Üstte bir hedef toplam yazar. Toplamı tam olarak bu sayıyı veren sayıları seç.
+// Üretici, hedefe ulaşan TEK bir sayı grubu olduğunu doğrular.
+
+const { OUTCOME } = __m5;
+const { createRepeatGuard } = __m3;
+const { h } = __m10;
+
+const COUNTS = [6, 6, 7, 7, 8, 8, 8, 9, 9, 9];
+
+const definition = {
+  id: 'numberHunt',
+  name: 'Sayı Avı',
+  category: 'numeric',
+  icon: 'Σ',
+  description: 'Toplamı hedef sayıyı veren sayıları seç.',
+  howTo: [
+    'Üstte hedef toplam yazar.',
+    'Aşağıdaki sayılardan toplamı tam olarak hedefi veren 2 (ileride 3) sayıyı seç.',
+    'Seçimi geri almak için aynı sayıya tekrar bas. Hedefi aşarsan tur biter.',
+  ],
+  targetRtMs: 3000,
+  gramsPerCorrect: 75,
+};
+
+const levelConfig = (level) => {
+  const l = Math.min(10, Math.max(1, level));
+  return { count: COUNTS[l - 1], pick: l <= 4 ? 2 : 3, max: l <= 3 ? 12 : l <= 6 ? 25 : 40 };
+};
+
+// Toplamı target olan ve en az 2 elemanlı tüm alt kümeler (indeks listeleri)
+function subsetsWithSum(numbers, target) {
+  const out = [];
+  const n = numbers.length;
+  for (let mask = 1; mask < 1 << n; mask++) {
+    let sum = 0;
+    let size = 0;
+    for (let i = 0; i < n; i++) if (mask & (1 << i)) {
+      sum += numbers[i];
+      size += 1;
+    }
+    if (size >= 2 && sum === target) out.push([...Array(n).keys()].filter((i) => mask & (1 << i)));
+  }
+  return out;
+}
+
+const createState = () => ({ guard: createRepeatGuard({ memory: 30 }) });
+
+function nextRound(state, { rng, level }) {
+  const cfg = levelConfig(level);
+  return state.guard.take(
+    () => {
+      for (let attempt = 0; attempt < 200; attempt++) {
+        const pool = [...Array(cfg.max).keys()].map((i) => i + 1);
+        const numbers = rng.sample(pool, cfg.count);
+        const solution = rng.sample([...Array(cfg.count).keys()], cfg.pick).sort((a, b) => a - b);
+        const target = solution.reduce((s, i) => s + numbers[i], 0);
+        const all = subsetsWithSum(numbers, target);
+        if (all.length === 1) return { ...cfg, numbers, target, solution, key: `${target}:${numbers.join(',')}` };
+      }
+      // Her zaman tek çözümlü yedek
+      return { ...cfg, pick: 2, numbers: [1, 2, 4, 8, 16, 32], target: 3, solution: [0, 1], key: 'fallback' };
+    },
+    (r) => r.key,
+  );
+}
+
+// 'continue' | 'correct' | 'wrong'
+function checkPicks(round, picks) {
+  const sum = picks.reduce((s, i) => s + round.numbers[i], 0);
+  if (sum > round.target) return 'wrong';
+  if (sum === round.target) return picks.length === round.solution.length ? 'correct' : 'wrong';
+  return picks.length >= round.solution.length ? 'wrong' : 'continue';
+}
+
+function evaluate(_state, round, input) {
+  if (input.timeout) return { outcome: OUTCOME.TIMEOUT };
+  const status = checkPicks(round, input.picks || []);
+  if (status === 'correct') return { outcome: OUTCOME.CORRECT };
+  if (status === 'continue') return { outcome: OUTCOME.SKIP };
+  return { outcome: OUTCOME.WRONG, explanation: `Doğrusu: ${round.solution.map((i) => round.numbers[i]).join(' + ')} = ${round.target}` };
+}
+
+function render(ctx) {
+  const { round } = ctx;
+  let picks = [];
+  let done = false;
+  const sumEl = h('span', { class: 'nh-sum' }, '0');
+  ctx.root.append(h('div', { class: 'nh-target' }, h('span', { class: 'label' }, 'Hedef'), h('strong', {}, String(round.target)), h('span', { class: 'nh-now' }, 'Toplam: ', sumEl)));
+  const grid = h('div', { class: 'nh-grid', role: 'group', 'aria-label': 'Sayılar' });
+  const buttons = round.numbers.map((n, i) => {
+    const b = h('button', { type: 'button', class: 'nh-num', 'aria-pressed': 'false', onclick: () => tap(i) }, String(n));
+    grid.append(b);
+    return b;
+  });
+  ctx.root.append(grid);
+
+  function tap(i) {
+    if (done) return;
+    if (picks.includes(i)) {
+      picks = picks.filter((p) => p !== i);
+      buttons[i].setAttribute('aria-pressed', 'false');
+    } else {
+      picks.push(i);
+      buttons[i].setAttribute('aria-pressed', 'true');
+    }
+    sumEl.textContent = String(picks.reduce((s, p) => s + round.numbers[p], 0));
+    const status = checkPicks(round, picks);
+    if (status === 'continue') return ctx.sound('tick');
+    done = true;
+    buttons.forEach((b, j) => {
+      b.disabled = true;
+      if (round.solution.includes(j)) b.classList.add('is-solution');
+    });
+    ctx.answer({ picks: picks.slice() });
+  }
+  ctx.status(`${round.solution.length} sayı seç`);
+  ctx.presented();
+}
+
+return { definition, levelConfig, subsetsWithSum, createState, nextRound, checkPicks, evaluate, render };
+})();
+
+// ---- src/games/freezeAlien.js ----
+const __m30 = (() => {
+// Beyin Testi · Görsel 1 — Uzaylıyı Dondur
+// İki sıra uzaylı ters yönlerde kayar; her biri elinde bir nesne tutar.
+// Üstte gösterilen nesneyi tutan uzaylılara tıklayıp dondur. Yanlış uzaylıya tıklamak
+// ve hedefi kaçırmak hata sayılır. Sürekli akan bir oyundur.
+
+const { OUTCOME } = __m5;
+const { OBJECT_IDS, objectInfo } = __m33;
+const { h } = __m10;
+const { s } = __m11;
+
+const ALIEN_COLORS = ['#7ac74f', '#4fb3c7', '#c77ac7', '#e0a43a', '#e06a5a'];
+const TARGET_RATE = 0.4;
+const FREEZES_PER_TARGET = 5;
+
+const definition = {
+  id: 'freezeAlien',
+  name: 'Uzaylıyı Dondur',
+  category: 'visual',
+  icon: '❄',
+  description: 'Hedef nesneyi tutan uzaylıları kaçmadan dondur.',
+  howTo: [
+    'İki sıra uzaylı ters yönlerde geçer; her biri elinde bir nesne tutar.',
+    'Üstte yazan nesneyi tutan uzaylılara dokun ve dondur.',
+    'Yanlış uzaylıya dokunmak ve hedefi kaçırmak hata sayılır.',
+    'İpucu: iki sırayı birden görmek için ekranın ortasına bak.',
+  ],
+  targetRtMs: 1800,
+  gramsPerCorrect: 45,
+  continuous: true,
+};
+
+function levelConfig(level) {
+  const l = Math.min(10, Math.max(1, level));
+  return {
+    crossMs: Math.round(7600 - l * 420),
+    spawnMs: Math.round(1350 - l * 70),
+    pool: Math.min(OBJECT_IDS.length, 4 + l), // seçilebilecek farklı nesne sayısı
+  };
+}
+
+function pickTarget(rng, level, previous = null) {
+  const pool = OBJECT_IDS.slice(0, levelConfig(level).pool).filter((o) => o !== previous);
+  return rng.pick(pool);
+}
+
+function makeAlien(rng, level, target) {
+  const isTarget = rng.chance(TARGET_RATE);
+  const pool = OBJECT_IDS.slice(0, levelConfig(level).pool).filter((o) => o !== target);
+  return {
+    object: isTarget ? target : rng.pick(pool),
+    color: rng.pick(ALIEN_COLORS),
+    isTarget,
+  };
+}
+
+const createState = () => ({ streams: 0 });
+function nextRound(state) {
+  state.streams += 1;
+  return { stream: true, key: `stream-${state.streams}` };
+}
+
+function evaluate(_state, _round, input) {
+  if (input.kind === 'freeze') {
+    return input.isTarget
+      ? { outcome: OUTCOME.CORRECT }
+      : { outcome: OUTCOME.FALSE_ALARM, explanation: 'Bu uzaylı hedef nesneyi tutmuyordu.' };
+  }
+  if (input.kind === 'escape') return { outcome: OUTCOME.MISS, explanation: 'Bir hedef kaçtı.' };
+  return { outcome: OUTCOME.IGNORE };
+}
+
+function alienSvg(color) {
+  return s(
+    'svg',
+    { viewBox: '0 0 60 70', width: 54, height: 63, class: 'fa-body', 'aria-hidden': 'true', focusable: 'false' },
+    s('path', { d: 'M18 12 L14 2 M42 12 L46 2', class: 'fa-stalk' }),
+    s('circle', { cx: 14, cy: 3, r: 3, fill: color }),
+    s('circle', { cx: 46, cy: 3, r: 3, fill: color }),
+    s('ellipse', { cx: 30, cy: 38, rx: 22, ry: 26, fill: color, class: 'fa-skin' }),
+    s('ellipse', { cx: 22, cy: 30, rx: 6, ry: 7, class: 'fa-eye' }),
+    s('ellipse', { cx: 38, cy: 30, rx: 6, ry: 7, class: 'fa-eye' }),
+    s('circle', { cx: 23, cy: 31, r: 3, class: 'fa-pupil' }),
+    s('circle', { cx: 37, cy: 31, r: 3, class: 'fa-pupil' }),
+    s('path', { d: 'M22 46 Q30 52 38 46', class: 'fa-mouth' }),
+  );
+}
+
+function render(ctx) {
+  const lanes = [h('div', { class: 'fa-lane fa-lane-a' }), h('div', { class: 'fa-lane fa-lane-b' })];
+  const targetIcon = h('span', { class: 'fa-target-icon' });
+  const targetName = h('strong', {});
+  const banner = h('div', { class: 'fa-target', 'aria-live': 'polite' }, h('span', { class: 'label' }, 'Dondur'), targetIcon, targetName, h('span', {}, ' tutanları'));
+  ctx.root.append(banner, h('div', { class: 'fa-field' }, lanes));
+  let target = null;
+  let frozenSinceSwitch = 0;
+  let laneIndex = 0;
+
+  const setTarget = () => {
+    target = pickTarget(ctx.rng, ctx.currentLevel(), target);
+    targetIcon.textContent = objectInfo(target).icon;
+    targetName.textContent = ` ${objectInfo(target).name}`;
+    banner.classList.remove('is-new');
+    void banner.offsetWidth;
+    banner.classList.add('is-new');
+    frozenSinceSwitch = 0;
+    ctx.status(`Elinde ${objectInfo(target).name} olanları dondur!`);
+  };
+
+  function spawn() {
+    const cfg = levelConfig(ctx.currentLevel());
+    const alien = makeAlien(ctx.rng, ctx.currentLevel(), target);
+    const lane = laneIndex++ % 2;
+    let state = 'moving';
+    const el = h(
+      'button',
+      {
+        type: 'button',
+        class: `fa-alien ${lane ? 'go-left' : 'go-right'}`,
+        style: { animationDuration: `${cfg.crossMs}ms` },
+        'aria-label': `Uzaylı, elinde ${objectInfo(alien.object).name}`,
+        onclick: () => {
+          if (state !== 'moving') return;
+          state = 'frozen';
+          el.classList.add(alien.isTarget ? 'is-frozen' : 'is-wrong');
+          el.disabled = true;
+          ctx.record({ kind: 'freeze', isTarget: alien.isTarget });
+          if (alien.isTarget && ++frozenSinceSwitch >= FREEZES_PER_TARGET) setTarget();
+          ctx.later(() => el.remove(), 700);
+        },
+      },
+      h('span', { class: 'fa-held', 'aria-hidden': 'true' }, objectInfo(alien.object).icon),
+      alienSvg(alien.color),
+    );
+    lanes[lane].append(el);
+    const heldTarget = target;
+    ctx.later(() => {
+      if (state !== 'moving') return;
+      state = 'gone';
+      el.remove();
+      // Hedef değiştiyse eski hedefi kaçırmak ceza almaz
+      if (alien.isTarget && heldTarget === target) ctx.record({ kind: 'escape' });
+    }, cfg.crossMs);
+    ctx.later(spawn, cfg.spawnMs);
+  }
+
+  setTarget();
+  ctx.presented();
+  spawn();
+}
+
+return { ALIEN_COLORS, TARGET_RATE, FREEZES_PER_TARGET, definition, levelConfig, pickTarget, makeAlien, createState, nextRound, evaluate, alienSvg, render };
+})();
+
+// ---- src/games/bubbles.js ----
+const __m31 = (() => {
+// Beyin Testi · Görsel 2 — Baloncuklar
+// Farklı büyüklükte baloncuklara küçükten büyüğe doğru tıkla.
+// Boyutlar arasında seviyeye göre en az bir oran farkı bırakılır; sıralama tektir.
+
+const { OUTCOME } = __m5;
+const { createRepeatGuard } = __m3;
+const { h } = __m10;
+
+const COUNTS = [4, 4, 5, 5, 6, 6, 7, 7, 8, 9];
+const MIN_STEP = [0.32, 0.28, 0.24, 0.2, 0.17, 0.15, 0.13, 0.11, 0.09, 0.08];
+
+const definition = {
+  id: 'bubbles',
+  name: 'Baloncuklar',
+  category: 'visual',
+  icon: '◯',
+  description: 'Baloncuklara küçükten büyüğe doğru dokun.',
+  howTo: [
+    'Farklı büyüklükte baloncuklar belirir.',
+    'En küçükten başlayarak büyüğe doğru sırayla dokun.',
+    'Yanlış sıra turu bitirir. Seviye arttıkça boyutlar birbirine yaklaşır.',
+  ],
+  targetRtMs: 3500,
+  gramsPerCorrect: 90,
+};
+
+const levelConfig = (level) => {
+  const l = Math.min(10, Math.max(1, level));
+  return { count: COUNTS[l - 1], minStep: MIN_STEP[l - 1] };
+};
+
+const createState = () => ({ guard: createRepeatGuard({ memory: 10 }) });
+
+function nextRound(state, { rng, level }) {
+  const cfg = levelConfig(level);
+  return state.guard.take(
+    () => {
+      // Yarıçaplar: 100 birimlik alanda, ardışık oran en az minStep
+      const radii = [];
+      let r = 5 + rng.next() * 2;
+      for (let i = 0; i < cfg.count; i++) {
+        radii.push(Math.round(r * 10) / 10);
+        r *= 1 + cfg.minStep + rng.next() * cfg.minStep * 0.6;
+      }
+      const scale = Math.min(1, 15 / radii[radii.length - 1]);
+      const sizes = radii.map((x) => Math.round(x * scale * 10) / 10);
+      const placed = [];
+      for (const size of rng.shuffle(sizes)) {
+        let pos = null;
+        for (let t = 0; t < 400 && !pos; t++) {
+          const x = size + rng.next() * (100 - 2 * size);
+          const y = size + rng.next() * (70 - 2 * size);
+          if (placed.every((p) => Math.hypot(p.x - x, p.y - y) > p.r + size + 1.5)) pos = { x, y };
+        }
+        placed.push({ r: size, ...(pos || { x: 50, y: 35 }) });
+      }
+      const order = placed.map((_, i) => i).sort((a, b) => placed[a].r - placed[b].r);
+      return { ...cfg, bubbles: placed, order, key: sizes.join(',') };
+    },
+    (r) => r.key,
+  );
+}
+
+// 'continue' | 'correct' | 'wrong'
+function checkPicks(round, picks) {
+  for (let i = 0; i < picks.length; i++) if (picks[i] !== round.order[i]) return 'wrong';
+  return picks.length === round.order.length ? 'correct' : 'continue';
+}
+
+function evaluate(_state, round, input) {
+  if (input.timeout) return { outcome: OUTCOME.TIMEOUT };
+  const status = checkPicks(round, input.picks || []);
+  if (status === 'correct') return { outcome: OUTCOME.CORRECT, targetRtMs: 700 * round.count };
+  if (status === 'continue') return { outcome: OUTCOME.SKIP };
+  return { outcome: OUTCOME.WRONG, explanation: 'Sıra küçükten büyüğe olmalıydı.' };
+}
+
+function render(ctx) {
+  const { round } = ctx;
+  const picks = [];
+  let done = false;
+  const field = h('div', { class: 'bb-field', role: 'group', 'aria-label': 'Baloncuklar' });
+  const els = round.bubbles.map((b, i) => {
+    const el = h('button', {
+      type: 'button',
+      class: 'bb-bubble',
+      'aria-label': `Baloncuk, boyut ${round.order.indexOf(i) + 1}`,
+      style: { left: `${b.x - b.r}%`, top: `${((b.y - b.r) / 70) * 100}%`, width: `${b.r * 2}%` },
+      onclick: () => tap(i),
+    });
+    field.append(el);
+    return el;
+  });
+  ctx.root.append(field);
+
+  function tap(i) {
+    if (done || picks.includes(i)) return;
+    picks.push(i);
+    const status = checkPicks(round, picks);
+    els[i].classList.add(status === 'wrong' ? 'is-wrong' : 'is-popped');
+    if (status === 'continue') return ctx.sound('tick');
+    done = true;
+    if (status === 'wrong') round.order.forEach((idx, n) => els[idx].setAttribute('data-n', String(n + 1)));
+    ctx.answer({ picks: picks.slice() });
+  }
+  ctx.status('Küçükten büyüğe!');
+  ctx.presented();
+}
+
+return { definition, levelConfig, createState, nextRound, checkPicks, evaluate, render };
+})();
+
 // ---- src/games/index.js ----
-const __m8 = (() => {
+const __m9 = (() => {
 // Oyun kaydı. Yeni oyun eklemek için: src/games/ altına ortak arayüzü uygulayan
 // bir modül yaz ve aşağıdaki listeye ekle. Başka hiçbir dosyanın değişmesi gerekmez.
 //
@@ -4393,17 +6575,29 @@ const __m8 = (() => {
 //   evaluate(state, round, input)      { outcome, explanation?, extraBonus?, targetRtMs? }
 //   render(ctx)                        turu ctx.root içine çizer, ctx.answer(input) ile cevap verir
 
-const memoryGrid = __m13;
-const quickMatch = __m14;
-const mentalMath = __m15;
-const dualFocus = __m16;
-const patternShift = __m17;
-const logicCircuit = __m18;
-const sequenceDetective = __m19;
-const wordSort = __m20;
-const mentalRotation = __m21;
+const memoryGrid = __m15;
+const quickMatch = __m16;
+const mentalMath = __m17;
+const dualFocus = __m18;
+const patternShift = __m19;
+const logicCircuit = __m20;
+const sequenceDetective = __m21;
+const wordSort = __m22;
+const mentalRotation = __m23;
+const patternShoot = __m24;
+const missingSymbol = __m25;
+const gearWheel = __m26;
+const alphaSort = __m27;
+const dontDrop = __m28;
+const numberHunt = __m29;
+const freezeAlien = __m30;
+const bubbles = __m31;
 
-const GAMES = [
+// Beyin Testi oyunları (Brain Buddies'in dört kategorisi; bkz. src/core/brainTest.js)
+const TEST_GAMES = [patternShoot, missingSymbol, gearWheel, alphaSort, dontDrop, numberHunt, freezeAlien, bubbles];
+
+// Serbest antrenmandaki ek oyunlar
+const EXTRA_GAMES = [
   memoryGrid,
   quickMatch,
   mentalMath,
@@ -4415,6 +6609,8 @@ const GAMES = [
   mentalRotation,
 ];
 
+const GAMES = [...TEST_GAMES, ...EXTRA_GAMES];
+
 const CATEGORIES = {
   memory: { name: 'Hafıza' },
   match: { name: 'Hızlı eşleştirme' },
@@ -4424,6 +6620,7 @@ const CATEGORIES = {
   verbal: { name: 'Sözel' },
   spatial: { name: 'Mekânsal' },
   logic: { name: 'Mantık' },
+  visual: { name: 'Görsel algı' },
 };
 
 const CATEGORY_IDS = Object.keys(CATEGORIES);
@@ -4431,11 +6628,11 @@ const CATEGORY_IDS = Object.keys(CATEGORIES);
 const gameById = (id) => GAMES.find((g) => g.definition.id === id) || null;
 const gamesInCategory = (cat) => GAMES.filter((g) => g.definition.category === cat);
 
-return { GAMES, CATEGORIES, CATEGORY_IDS, gameById, gamesInCategory };
+return { TEST_GAMES, EXTRA_GAMES, GAMES, CATEGORIES, CATEGORY_IDS, gameById, gamesInCategory };
 })();
 
 // ---- src/ui/audio.js ----
-const __m11 = (() => {
+const __m12 = (() => {
 // AudioManager: Web Audio ile sentezlenen kısa sesler. Ses dosyası yoktur.
 // AudioContext ilk kullanıcı etkileşiminden sonra, ilk çalmada oluşturulur.
 
@@ -4489,21 +6686,389 @@ function createAudio(isEnabled = () => true) {
 return { createAudio };
 })();
 
+// ---- src/ui/mascot.js ----
+const __m34 = (() => {
+// Profesör Gram: oyunun sunucu karakteri (özgün çizim, SVG). Beyinleri gram cinsinden tartar.
+
+const { s } = __m11;
+const { h } = __m10;
+
+// mood: 'happy' | 'think' | 'wow'
+function mascotSvg({ size = 150, mood = 'happy' } = {}) {
+  const mouth = {
+    happy: s('path', { d: 'M52 78 Q60 86 68 78', class: 'pg-line' }),
+    think: s('path', { d: 'M53 80 L67 78', class: 'pg-line' }),
+    wow: s('ellipse', { cx: 60, cy: 80, rx: 5, ry: 6, class: 'pg-mouth' }),
+  }[mood];
+  return s(
+    'svg',
+    { viewBox: '0 0 120 150', width: size, height: (size * 150) / 120, class: `mascot mood-${mood}`, role: 'img', focusable: 'false' },
+    s('title', {}, document.createTextNode('Profesör Gram')),
+    // önlük
+    s('path', { d: 'M28 150 L34 104 Q60 94 86 104 L92 150 Z', class: 'pg-coat' }),
+    s('path', { d: 'M60 100 L50 126 M60 100 L70 126', class: 'pg-lapel' }),
+    s('rect', { x: 66, y: 114, width: 12, height: 3, rx: 1.5, class: 'pg-pen' }),
+    // kollar ve deney tüpü
+    s('path', { d: 'M34 112 Q18 118 22 98', class: 'pg-arm' }),
+    s('path', { d: 'M86 112 Q102 116 98 96', class: 'pg-arm' }),
+    s('rect', { x: 92, y: 70, width: 9, height: 26, rx: 4.5, class: 'pg-tube' }),
+    s('rect', { x: 92, y: 82, width: 9, height: 14, rx: 4.5, class: 'pg-liquid' }),
+    // beyin
+    s(
+      'g',
+      { class: 'pg-brain' },
+      s('circle', { cx: 40, cy: 44, r: 22 }),
+      s('circle', { cx: 60, cy: 34, r: 24 }),
+      s('circle', { cx: 80, cy: 44, r: 22 }),
+      s('circle', { cx: 46, cy: 66, r: 22 }),
+      s('circle', { cx: 74, cy: 66, r: 22 }),
+    ),
+    s('path', { d: 'M60 14 Q54 30 60 44 Q66 58 60 72', class: 'pg-fold' }),
+    s('path', { d: 'M30 40 Q38 34 44 42 M78 28 Q86 30 88 38 M36 58 Q42 54 48 60', class: 'pg-fold' }),
+    // gözlük ve gözler
+    s('circle', { cx: 48, cy: 62, r: 10, class: 'pg-glass' }),
+    s('circle', { cx: 72, cy: 62, r: 10, class: 'pg-glass' }),
+    s('path', { d: 'M58 62 L62 62', class: 'pg-line' }),
+    s('circle', { cx: mood === 'think' ? 50 : 48, cy: mood === 'think' ? 59 : 62, r: 3.6, class: 'pg-eye' }),
+    s('circle', { cx: mood === 'think' ? 74 : 72, cy: mood === 'think' ? 59 : 62, r: 3.6, class: 'pg-eye' }),
+    mouth,
+  );
+}
+
+function speech(text, { mood = 'happy', size = 120 } = {}) {
+  return h('div', { class: 'speech-row' }, mascotSvg({ size, mood }), h('p', { class: 'speech' }, text));
+}
+
+return { mascotSvg, speech };
+})();
+
+// ---- src/ui/brainScreens.js ----
+const __m13 = (() => {
+// Beyin Testi ekranları: ana sayfa, kategori girişi, ara sonuç, final tartısı, kupalar.
+
+const { h } = __m10;
+const { s } = __m11;
+const { mascotSvg, speech } = __m34;
+const { createRng } = __m3;
+const { TEST_CATEGORIES, STEP_MS, BONUS_EVERY, BONUS_MS, scoringFor, unlockedGames, pickGame, summarizeTest, TROPHIES, weightComment, stepComment, categoryById } = __m2;
+const { gameById } = __m9;
+
+const g = (v) => `${Math.round(v || 0).toLocaleString('tr-TR')} g`;
+const nameOf = (id) => gameById(id).definition.name;
+
+function createBrainScreens({ repo, show, play, audio, reducedMotion, openTraining }) {
+  const brain = () => repo.data.brain;
+
+  // ---------------- Ana sayfa ----------------
+  function home() {
+    show((el) => {
+      const b = brain();
+      const earned = TROPHIES.filter((t) => b.trophies[t.id]).length;
+      el.append(
+        h(
+          'section',
+          { class: 'bt-hero' },
+          h(
+            'div',
+            { class: 'bt-window' },
+            h('div', { class: 'bt-sky', 'aria-hidden': 'true' }),
+            h('div', { class: 'bt-host' }, mascotSvg({ size: 132, mood: 'happy' })),
+            h(
+              'div',
+              { class: 'bt-hero-text' },
+              h('p', { class: 'speech' }, b.tests ? 'Tekrar hoş geldin! Beynini bir kez daha tartalım mı?' : 'Merhaba, ben Profesör Gram! Beynini tartmaya hazır mısın?'),
+              h('h1', { class: 'bt-title' }, 'Beynin kaç gram?'),
+              h(
+                'p',
+                { class: 'bt-record' },
+                b.best ? ['Rekorun: ', h('strong', { id: 'record-weight' }, g(b.best.total))] : 'Henüz tartılmadın.',
+              ),
+              h(
+                'div',
+                { class: 'row-actions' },
+                h('button', { type: 'button', class: 'btn btn-primary btn-lg', id: 'start-test', onclick: startTest }, 'Testi başlat'),
+                h('button', { type: 'button', class: 'btn btn-secondary', id: 'open-trophies', onclick: trophies }, `Kupalar ${earned}/${TROPHIES.length}`),
+              ),
+              h('p', { class: 'bt-sub' }, '4 oyun × 60 saniye: Hafıza, Mantık, Hesap, Görsel.'),
+            ),
+          ),
+        ),
+        h(
+          'section',
+          { class: 'bt-cats', 'aria-labelledby': 'cats-h' },
+          h('h2', { class: 'section-title', id: 'cats-h' }, 'Testteki oyunlar'),
+          h('div', { class: 'bt-cat-grid' }, TEST_CATEGORIES.map((cat) => categoryCard(cat))),
+        ),
+        h(
+          'section',
+          { class: 'bt-training' },
+          h('div', {}, h('h2', { class: 'section-title' }, 'Serbest antrenman'), h('p', { class: 'muted' }, 'Açtığın oyunları ve ek beyin oyunlarını tek tek, süre ve zorluk ayarlarıyla oyna.')),
+          h('button', { type: 'button', class: 'btn btn-secondary', id: 'open-training', onclick: openTraining }, 'Antrenmana git'),
+        ),
+      );
+      if (!repo.persistent) el.append(h('p', { class: 'note' }, 'Not: Tarayıcı yerel kaydı engelliyor. Sonuçlar bu sekme kapanınca silinir.'));
+    }, { focus: false });
+  }
+
+  function categoryCard(cat) {
+    const b = brain();
+    const open = unlockedGames(cat.id, b.tests);
+    const locked = cat.games.filter((id) => !open.includes(id));
+    let gameLine;
+    if (open.length > 1) {
+      const sel = h(
+        'select',
+        { id: `choice-${cat.id}`, 'aria-label': `${cat.name} oyunu`, onchange: (e) => repo.setBrainChoice(cat.id, e.target.value) },
+        h('option', { value: 'random', selected: b.choice[cat.id] === 'random' }, 'Rastgele'),
+        open.map((id) => h('option', { value: id, selected: b.choice[cat.id] === id }, nameOf(id))),
+      );
+      gameLine = h('label', { class: 'bt-choice' }, h('span', { class: 'label' }, 'Oyun'), sel);
+    } else {
+      gameLine = h('p', { class: 'bt-game' }, nameOf(open[0]));
+    }
+    return h(
+      'article',
+      { class: `bt-cat cat-${cat.id}` },
+      h('div', { class: 'bt-cat-head' }, h('span', { class: 'bt-cat-icon', 'aria-hidden': 'true' }, cat.icon), h('h3', {}, cat.name)),
+      gameLine,
+      h('p', { class: 'bt-cat-best' }, h('span', { class: 'label' }, 'En iyi'), h('strong', {}, b.catBest[cat.id] ? g(b.catBest[cat.id]) : '—')),
+      locked.map((id) => {
+        const after = cat.unlockAfter[cat.games.indexOf(id)];
+        return h('p', { class: 'bt-lock' }, `🔒 ${nameOf(id)}: ${after - b.tests} test sonra açılır`);
+      }),
+    );
+  }
+
+  // ---------------- Test akışı ----------------
+  function startTest() {
+    const b = brain();
+    const seed = repo.settings.seed ? `${repo.settings.seed}:test:${b.tests}` : Date.now();
+    const rng = createRng(seed);
+    const plan = TEST_CATEGORIES.map((cat) => ({ category: cat.id, gameId: pickGame(cat.id, b.tests, b.choice[cat.id], rng) }));
+    audio.play('start');
+    stepIntro({ plan, steps: [] }, 0);
+  }
+
+  function progress(state, current) {
+    return h(
+      'ol',
+      { class: 'bt-progress', 'aria-label': 'Test ilerlemesi' },
+      state.plan.map((p, i) => {
+        const done = state.steps[i];
+        return h(
+          'li',
+          { class: done ? 'is-done' : i === current ? 'is-current' : '', 'aria-current': i === current ? 'step' : null },
+          h('span', { class: 'bt-progress-name' }, categoryById(p.category).name),
+          h('span', { class: 'bt-progress-val' }, done ? g(done.result.score) : i === current ? 'şimdi' : '—'),
+        );
+      }),
+    );
+  }
+
+  function stepIntro(state, i) {
+    const p = state.plan[i];
+    const cat = categoryById(p.category);
+    const def = gameById(p.gameId).definition;
+    show((el) => {
+      el.append(
+        h(
+          'section',
+          { class: 'bt-step' },
+          progress(state, i),
+          speech(i === 0 ? `İlk olarak ${cat.name.toLocaleLowerCase('tr')}! Hazırsan başlayalım.` : `Sırada ${cat.name.toLocaleLowerCase('tr')} var.`, { mood: 'think', size: 96 }),
+          h('p', { class: 'eyebrow' }, `${i + 1}/4 · ${cat.name}`),
+          h('h1', { class: 'intro-title' }, def.name),
+          h('ol', { class: 'howto' }, def.howTo.map((line) => h('li', {}, line))),
+          h('p', { class: 'muted' }, `60 saniye · art arda ${BONUS_EVERY} doğru = +${BONUS_MS / 1000} sn · hatalar gram kaybettirir`),
+          h(
+            'div',
+            { class: 'row-actions' },
+            h('button', {
+              type: 'button',
+              class: 'btn btn-primary btn-lg',
+              id: 'start-step',
+              onclick: () =>
+                play(p.gameId, {
+                  level: 1,
+                  test: {
+                    durationMs: STEP_MS,
+                    scoring: scoringFor(def),
+                    bonusEvery: BONUS_EVERY,
+                    bonusMs: BONUS_MS,
+                    label: `${i + 1}/4 · ${cat.name}`,
+                    onFinish: (result) => stepResult(state, i, result),
+                    onQuit: home,
+                  },
+                }),
+            }, 'Başla'),
+            h('button', { type: 'button', class: 'btn btn-ghost', onclick: home }, 'Testi bırak'),
+          ),
+        ),
+      );
+      setTimeout(() => el.querySelector('#start-step')?.focus(), 0);
+    });
+  }
+
+  function stepResult(state, i, result) {
+    const p = state.plan[i];
+    const cat = categoryById(p.category);
+    state.steps[i] = { ...p, result };
+    const b = brain();
+    const grams = Math.round(result.score);
+    const errors = result.answered - result.counts.correct;
+    const last = i === state.plan.length - 1;
+    show((el) => {
+      el.append(
+        h(
+          'section',
+          { class: 'bt-step' },
+          progress(state, last ? -1 : i + 1),
+          speech(stepComment(grams, b.catBest[cat.id]), { mood: grams >= 1000 ? 'wow' : 'happy', size: 96 }),
+          h('p', { class: 'eyebrow' }, `${cat.name} · ${nameOf(p.gameId)}`),
+          h('h1', { class: 'bt-grams' }, h('span', { id: 'step-grams' }, g(grams))),
+          h(
+            'dl',
+            { class: 'stat-grid' },
+            h('div', {}, h('dt', {}, 'Doğru / hata'), h('dd', {}, `${result.counts.correct} / ${errors}`)),
+            h('div', {}, h('dt', {}, 'En uzun seri'), h('dd', {}, String(result.bestStreak))),
+            h('div', {}, h('dt', {}, 'Rekor testindeki'), h('dd', {}, b.best ? g(b.best.cats[cat.id]) : '—')),
+            h('div', {}, h('dt', {}, 'Kategori en iyin'), h('dd', {}, b.catBest[cat.id] ? g(b.catBest[cat.id]) : '—')),
+          ),
+          h(
+            'div',
+            { class: 'row-actions' },
+            last
+              ? h('button', { type: 'button', class: 'btn btn-primary btn-lg', id: 'weigh', onclick: () => finalScreen(state) }, 'Beynimi tart')
+              : h('button', { type: 'button', class: 'btn btn-primary btn-lg', id: 'next-step', onclick: () => stepIntro(state, i + 1) }, `Sonraki: ${categoryById(state.plan[i + 1].category).name}`),
+            h('button', { type: 'button', class: 'btn btn-ghost', onclick: home }, 'Testi bırak'),
+          ),
+        ),
+      );
+      setTimeout(() => el.querySelector('#weigh, #next-step')?.focus(), 0);
+    });
+  }
+
+  function scaleSvg() {
+    return s(
+      'svg',
+      { viewBox: '0 0 200 120', class: 'bt-scale', 'aria-hidden': 'true', focusable: 'false' },
+      s('rect', { x: 20, y: 96, width: 160, height: 18, rx: 6, class: 'sc-base' }),
+      s('rect', { x: 92, y: 62, width: 16, height: 36, class: 'sc-post' }),
+      s('rect', { x: 40, y: 54, width: 120, height: 10, rx: 5, class: 'sc-plate' }),
+      s('g', { class: 'sc-brain' }, [[78, 34, 18], [100, 26, 20], [122, 34, 18], [88, 46, 16], [112, 46, 16]].map(([cx, cy, r]) => s('circle', { cx, cy, r }))),
+      s('path', { d: 'M100 10 Q94 28 100 40 Q106 52 100 58', class: 'sc-fold' }),
+    );
+  }
+
+  function finalScreen(state) {
+    const summary = summarizeTest(state.steps);
+    const outcome = repo.recordBrainTest(summary);
+    const b = brain();
+    audio.play('end');
+    show((el) => {
+      const big = h('span', { id: 'brain-weight', 'aria-label': g(summary.total) }, reducedMotion() ? g(summary.total) : '0 g');
+      const prev = outcome.previousBest;
+      el.append(
+        h(
+          'section',
+          { class: 'bt-final' },
+          speech(weightComment(summary.total), { mood: 'wow', size: 110 }),
+          h('div', { class: 'bt-weigh' }, scaleSvg(), h('h1', { class: 'bt-total' }, h('small', {}, 'Beyin ağırlığın'), big)),
+          outcome.isRecord
+            ? h('p', { class: 'badge badge-record' }, prev ? `Yeni rekor! Öncekinden ${g(summary.total - prev.total)} ağır.` : 'İlk tartın rekor olarak kaydedildi!')
+            : h('p', { class: 'badge' }, `Rekorun ${g(prev.total)}. Rekor yalnızca toplamı geçince güncellenir.`),
+          h(
+            'ul',
+            { class: 'bt-breakdown', 'aria-label': 'Kategori dağılımı' },
+            TEST_CATEGORIES.map((cat) => {
+              const v = summary.cats[cat.id];
+              return h(
+                'li',
+                {},
+                h('span', { class: 'bar-name' }, `${cat.name}`, h('small', {}, nameOf(state.plan.find((p) => p.category === cat.id).gameId))),
+                h('span', { class: 'bar-track', 'aria-hidden': 'true' }, h('span', { class: `bar-fill cat-${cat.id}`, style: { width: `${Math.min(100, (v / 2000) * 100)}%` } })),
+                h('span', { class: 'bar-num' }, g(v)),
+              );
+            }),
+          ),
+          outcome.newTrophies.length
+            ? h('div', { class: 'panel' }, h('h2', { class: 'section-title' }, '🏆 Yeni kupa'), h('ul', { class: 'plain' }, outcome.newTrophies.map((t) => h('li', {}, h('strong', {}, t.name), ` · ${t.desc}`))))
+            : null,
+          outcome.unlocked.length
+            ? h('div', { class: 'panel' }, h('h2', { class: 'section-title' }, '🔓 Yeni oyun açıldı'), h('ul', { class: 'plain' }, outcome.unlocked.map((u) => h('li', {}, h('strong', {}, nameOf(u.gameId)), ` · ${categoryById(u.category).name}. Ana sayfada seçebilirsin.`))))
+            : null,
+          h('p', { class: 'muted' }, `Toplam ${b.tests} test. ${summary.errors ? `Bu testte ${summary.errors} hata.` : 'Bu testte hiç hata yapmadın!'}`),
+          h(
+            'div',
+            { class: 'row-actions' },
+            h('button', { type: 'button', class: 'btn btn-primary btn-lg', id: 'again-test', onclick: startTest }, 'Yeniden test'),
+            h('button', { type: 'button', class: 'btn btn-secondary', id: 'go-home', onclick: home }, 'Ana sayfa'),
+          ),
+        ),
+      );
+      if (!reducedMotion()) {
+        const t0 = performance.now();
+        const step = (t) => {
+          if (!big.isConnected) return;
+          const k = Math.min(1, (t - t0) / 1400);
+          big.textContent = g(summary.total * (1 - (1 - k) ** 3));
+          if (k < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      }
+      setTimeout(() => el.querySelector('#again-test')?.focus(), 0);
+    });
+  }
+
+  // ---------------- Kupalar ----------------
+  function trophies() {
+    show((el) => {
+      const b = brain();
+      el.append(
+        h('h1', { class: 'page-title' }, 'Kupalar'),
+        h(
+          'ul',
+          { class: 'trophy-grid' },
+          TROPHIES.map((t) => {
+            const at = b.trophies[t.id];
+            return h(
+              'li',
+              { class: `trophy${at ? ' is-earned' : ''}` },
+              h('span', { class: 'trophy-icon', 'aria-hidden': 'true' }, at ? '🏆' : '🔒'),
+              h('strong', {}, t.name),
+              h('span', { class: 'muted' }, t.desc),
+              h('span', { class: 'trophy-state' }, at ? `Kazanıldı · ${new Date(at).toLocaleDateString('tr-TR')}` : 'Henüz kazanılmadı'),
+            );
+          }),
+        ),
+        h('div', { class: 'row-actions' }, h('button', { type: 'button', class: 'btn btn-secondary', onclick: home }, 'Ana sayfa')),
+      );
+    });
+  }
+
+  return { home, trophies, startTest };
+}
+
+return { createBrainScreens };
+})();
+
 // ---- src/ui/app.js ----
 const __m1 = (() => {
 // Uygulama kabuğu: ekranlar (menü, tanıtım, oyun, sonuç, istatistik, ayarlar) ve oyun döngüsü.
 
-const { createRng } = __m2;
-const { createSession, PHASE } = __m3;
-const { OUTCOME } = __m4;
-const { createTimer } = __m5;
-const { sessionSummary, categoryStrengths, trend } = __m6;
-const { planChallenge, summarizeChallenge } = __m7;
-const { GAMES, CATEGORIES, CATEGORY_IDS, gameById, gamesInCategory } = __m8;
-const { h, clear } = __m9;
-const { s } = __m10;
-const { createAudio } = __m11;
+const { createRng } = __m3;
+const { createSession, PHASE } = __m4;
+const { OUTCOME } = __m5;
+const { createTimer } = __m6;
+const { sessionSummary, categoryStrengths, trend } = __m7;
+const { planChallenge, summarizeChallenge } = __m8;
+const { GAMES, CATEGORIES, CATEGORY_IDS, gameById, gamesInCategory } = __m9;
+const { h, clear, append } = __m10;
+const { s } = __m11;
+const { createAudio } = __m12;
 const { MAX_IMPORT_BYTES } = __m0;
+const { createBrainScreens } = __m13;
+const { TEST_CATEGORIES, unlockedGames } = __m2;
 
 const RELAXED_ROUNDS = 12;
 
@@ -4565,8 +7130,8 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
         h(
           'section',
           { class: 'hero' },
-          h('h1', { class: 'hero-title' }, 'Kısa bir mola, ', h('span', { class: 'hl' }, 'keskin'), ' bir zihin.'),
-          h('p', { class: 'hero-sub' }, `Bugün ${sum.today} oturum · Son 7 gün ${sum.week} oturum`),
+          h('h1', { class: 'hero-title' }, 'Serbest ', h('span', { class: 'hl' }, 'antrenman')),
+          h('p', { class: 'hero-sub' }, `Oyunları tek tek oyna. Bugün ${sum.today} oturum · Son 7 gün ${sum.week} oturum`),
           h(
             'div',
             { class: 'hero-actions' },
@@ -4599,10 +7164,26 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
     }, { focus: false });
   }
 
+  function lockedTestGame(id) {
+    const cat = TEST_CATEGORIES.find((c) => c.games.includes(id));
+    if (!cat || unlockedGames(cat.id, repo.data.brain.tests).includes(id)) return null;
+    return cat.unlockAfter[cat.games.indexOf(id)] - repo.data.brain.tests;
+  }
+
   function gameRow(game) {
     const d = game.definition;
     const rec = repo.data.games[d.id];
     const best = rec?.best;
+    const lockedFor = lockedTestGame(d.id);
+    if (lockedFor) {
+      return h(
+        'div',
+        { class: 'game-row is-locked', 'aria-disabled': 'true' },
+        h('span', { class: 'game-icon', 'aria-hidden': 'true' }, '🔒'),
+        h('span', { class: 'game-text' }, h('strong', {}, d.name), h('span', {}, `Beyin Testi'ni ${lockedFor} kez daha bitirince açılır.`)),
+        h('span', { class: 'game-best' }, h('small', {}, 'Kilitli')),
+      );
+    }
     return h(
       'button',
       { type: 'button', class: 'game-row', onclick: () => intro(d.id), 'aria-label': `${d.name}. ${d.description}${best ? ` En iyi skor ${best.score}.` : ''}` },
@@ -4616,7 +7197,7 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
     const today = new Date().setHours(0, 0, 0, 0);
     const playedToday = new Set(repo.data.sessions.filter((x) => x.at >= today).map((x) => x.gameId));
     const fresh = GAMES.filter((g) => !playedToday.has(g.definition.id));
-    const pool = fresh.length ? fresh : GAMES;
+    const pool = (fresh.length ? fresh : GAMES).filter((g) => !lockedTestGame(g.definition.id));
     const pick = pool[Math.floor(Math.random() * pool.length)];
     intro(pick.definition.id);
   }
@@ -4702,22 +7283,30 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
   }
 
   // ---------------- Oyun ----------------
-  function play(id, { options = {}, challenge = null, practiceRounds = 0, level = 1 }) {
+  // test: Beyin Testi adımı { durationMs, scoring, bonusEvery, bonusMs, label, onFinish(result), onQuit() }
+  function play(id, { options = {}, challenge = null, practiceRounds = 0, level = 1, test = null }) {
     const game = gameById(id);
     const d = game.definition;
     const settings = repo.settings;
-    const relaxed = settings.relaxed && !challenge;
+    // Sürekli akan oyunlar tur saymaz; bu yüzden "süre baskısı kapalı" modunda da süreli oynanır
+    const relaxed = settings.relaxed && !challenge && !test && !d.continuous;
     const seed = settings.seed ? `${settings.seed}:${id}` : `${Date.now()}:${Math.random()}`;
+    const rng = createRng(seed);
+    const unit = test ? ' g' : '';
     const playClock = createTimer({ durationMs: Infinity, now: () => performance.now() });
     playClock.start();
     const now = () => playClock.elapsed();
     const rec = repo.data.games[id];
     const session = createSession({
       game,
-      rng: createRng(seed),
+      rng,
       startLevel: level,
-      adaptive: settings.adaptive,
-      durationMs: challenge ? challenge.step.durationMs : relaxed ? Infinity : settings.durationSec * 1000,
+      // Beyin Testi'nde oyunlar her zaman kolaydan başlayıp zorlaşır
+      adaptive: test ? true : settings.adaptive,
+      durationMs: test ? test.durationMs : challenge ? challenge.step.durationMs : relaxed ? Infinity : settings.durationSec * 1000,
+      scoring: test?.scoring,
+      bonusEvery: test?.bonusEvery || 0,
+      bonusMs: test?.bonusMs,
       rounds: RELAXED_ROUNDS,
       practiceRounds,
       options,
@@ -4743,6 +7332,8 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
       const status = h('p', { class: 'status', 'aria-live': 'polite' }, '');
       const stage = h('div', { class: 'stage', id: 'stage' });
       const feedback = h('div', { class: 'feedback', role: 'status', 'aria-live': 'assertive' });
+      // null/false çocukları atlayan ekleme (yerel append bunları "null" metnine çevirir)
+      const fbAppend = (...nodes) => append(feedback, nodes);
       const banner = h('p', { class: 'banner', hidden: true });
       const pauseBtn = h('button', { type: 'button', class: 'btn btn-ghost btn-sm', id: 'pause', onclick: () => togglePause() }, 'Duraklat');
       const pauseLayer = h(
@@ -4751,7 +7342,7 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
         h('h2', { id: 'pause-h' }, 'Duraklatıldı'),
         h('div', { class: 'row-actions' },
           h('button', { type: 'button', class: 'btn btn-primary', id: 'resume', onclick: () => togglePause() }, 'Devam et'),
-          h('button', { type: 'button', class: 'btn btn-ghost', id: 'quit', onclick: () => finish(true) }, 'Oyunu bitir'),
+          h('button', { type: 'button', class: 'btn btn-ghost', id: 'quit', onclick: () => finish(true) }, test ? 'Testi bırak' : 'Oyunu bitir'),
         ),
       );
 
@@ -4765,7 +7356,7 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
             pauseBtn,
             h('span', { class: 'hud-item' }, h('small', {}, 'Seviye'), hudLevel),
             h('span', { class: 'hud-item' }, h('small', {}, 'Seri'), hudStreak),
-            h('span', { class: 'hud-item hud-score' }, h('small', {}, 'Skor'), hudScore),
+            h('span', { class: 'hud-item hud-score' }, h('small', {}, test ? 'Gram' : 'Skor'), hudScore),
           ),
           h(
             'div',
@@ -4781,6 +7372,7 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
           ),
           h('div', { class: 'roundbar', 'aria-hidden': 'true' }, roundFill),
           banner,
+          test ? h('p', { class: 'test-step-label' }, test.label) : null,
           h('h1', { class: 'visually-hidden' }, d.name),
           status,
           stage,
@@ -4816,18 +7408,20 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
           playClock.resume();
           pauseLayer.hidden = true;
           stage.inert = false;
+          stage.classList.remove('is-paused');
           pauseBtn.focus();
         } else {
           session.pause();
           playClock.pause();
           pauseLayer.hidden = false;
           stage.inert = true;
+          stage.classList.add('is-paused');
           pauseLayer.querySelector('#resume').focus();
         }
       }
 
       function updateHud() {
-        hudScore.textContent = fmtInt(session.score);
+        hudScore.textContent = fmtInt(session.score) + unit;
         hudLevel.textContent = String(session.level);
         hudStreak.textContent = String(session.streak);
       }
@@ -4905,7 +7499,34 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
             roundLimit = { timer: createTimer({ durationMs: ms, now }), map };
             roundLimit.timer.start();
           },
+          // sürekli akan oyunlar için
+          currentLevel: () => session.level,
+          rng,
+          now,
+          record: recordEvent,
         });
+      }
+
+      // Sürekli oyunlarda tek olay: tur bitmez, kısa geri bildirim verilir.
+      function recordEvent(input) {
+        if (finished || paused || session.phase !== PHASE.AWAITING) return null;
+        const res = session.record(input);
+        updateHud();
+        const ok = res.outcome === OUTCOME.CORRECT;
+        if (res.outcome !== OUTCOME.IGNORE) {
+          feedback.className = `feedback is-flash ${ok ? 'is-ok' : 'is-bad'}`;
+          clear(feedback);
+          fbAppend(
+            h('span', { class: 'fb-icon', 'aria-hidden': 'true' }, ok ? '✓' : '✕'),
+            h('span', { class: 'fb-pts' }, `${res.points >= 0 ? '+' : ''}${res.points}${unit}`),
+            !ok && res.explanation ? h('span', { class: 'fb-inline' }, res.explanation) : null,
+            res.bonusTime ? h('strong', { class: 'fb-bonus' }, `+${res.bonusTime / 1000} sn ek süre!`) : null,
+          );
+          audio.play(ok ? 'tick' : 'wrong');
+          if (res.bonusTime) audio.play('level');
+        }
+        if (res.levelChange.changed) announce(`Seviye ${res.levelChange.level}`);
+        return res;
       }
 
       function answer(input) {
@@ -4927,10 +7548,11 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
         if (!ignore) {
           feedback.className = `feedback ${ok ? 'is-ok' : 'is-bad'}`;
           clear(feedback);
-          feedback.append(
+          fbAppend(
             h('span', { class: 'fb-icon', 'aria-hidden': 'true' }, ok ? '✓' : '✕'),
             h('strong', {}, label),
-            res.practice ? h('span', { class: 'fb-pts' }, 'alıştırma') : h('span', { class: 'fb-pts' }, `${res.points >= 0 ? '+' : ''}${res.points}`),
+            res.practice ? h('span', { class: 'fb-pts' }, 'alıştırma') : h('span', { class: 'fb-pts' }, `${res.points >= 0 ? '+' : ''}${res.points}${unit}`),
+            res.bonusTime ? h('strong', { class: 'fb-bonus' }, `+${res.bonusTime / 1000} sn ek süre!`) : null,
             res.quickSwitch ? h('span', { class: 'fb-note' }, 'Kural değişimini hemen fark ettin!') : null,
             !ok && res.explanation ? h('span', { class: 'fb-note' }, res.explanation) : null,
           );
@@ -4939,17 +7561,17 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
         if (res.levelChange.changed) {
           const up = res.levelChange.changed > 0;
           const toast = h('span', { class: `fb-level ${up ? 'up' : 'down'}` }, `Seviye ${res.levelChange.level} ${up ? '↑' : '↓'} · ${res.levelChange.reason}`);
-          feedback.append(toast);
+          fbAppend(toast);
           if (up) audio.play('level');
           announce(toast.textContent);
         }
         const practiceDone = res.practice && !session.practice;
-        if (practiceDone) feedback.append(h('span', { class: 'fb-note' }, 'Alıştırma bitti. Şimdi gerçek oyun başlıyor!'));
+        if (practiceDone) fbAppend(h('span', { class: 'fb-note' }, 'Alıştırma bitti. Şimdi gerçek oyun başlıyor!'));
         const long = !ok && res.explanation;
         const delay = ignore ? 220 : practiceDone ? 1800 : long ? (res.steps ? 2800 : 1700) : ok ? 520 : 900;
         if (relaxed && long) {
           const cont = h('button', { type: 'button', class: 'btn btn-secondary btn-sm', id: 'continue', onclick: () => newRound() }, 'Devam');
-          feedback.append(cont);
+          fbAppend(cont);
           keyHandlers = [(e) => (e.key === 'Enter' ? (cont.click(), true) : false)];
           cont.focus();
         } else {
@@ -4964,6 +7586,11 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
         finished = true;
         session.end();
         const result = session.result();
+        if (test && quit) {
+          cleanup();
+          test.onQuit();
+          return;
+        }
         if (quit && result.answered === 0) {
           cleanup();
           if (challenge) abandonChallenge(challenge);
@@ -4974,7 +7601,8 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
         const previousBest = repo.recordResult(result, { category: d.category });
         audio.play('end');
         cleanup();
-        if (challenge) challengeNext(challenge, result);
+        if (test) test.onFinish(result);
+        else if (challenge) challengeNext(challenge, result);
         else resultScreen(result, previousBest);
       }
 
@@ -5209,12 +7837,31 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
     );
   }
 
+  function brainPanel() {
+    const b = repo.data.brain;
+    const kg = (v) => (v ? `${Math.round(v).toLocaleString('tr-TR')} g` : '—');
+    return h(
+      'section',
+      { class: 'panel' },
+      h('h2', { class: 'section-title' }, 'Beyin Testi'),
+      h(
+        'dl',
+        { class: 'stat-grid' },
+        h('div', {}, h('dt', {}, 'Test'), h('dd', {}, String(b.tests))),
+        h('div', {}, h('dt', {}, 'Rekor beyin'), h('dd', {}, kg(b.best?.total))),
+        TEST_CATEGORIES.map((c) => h('div', {}, h('dt', {}, `${c.name} en iyi`), h('dd', {}, kg(b.catBest[c.id])))),
+      ),
+      h('div', { class: 'bt-trend' }, h('span', { class: 'muted' }, 'Son testler'), sparkline(b.history.slice(-10).map((x) => x.total))),
+    );
+  }
+
   function statsScreen() {
     show((el) => {
       const sum = sessionSummary(repo.data.sessions);
       const strengths = categoryStrengths(repo.data.sessions, CATEGORY_IDS);
       el.append(
         h('h1', { class: 'page-title' }, 'İstatistikler'),
+        brainPanel(),
         h(
           'dl',
           { class: 'stat-grid three' },
@@ -5458,14 +8105,16 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
     });
   }
 
-  return { menu, intro, statsScreen, settingsScreen, applySettings };
+  const brainScreens = createBrainScreens({ repo, show, play, audio, reducedMotion, openTraining: menu });
+
+  return { menu: brainScreens.home, training: menu, trophies: brainScreens.trophies, intro, statsScreen, settingsScreen, applySettings };
 }
 
 return { createApp };
 })();
 
 // ---- src/main.js ----
-const __m23 = (() => {
+const __m35 = (() => {
 // Uygulama girişi: kayıt deposunu açar, kabuğu kurar, menüyü gösterir.
 
 const { createProgressRepository, createBrowserStore } = __m0;
@@ -5477,6 +8126,7 @@ function boot() {
   const app = createApp({ root, repo });
   app.applySettings();
   root.querySelector('#nav-home').addEventListener('click', app.menu);
+  root.querySelector('#nav-training').addEventListener('click', app.training);
   root.querySelector('#nav-stats').addEventListener('click', app.statsScreen);
   root.querySelector('#nav-settings').addEventListener('click', app.settingsScreen);
   globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').addEventListener?.('change', app.applySettings);

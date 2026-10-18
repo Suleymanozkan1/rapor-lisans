@@ -2,7 +2,9 @@
 // Şema sürümlüdür; eski kayıt migrate() ile dönüştürülür, bozuk kayıt yedeklenip
 // varsayılana dönülür. Hiçbir veri dış servise gönderilmez.
 
-export const SCHEMA_VERSION = 1;
+import { defaultBrain, CATEGORY_IDS as BRAIN_CATS, TEST_CATEGORIES, TROPHIES, recordTest } from './brainTest.js';
+
+export const SCHEMA_VERSION = 2;
 export const STORAGE_KEY = 'zihin-molasi:v';
 export const HISTORY_LIMIT = 30;
 export const SESSION_LIMIT = 500;
@@ -28,7 +30,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
 });
 
 export function defaultData() {
-  return { version: SCHEMA_VERSION, settings: { ...DEFAULT_SETTINGS }, games: {}, sessions: [], options: {} };
+  return { version: SCHEMA_VERSION, settings: { ...DEFAULT_SETTINGS }, games: {}, sessions: [], options: {}, brain: defaultBrain() };
 }
 
 export function defaultGameRecord() {
@@ -50,6 +52,10 @@ export const MIGRATIONS = {
     }
     data.version = 1;
     return data;
+  },
+  // 1 → 2: Beyin Testi kaydı eklendi; diğer alanlar aynen korunur.
+  1(old) {
+    return { ...old, brain: defaultBrain(), version: 2 };
   },
 };
 
@@ -142,7 +148,36 @@ export function sanitize(data) {
       );
     }
   }
+  if (isObj(data.brain)) clean.brain = sanitizeBrain(data.brain);
   return clean;
+}
+
+const gramOf = (v, max = 10000) => (Number.isFinite(v) ? Math.round(clamp(v, 0, max)) : 0);
+const catGrams = (cats) => Object.fromEntries(BRAIN_CATS.map((c) => [c, gramOf(isObj(cats) ? cats[c] : 0)]));
+
+export function sanitizeBrain(b) {
+  const out = defaultBrain();
+  out.tests = Number.isInteger(b.tests) ? clamp(b.tests, 0, 1e6) : 0;
+  if (isObj(b.best) && Number.isFinite(b.best.total)) {
+    out.best = { total: gramOf(b.best.total, 40000), cats: catGrams(b.best.cats), at: finiteOrNull(b.best.at) ?? 0 };
+  }
+  out.catBest = catGrams(b.catBest);
+  if (Array.isArray(b.history)) {
+    out.history = b.history
+      .filter((x) => isObj(x) && Number.isFinite(x.total) && Number.isFinite(x.at))
+      .slice(-50)
+      .map((x) => ({ at: x.at, total: gramOf(x.total, 40000), cats: catGrams(x.cats) }));
+  }
+  if (isObj(b.choice)) {
+    for (const cat of TEST_CATEGORIES) {
+      const v = b.choice[cat.id];
+      if (v === 'random' || cat.games.includes(v)) out.choice[cat.id] = v;
+    }
+  }
+  if (isObj(b.trophies)) {
+    for (const t of TROPHIES) if (Number.isFinite(b.trophies[t.id])) out.trophies[t.id] = b.trophies[t.id];
+  }
+  return out;
 }
 
 export function createMemoryStore() {
@@ -311,6 +346,16 @@ export function createProgressRepository(store = createMemoryStore()) {
     },
     resetStats() {
       data = { ...defaultData(), settings: data.settings };
+      save();
+    },
+    // Tamamlanan Beyin Testini işler; rekor, kupa ve yeni açılan oyunları döner.
+    recordBrainTest(test, at = Date.now()) {
+      const outcome = recordTest(data.brain, test, at);
+      save();
+      return outcome;
+    },
+    setBrainChoice(categoryId, value) {
+      data.brain = sanitizeBrain({ ...data.brain, choice: { ...data.brain.choice, [categoryId]: value } });
       save();
     },
     exportJson() {

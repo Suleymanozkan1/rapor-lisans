@@ -75,9 +75,11 @@ brain-buddies/
     storage.js          ProgressRepository (sürüm, göç, bozuk veri)
     stats.js            istatistik ve güçlü alan hesabı
     adaptive.js         Uyarlanabilir Mücadele planlayıcısı
+    brainTest.js        Beyin Testi kuralları (kategoriler, gram, rekor, kupalar)
+    icons.js            nesne simgeleri
     shapes.js           ortak şekil/renk/desen tanımları
-  src/games/            her mini oyun bir modül (ortak arayüz)
-  src/ui/               ekranlar, SVG çizimi, ses, DOM yardımcıları
+  src/games/            her mini oyun bir modül (ortak arayüz); 8 test + 9 ek oyun
+  src/ui/               ekranlar (app.js, brainScreens.js), Profesör Gram (mascot.js), SVG, ses, DOM
   tests/                birim + entegrasyon testleri
   tools/                build, yerel sunucu, arayüz kontrolü
   docs/                 bu belgeler

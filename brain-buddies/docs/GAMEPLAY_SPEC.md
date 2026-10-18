@@ -1,7 +1,50 @@
 # GAMEPLAY_SPEC — Oyun kuralları, puanlama, süre ve zorluk
 
-Bu belgedeki tüm değerler **özgün tasarım** kararlarıdır (Brain Buddies'in gerçek değerleri
-bilinmiyor; bkz. `REFERENCE_GAPS.md`). Kod karşılıkları parantez içinde.
+Yapı, kategoriler, gram puanı, rekor kuralı, ek süre ve oyun adları Brain Buddies'e dair bulunan
+kanıtlara dayanır; sayısal değerler (gram, süre, seviye tabloları) ise **TAHMİN / özgün tasarım**dır.
+Ayrıntı: `REFERENCE_GAPS.md`. Kod karşılıkları parantez içinde.
+
+## 0. Beyin Testi — ana mod (`src/core/brainTest.js`, `src/ui/brainScreens.js`)
+
+```
+Ana sayfa (Profesör Gram, rekor beyin ağırlığı) → Testi başlat →
+  4 kez: kategori girişi → 60 sn mini oyun → kategori sonucu (gram)
+→ Final tartısı (beyin ağırlığı, kategori dağılımı, rekor, kupalar, açılan oyunlar)
+```
+
+| Kural | Değer | Dayanak |
+|---|---|---|
+| Kategoriler ve sıra | Hafıza → Mantık → Hesap → Görsel | GÖZLEMLENDİ |
+| Oyun süresi | Her oyun 60 sn | KAYNAKTA ("Train your brain in 60 seconds") |
+| Ek süre | Art arda 10 doğru = +5 sn (her 10'da bir) | OYUNCU ANLATIMI; +5 sn TAHMİN |
+| Puan birimi | Gram; toplam = beyin ağırlığı | OYUNCU ANLATIMI |
+| Doğru cevap | Oyunun gram değeri × (1 + 0,05 × (seviye − 1)) + hız bonusu (en fazla %25) | TAHMİN |
+| Yanlış / yanlış alarm | −1,5 × gram değeri | "Hatalar puanı çok düşürür" |
+| Kaçırma / düşen top | −1 × gram değeri | TAHMİN |
+| Kategori puanı | 0'ın altına inmez | TAHMİN |
+| Zorluk | Her oyun seviye 1'den başlar ve doğrulara göre hızla yükselir (otomatik zorluk ayarından bağımsız) | TAHMİN |
+| Rekor | Yalnızca toplam rekor geçilince kaydedilir; kategori en iyileri ayrıca tutulur | KAYNAKTA |
+| Karşılaştırma | Ara sonuçta: rekor testindeki aynı kategori ve kategori en iyisi (arkadaş yerine) | Uyarlama |
+| Oyun seçimi | Her kategoride 2 oyun. Başta 1'i açık. 2. oyun: Hafıza 2, Mantık 3, Hesap 4, Görsel 5 testten sonra açılır. Açıksa ana sayfadan seçilir, yoksa rastgele | OYUNCU ANLATIMI; eşikler TAHMİN |
+| Yarıda bırakma | Test kaydedilmez | TAHMİN |
+
+Oyunların gram değerleri (iyi bir oyuncu 60 sn'de ≈ 1000 g alacak şekilde):
+
+| Oyun | Kategori | Gram / doğru | Ne yapılır |
+|---|---|---|---|
+| Deseni Vur | Hafıza | 110 | Izgarada nesnelerin yerini ezberle; kaybolunca aynı karelere tıkla. İlk tıklama nesneleri gizler. 4×4/3 nesneden 6×6/10 nesneye |
+| Kayıp Sembol | Hafıza | 100 | 4–10 nesneyi ezberle; biri eksik gösterilince 4 seçenekten eksik olanı seç (seçeneklerin yalnızca biri ilk grupta vardı). "Hazırım" süreyi kısaltır |
+| Dişli Çark | Mantık | 85 | Üç dönen dişliden tek dişi farklı olanı bul. 8 → 16 diş; seviye 3+ dönme, 7+ ters yön |
+| ABC Sırala | Mantık | 100 | 3–8 harfe Türk alfabesi sırasıyla tıkla (klavyeden de yazılabilir) |
+| Düşürme! | Hesap | 38 / top | İşlemli toplar düşer; sonucu tuş takımıyla yaz. Ekranda aynı anda 3–6 top; cevaplar birbirinin öneki olmaz. Yanlış sayı −57 g, düşen top −38 g |
+| Sayı Avı | Hesap | 75 | Hedef toplamı veren 2 (5+ seviyede 3) sayıyı seç; tek çözüm garanti |
+| Uzaylıyı Dondur | Görsel | 45 / uzaylı | İki sırada ters yönde kayan uzaylılardan hedef nesneyi tutanlara dokun. Her 5 dondurmada hedef değişir. Yanlış uzaylı −68 g, kaçan hedef −45 g |
+| Baloncuklar | Görsel | 90 | 4–9 baloncuğa küçükten büyüğe dokun; boyut farkı %32'den %8'e iner |
+
+Kupalar (`TROPHIES`): İlk tartı · 3 kiloluk beyin (3000 g) · 4 kiloluk beyin · Dev beyin (5000 g) ·
+Hatasız 2500 · Dengeli beyin (her kategoride 1000 g) · Seri (art arda 20 doğru) · Müdavim (30 test).
+
+Profesör Gram'ın final yorumu toplam ağırlığa göre değişir (<1000, 1000, 2000, 3000, 4000, 5000 g).
 
 ## 1. Ortak oturum akışı (`src/core/session.js`, `src/ui/app.js`)
 
@@ -72,7 +115,7 @@ Seviye 1–10. Son 4 cevaba bakılır; iki değişiklik arasında en az 3 cevap 
   oyun kilitlenmez, yine bir soru verir.
 - Her üretici tek doğru cevabı doğrular; testler her oyunu 10 seviye × 25 tohum × 4 turda dener.
 
-## 5. Oyunlar
+## 5. Serbest antrenmandaki ek oyunlar (ilk sürüm)
 
 Hedef tepki süreleri (hız bonusu ve zorluk için) her oyunun `definition.targetRtMs` alanındadır.
 
@@ -165,7 +208,8 @@ Gösterim süresi: `600 + kare × max(260, 460 − 20 × seviye)` ms. Sıra modu
 
 ## 6. Kayıt (`src/core/storage.js`)
 
-- Anahtar `zihin-molasi:v` (localStorage). Şema sürümü 1. Sürümsüz eski biçim (`bestScores`) sürüm 1'e dönüştürülür.
+- Anahtar `zihin-molasi:v` (localStorage). Şema sürümü 2. Sürümsüz eski biçim (`bestScores`) → 1 → 2 sırayla dönüştürülür;
+  2. sürüm `brain` alanını ekler (test sayısı, rekor test, kategori en iyileri, son 50 test, oyun seçimleri, kupalar).
 - Bozuk JSON, nesne olmayan değer veya bu uygulamadan yeni bir sürüm → eski metin `zihin-molasi:v:bozuk`
   anahtarına yedeklenir, varsayılan veri ile devam edilir ve ayarlarda uyarı gösterilir.
 - Yüklenen her kayıt `sanitize()` ile tür ve sınır denetiminden geçer; bilinmeyen alanlar atılır.

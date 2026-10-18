@@ -7,10 +7,12 @@ import { createTimer } from '../core/timer.js';
 import { sessionSummary, categoryStrengths, trend } from '../core/stats.js';
 import { planChallenge, summarizeChallenge } from '../core/adaptive.js';
 import { GAMES, CATEGORIES, CATEGORY_IDS, gameById, gamesInCategory } from '../games/index.js';
-import { h, clear } from './dom.js';
+import { h, clear, append } from './dom.js';
 import { s } from './svg.js';
 import { createAudio } from './audio.js';
 import { MAX_IMPORT_BYTES } from '../core/storage.js';
+import { createBrainScreens } from './brainScreens.js';
+import { TEST_CATEGORIES, unlockedGames } from '../core/brainTest.js';
 
 const RELAXED_ROUNDS = 12;
 
@@ -72,8 +74,8 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
         h(
           'section',
           { class: 'hero' },
-          h('h1', { class: 'hero-title' }, 'Kısa bir mola, ', h('span', { class: 'hl' }, 'keskin'), ' bir zihin.'),
-          h('p', { class: 'hero-sub' }, `Bugün ${sum.today} oturum · Son 7 gün ${sum.week} oturum`),
+          h('h1', { class: 'hero-title' }, 'Serbest ', h('span', { class: 'hl' }, 'antrenman')),
+          h('p', { class: 'hero-sub' }, `Oyunları tek tek oyna. Bugün ${sum.today} oturum · Son 7 gün ${sum.week} oturum`),
           h(
             'div',
             { class: 'hero-actions' },
@@ -106,10 +108,26 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
     }, { focus: false });
   }
 
+  function lockedTestGame(id) {
+    const cat = TEST_CATEGORIES.find((c) => c.games.includes(id));
+    if (!cat || unlockedGames(cat.id, repo.data.brain.tests).includes(id)) return null;
+    return cat.unlockAfter[cat.games.indexOf(id)] - repo.data.brain.tests;
+  }
+
   function gameRow(game) {
     const d = game.definition;
     const rec = repo.data.games[d.id];
     const best = rec?.best;
+    const lockedFor = lockedTestGame(d.id);
+    if (lockedFor) {
+      return h(
+        'div',
+        { class: 'game-row is-locked', 'aria-disabled': 'true' },
+        h('span', { class: 'game-icon', 'aria-hidden': 'true' }, '🔒'),
+        h('span', { class: 'game-text' }, h('strong', {}, d.name), h('span', {}, `Beyin Testi'ni ${lockedFor} kez daha bitirince açılır.`)),
+        h('span', { class: 'game-best' }, h('small', {}, 'Kilitli')),
+      );
+    }
     return h(
       'button',
       { type: 'button', class: 'game-row', onclick: () => intro(d.id), 'aria-label': `${d.name}. ${d.description}${best ? ` En iyi skor ${best.score}.` : ''}` },
@@ -123,7 +141,7 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
     const today = new Date().setHours(0, 0, 0, 0);
     const playedToday = new Set(repo.data.sessions.filter((x) => x.at >= today).map((x) => x.gameId));
     const fresh = GAMES.filter((g) => !playedToday.has(g.definition.id));
-    const pool = fresh.length ? fresh : GAMES;
+    const pool = (fresh.length ? fresh : GAMES).filter((g) => !lockedTestGame(g.definition.id));
     const pick = pool[Math.floor(Math.random() * pool.length)];
     intro(pick.definition.id);
   }
@@ -209,22 +227,30 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
   }
 
   // ---------------- Oyun ----------------
-  function play(id, { options = {}, challenge = null, practiceRounds = 0, level = 1 }) {
+  // test: Beyin Testi adımı { durationMs, scoring, bonusEvery, bonusMs, label, onFinish(result), onQuit() }
+  function play(id, { options = {}, challenge = null, practiceRounds = 0, level = 1, test = null }) {
     const game = gameById(id);
     const d = game.definition;
     const settings = repo.settings;
-    const relaxed = settings.relaxed && !challenge;
+    // Sürekli akan oyunlar tur saymaz; bu yüzden "süre baskısı kapalı" modunda da süreli oynanır
+    const relaxed = settings.relaxed && !challenge && !test && !d.continuous;
     const seed = settings.seed ? `${settings.seed}:${id}` : `${Date.now()}:${Math.random()}`;
+    const rng = createRng(seed);
+    const unit = test ? ' g' : '';
     const playClock = createTimer({ durationMs: Infinity, now: () => performance.now() });
     playClock.start();
     const now = () => playClock.elapsed();
     const rec = repo.data.games[id];
     const session = createSession({
       game,
-      rng: createRng(seed),
+      rng,
       startLevel: level,
-      adaptive: settings.adaptive,
-      durationMs: challenge ? challenge.step.durationMs : relaxed ? Infinity : settings.durationSec * 1000,
+      // Beyin Testi'nde oyunlar her zaman kolaydan başlayıp zorlaşır
+      adaptive: test ? true : settings.adaptive,
+      durationMs: test ? test.durationMs : challenge ? challenge.step.durationMs : relaxed ? Infinity : settings.durationSec * 1000,
+      scoring: test?.scoring,
+      bonusEvery: test?.bonusEvery || 0,
+      bonusMs: test?.bonusMs,
       rounds: RELAXED_ROUNDS,
       practiceRounds,
       options,
@@ -250,6 +276,8 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
       const status = h('p', { class: 'status', 'aria-live': 'polite' }, '');
       const stage = h('div', { class: 'stage', id: 'stage' });
       const feedback = h('div', { class: 'feedback', role: 'status', 'aria-live': 'assertive' });
+      // null/false çocukları atlayan ekleme (yerel append bunları "null" metnine çevirir)
+      const fbAppend = (...nodes) => append(feedback, nodes);
       const banner = h('p', { class: 'banner', hidden: true });
       const pauseBtn = h('button', { type: 'button', class: 'btn btn-ghost btn-sm', id: 'pause', onclick: () => togglePause() }, 'Duraklat');
       const pauseLayer = h(
@@ -258,7 +286,7 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
         h('h2', { id: 'pause-h' }, 'Duraklatıldı'),
         h('div', { class: 'row-actions' },
           h('button', { type: 'button', class: 'btn btn-primary', id: 'resume', onclick: () => togglePause() }, 'Devam et'),
-          h('button', { type: 'button', class: 'btn btn-ghost', id: 'quit', onclick: () => finish(true) }, 'Oyunu bitir'),
+          h('button', { type: 'button', class: 'btn btn-ghost', id: 'quit', onclick: () => finish(true) }, test ? 'Testi bırak' : 'Oyunu bitir'),
         ),
       );
 
@@ -272,7 +300,7 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
             pauseBtn,
             h('span', { class: 'hud-item' }, h('small', {}, 'Seviye'), hudLevel),
             h('span', { class: 'hud-item' }, h('small', {}, 'Seri'), hudStreak),
-            h('span', { class: 'hud-item hud-score' }, h('small', {}, 'Skor'), hudScore),
+            h('span', { class: 'hud-item hud-score' }, h('small', {}, test ? 'Gram' : 'Skor'), hudScore),
           ),
           h(
             'div',
@@ -288,6 +316,7 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
           ),
           h('div', { class: 'roundbar', 'aria-hidden': 'true' }, roundFill),
           banner,
+          test ? h('p', { class: 'test-step-label' }, test.label) : null,
           h('h1', { class: 'visually-hidden' }, d.name),
           status,
           stage,
@@ -323,18 +352,20 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
           playClock.resume();
           pauseLayer.hidden = true;
           stage.inert = false;
+          stage.classList.remove('is-paused');
           pauseBtn.focus();
         } else {
           session.pause();
           playClock.pause();
           pauseLayer.hidden = false;
           stage.inert = true;
+          stage.classList.add('is-paused');
           pauseLayer.querySelector('#resume').focus();
         }
       }
 
       function updateHud() {
-        hudScore.textContent = fmtInt(session.score);
+        hudScore.textContent = fmtInt(session.score) + unit;
         hudLevel.textContent = String(session.level);
         hudStreak.textContent = String(session.streak);
       }
@@ -412,7 +443,34 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
             roundLimit = { timer: createTimer({ durationMs: ms, now }), map };
             roundLimit.timer.start();
           },
+          // sürekli akan oyunlar için
+          currentLevel: () => session.level,
+          rng,
+          now,
+          record: recordEvent,
         });
+      }
+
+      // Sürekli oyunlarda tek olay: tur bitmez, kısa geri bildirim verilir.
+      function recordEvent(input) {
+        if (finished || paused || session.phase !== PHASE.AWAITING) return null;
+        const res = session.record(input);
+        updateHud();
+        const ok = res.outcome === OUTCOME.CORRECT;
+        if (res.outcome !== OUTCOME.IGNORE) {
+          feedback.className = `feedback is-flash ${ok ? 'is-ok' : 'is-bad'}`;
+          clear(feedback);
+          fbAppend(
+            h('span', { class: 'fb-icon', 'aria-hidden': 'true' }, ok ? '✓' : '✕'),
+            h('span', { class: 'fb-pts' }, `${res.points >= 0 ? '+' : ''}${res.points}${unit}`),
+            !ok && res.explanation ? h('span', { class: 'fb-inline' }, res.explanation) : null,
+            res.bonusTime ? h('strong', { class: 'fb-bonus' }, `+${res.bonusTime / 1000} sn ek süre!`) : null,
+          );
+          audio.play(ok ? 'tick' : 'wrong');
+          if (res.bonusTime) audio.play('level');
+        }
+        if (res.levelChange.changed) announce(`Seviye ${res.levelChange.level}`);
+        return res;
       }
 
       function answer(input) {
@@ -434,10 +492,11 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
         if (!ignore) {
           feedback.className = `feedback ${ok ? 'is-ok' : 'is-bad'}`;
           clear(feedback);
-          feedback.append(
+          fbAppend(
             h('span', { class: 'fb-icon', 'aria-hidden': 'true' }, ok ? '✓' : '✕'),
             h('strong', {}, label),
-            res.practice ? h('span', { class: 'fb-pts' }, 'alıştırma') : h('span', { class: 'fb-pts' }, `${res.points >= 0 ? '+' : ''}${res.points}`),
+            res.practice ? h('span', { class: 'fb-pts' }, 'alıştırma') : h('span', { class: 'fb-pts' }, `${res.points >= 0 ? '+' : ''}${res.points}${unit}`),
+            res.bonusTime ? h('strong', { class: 'fb-bonus' }, `+${res.bonusTime / 1000} sn ek süre!`) : null,
             res.quickSwitch ? h('span', { class: 'fb-note' }, 'Kural değişimini hemen fark ettin!') : null,
             !ok && res.explanation ? h('span', { class: 'fb-note' }, res.explanation) : null,
           );
@@ -446,17 +505,17 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
         if (res.levelChange.changed) {
           const up = res.levelChange.changed > 0;
           const toast = h('span', { class: `fb-level ${up ? 'up' : 'down'}` }, `Seviye ${res.levelChange.level} ${up ? '↑' : '↓'} · ${res.levelChange.reason}`);
-          feedback.append(toast);
+          fbAppend(toast);
           if (up) audio.play('level');
           announce(toast.textContent);
         }
         const practiceDone = res.practice && !session.practice;
-        if (practiceDone) feedback.append(h('span', { class: 'fb-note' }, 'Alıştırma bitti. Şimdi gerçek oyun başlıyor!'));
+        if (practiceDone) fbAppend(h('span', { class: 'fb-note' }, 'Alıştırma bitti. Şimdi gerçek oyun başlıyor!'));
         const long = !ok && res.explanation;
         const delay = ignore ? 220 : practiceDone ? 1800 : long ? (res.steps ? 2800 : 1700) : ok ? 520 : 900;
         if (relaxed && long) {
           const cont = h('button', { type: 'button', class: 'btn btn-secondary btn-sm', id: 'continue', onclick: () => newRound() }, 'Devam');
-          feedback.append(cont);
+          fbAppend(cont);
           keyHandlers = [(e) => (e.key === 'Enter' ? (cont.click(), true) : false)];
           cont.focus();
         } else {
@@ -471,6 +530,11 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
         finished = true;
         session.end();
         const result = session.result();
+        if (test && quit) {
+          cleanup();
+          test.onQuit();
+          return;
+        }
         if (quit && result.answered === 0) {
           cleanup();
           if (challenge) abandonChallenge(challenge);
@@ -481,7 +545,8 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
         const previousBest = repo.recordResult(result, { category: d.category });
         audio.play('end');
         cleanup();
-        if (challenge) challengeNext(challenge, result);
+        if (test) test.onFinish(result);
+        else if (challenge) challengeNext(challenge, result);
         else resultScreen(result, previousBest);
       }
 
@@ -716,12 +781,31 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
     );
   }
 
+  function brainPanel() {
+    const b = repo.data.brain;
+    const kg = (v) => (v ? `${Math.round(v).toLocaleString('tr-TR')} g` : '—');
+    return h(
+      'section',
+      { class: 'panel' },
+      h('h2', { class: 'section-title' }, 'Beyin Testi'),
+      h(
+        'dl',
+        { class: 'stat-grid' },
+        h('div', {}, h('dt', {}, 'Test'), h('dd', {}, String(b.tests))),
+        h('div', {}, h('dt', {}, 'Rekor beyin'), h('dd', {}, kg(b.best?.total))),
+        TEST_CATEGORIES.map((c) => h('div', {}, h('dt', {}, `${c.name} en iyi`), h('dd', {}, kg(b.catBest[c.id])))),
+      ),
+      h('div', { class: 'bt-trend' }, h('span', { class: 'muted' }, 'Son testler'), sparkline(b.history.slice(-10).map((x) => x.total))),
+    );
+  }
+
   function statsScreen() {
     show((el) => {
       const sum = sessionSummary(repo.data.sessions);
       const strengths = categoryStrengths(repo.data.sessions, CATEGORY_IDS);
       el.append(
         h('h1', { class: 'page-title' }, 'İstatistikler'),
+        brainPanel(),
         h(
           'dl',
           { class: 'stat-grid three' },
@@ -965,5 +1049,7 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
     });
   }
 
-  return { menu, intro, statsScreen, settingsScreen, applySettings };
+  const brainScreens = createBrainScreens({ repo, show, play, audio, reducedMotion, openTraining: menu });
+
+  return { menu: brainScreens.home, training: menu, trophies: brainScreens.trophies, intro, statsScreen, settingsScreen, applySettings };
 }

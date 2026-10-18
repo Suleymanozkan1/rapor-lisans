@@ -22,6 +22,7 @@
 | ESLint 10.1.0 | lint (yalnızca yerleşik kurallar) | MIT | Ücretsiz | Evet (kuruluysa) | Yok | Hayır (ortamda global kurulu) |
 | Playwright + Chromium | uçtan uca arayüz kontrolü | Apache-2.0 / BSD | Ücretsiz | Evet (kuruluysa) | Yok | Hayır (ortamda global kurulu) |
 | Python 3 + Pillow | yalnızca ekran görüntülerini birleştirmek için (geliştirme oturumunda) | PSF / HPND | Ücretsiz | Evet | Yok | Hayır |
+| Web araması / WebFetch | Brain Buddies kanıtlarını bulmak (oturum araçları) | — | Ek ücret yok | Hayır (ağ) | — | Hayır |
 | Cloudflare security-audit-skill | güvenlik denetimi iş akışı | MIT (LICENSE okundu) | Ücretsiz | Evet (doğrulayıcılar sıfır bağımlılıklı Node betikleri) | Yok | Hayır (projeye kopyalanmadı) |
 | REA (`rea-agents` 6.7.0, morluto/rea) | statik JavaScript analizi | MIT | Ücretsiz | Evet (statik analiz) | Belgelenmemiş; analiz yerelde çalıştı | Hayır (geçici klasöre `--ignore-scripts` ile kuruldu) |
 
@@ -37,11 +38,11 @@ Notlar:
 
 | Kontrol | Komut | Sonuç |
 |---|---|---|
-| Sözdizimi | `npm run check` | 34/34 dosya geçti |
-| Otomatik testler | `npm test` | 75/75 geçti (geliştirme sunucusu testleri dahil) |
-| Build | `npm run build` | `dist/zihin-molasi.html` üretildi (~167 KB, 24 modül) |
+| Sözdizimi | `npm run check` | 47/47 dosya geçti |
+| Otomatik testler | `npm test` | 92/92 geçti (Beyin Testi ve geliştirme sunucusu testleri dahil) |
+| Build | `npm run build` | `dist/zihin-molasi.html` üretildi (~251 KB, 36 modül) |
 | Lint | `eslint .` | 0 hata, 0 uyarı (1 `prefer-const` hatası bulundu ve düzeltildi) |
-| Uçtan uca arayüz | `npm run ui` | tüm kontroller geçti: 9 oyunun tam oturumu (telefon), taşma (dikey/yatay/masaüstü), klavye, Esc ile duraklatma, kalıcılık, dışa/içe aktarma onayı, koyu tema, erişilebilir adlar, konsol hatası yok |
+| Uçtan uca arayüz | `npm run ui` | 61/61 kontrol geçti: tam Beyin Testi (4 oyun + final tartısı), rekorun kalıcılığı, antrenmandaki 13 açık oyunun tam oturumu ve 4 kilitli oyun, taşma (dikey/yatay/masaüstü), klavye (1–4 ve Düşürme!'de rakamlar), Esc ile duraklatma, dışa/içe aktarma onayı, koyu tema, erişilebilir adlar, konsol hatası yok |
 | Kontrast (WCAG AA) | `tests/a11y.test.mjs` | açık + koyu tema geçti (2 renk düzeltildi) |
 | Güvenlik denetimi | Cloudflare security-audit-skill, quick profil, 6 alt ajan | 0 doğrulanmış açık, 0 doğrulama bekleyen iz, 7 sertleştirme notu (6'sı uygulandı); iki doğrulayıcı PASS. Hedef kod sandbox'ta çalıştırılmadı (bkz. `SECURITY_AUDIT.md`) |
 | REA statik analizi | `rea analyze-javascript-application` | 34 dosya, 0 ayrıştırma hatası; ağ uç noktası yok (bkz. `REA_ANALYSIS.md`) |

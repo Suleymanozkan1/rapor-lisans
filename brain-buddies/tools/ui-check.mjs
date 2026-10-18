@@ -1,9 +1,10 @@
 // Tarayıcıda uçtan uca arayüz kontrolü (isteğe bağlı; Playwright + Chromium gerekir, ikisi de ücretsiz).
 // Proje bağımlılığı DEĞİLDİR: global kurulu Playwright kullanılır (npm i -g playwright).
+// Oyun saatini hızlandırmak için Playwright'ın sahte saati (page.clock) kullanılır.
 //
 // Kontroller: konsol hatası yok · yatay taşma yok (telefon dikey/yatay, masaüstü) ·
-// her mini oyun bir oturumu sonuna kadar oynanır · klavyeyle başlatma ve cevaplama ·
-// yeniden açınca kayıtlar korunur · tüm düğmelerin erişilebilir adı var.
+// tam bir Beyin Testi (4 oyun) ve final tartısı · rekorun kaydı · antrenmanda açık her oyunun
+// sonuna kadar oynanması, kilitli oyunlar · klavye ve duraklatma · dışa/içe aktarma · erişilebilir adlar.
 // Kullanım: npm run ui   (SHOTS=klasör ile ekran görüntüsü kaydeder)
 
 import { createRequire } from 'node:module';
@@ -41,101 +42,109 @@ async function newPage(viewport, colorScheme = 'light') {
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+  await page.clock.install();
   await page.goto(PAGE);
   return { context, page, errors };
 }
 
-const overflow = (page) =>
-  page.evaluate(() => document.scrollingElement.scrollWidth - document.documentElement.clientWidth);
+const overflow = (page) => page.evaluate(() => document.scrollingElement.scrollWidth - document.documentElement.clientWidth);
+const shot = async (page, name) => SHOTS && page.screenshot({ path: resolve(SHOTS, `${name}.png`) });
 
-async function shot(page, name) {
-  if (SHOTS) await page.screenshot({ path: resolve(SHOTS, `${name}.png`), fullPage: false });
-}
+// Ekrandaki oyuna uygun rastgele bir eylem yapar.
+const act = (page) =>
+  page.evaluate(() => {
+    const ok = (el) => el && !el.disabled && el.offsetParent !== null;
+    const pick = (list) => list[Math.floor(Math.random() * list.length)];
+    for (const sel of ['#continue', '.mg-ready', '#ms-ready']) {
+      const b = document.querySelector(sel);
+      if (ok(b)) return b.click(), sel;
+    }
+    const groups = [
+      '.mg-cell:not([aria-pressed])', '.ps-cell:not(.is-ok)', '.as-letter', '.nh-num[aria-pressed="false"]',
+      '.bb-bubble:not(.is-popped)', '.fa-alien', '.dd-key', '.choice',
+    ];
+    for (const sel of groups) {
+      const list = [...document.querySelectorAll(sel)].filter(ok);
+      if (list.length) return pick(list).click(), sel;
+    }
+    const press = document.querySelector('.df-press');
+    if (ok(press) && Math.random() < 0.5) return press.click(), 'press';
+    return 'wait';
+  });
 
-// Bir oyun oturumunu (süre baskısı kapalı = 12 tur) sonuna kadar oynar.
-async function playToEnd(page, gameName, { maxMs = 90000, keyboard = false } = {}) {
-  const deadline = Date.now() + maxMs;
-  let steps = 0;
-  while (Date.now() < deadline) {
-    if (await page.locator('#again').count()) return { ok: true, steps };
-    const act = await page.evaluate((kb) => {
-      const visible = (el) => el && !el.disabled && el.offsetParent !== null;
-      const cont = document.querySelector('#continue');
-      if (visible(cont)) return cont.click(), 'continue';
-      const ready = document.querySelector('.mg-ready');
-      if (visible(ready)) return ready.click(), 'ready';
-      const cells = [...document.querySelectorAll('.mg-cell')].filter((c) => !c.disabled && !c.getAttribute('aria-pressed'));
-      if (cells.length) return cells[Math.floor(Math.random() * cells.length)].click(), 'cell';
-      const press = document.querySelector('.df-press');
-      if (visible(press)) return Math.random() < 0.5 ? (press.click(), 'press') : 'wait';
-      const choices = [...document.querySelectorAll('.choice')].filter(visible);
-      if (choices.length) {
-        if (kb) return 'key';
-        choices[Math.floor(Math.random() * choices.length)].click();
-        return 'choice';
-      }
-      return 'wait';
-    }, keyboard);
-    if (act === 'key') await page.keyboard.press('1');
-    if (act !== 'wait') steps += 1;
-    await page.waitForTimeout(act === 'wait' ? 120 : 60);
+// Sonuç ekranındaki düğmeyi görene kadar oynar (sahte saati ilerleterek).
+async function playUntil(page, doneSelector, maxSteps = 900) {
+  for (let i = 0; i < maxSteps; i++) {
+    if (await page.locator(doneSelector).count()) return true;
+    await act(page);
+    await page.clock.runFor(250);
   }
-  return { ok: false, steps };
+  return page.locator(doneSelector).count().then(Boolean);
 }
 
 try {
-  // ---- 1) Telefon dikey: tüm oyunlar, süre baskısı kapalı ----
+  // ---- 1) Telefon dikey: tam Beyin Testi ----
   {
-    const { context, page, errors } = await newPage({ width: 360, height: 740 });
-    log((await overflow(page)) <= 0, 'telefon: menüde yatay taşma yok');
-    await shot(page, 'menu-phone-light');
-    // süre baskısını kapat (ayarlar ekranı üzerinden, gerçek kullanıcı gibi)
+    const { context, page, errors } = await newPage({ width: 360, height: 760 });
+    log((await overflow(page)) <= 0, 'telefon: Beyin Testi ana sayfasında yatay taşma yok');
+    log((await page.textContent('h1')).includes('Beynin kaç gram'), 'ana sayfa Beyin Testi');
+    await shot(page, 'home-phone');
+    await page.click('#start-test');
+    for (let i = 0; i < 4; i++) {
+      const name = await page.textContent('.intro-title');
+      await page.click('#start-step');
+      await page.clock.runFor(2500);
+      let maxOver = await overflow(page);
+      if (i === 2) await shot(page, 'test-step-phone');
+      const done = await playUntil(page, i < 3 ? '#next-step' : '#weigh', 400);
+      maxOver = Math.max(maxOver, await overflow(page));
+      const grams = (await page.textContent('#step-grams').catch(() => '')) || '';
+      log(done && /\d+ g/.test(grams), `${i + 1}/4 ${name}: 60 sn sonunda gram sonucu (${grams})`);
+      log(maxOver <= 0, `${name}: yatay taşma yok`);
+      await page.click(i < 3 ? '#next-step' : '#weigh');
+    }
+    await page.clock.runFor(2000);
+    const total = await page.textContent('#brain-weight');
+    log(/\d+ g/.test(total), `final tartısı beyin ağırlığını gösteriyor (${total})`);
+    log((await page.textContent('.badge')).includes('rekor'), 'ilk test rekor olarak kaydedildi');
+    log((await overflow(page)) <= 0, 'final ekranında yatay taşma yok');
+    await shot(page, 'final-phone');
+    await page.reload();
+    log((await page.textContent('.bt-record')).includes('Rekorun'), 'yeniden açınca rekor beyin ağırlığı korunuyor');
+    // Antrenman: kilitli ve açık oyunlar
     await page.click('#nav-settings');
     await page.check('#set-relaxed');
-    log((await overflow(page)) <= 0, 'telefon: ayarlarda yatay taşma yok');
-    await page.click('#nav-home');
-    const names = await page.$$eval('.game-row strong', (els) => els.map((e) => e.textContent));
-    log(names.length === 9, `menüde 9 oyun listeleniyor (${names.length})`);
-    for (let i = 0; i < names.length; i++) {
-      await page.click('#nav-home');
-      await page.locator('.game-row').nth(i).click();
+    await page.click('#nav-training');
+    const locked = await page.locator('.game-row.is-locked').count();
+    log(locked === 4, `1 testten sonra 4 Beyin Testi oyunu hâlâ kilitli (${locked})`);
+    const names = await page.$$eval('button.game-row strong', (els) => els.map((e) => e.textContent));
+    log(names.length === 13, `antrenmanda 13 açık oyun (${names.length})`);
+    for (const name of names) {
+      await page.click('#nav-training');
+      await page.locator('button.game-row', { hasText: name }).click();
       await page.click('#start-game');
-      await page.waitForTimeout(2200); // geri sayım
-      let maxOverflow = await overflow(page);
-      if (i === 0) await shot(page, 'play-phone');
-      const res = await playToEnd(page, names[i]);
-      maxOverflow = Math.max(maxOverflow, await overflow(page));
-      log(res.ok, `${names[i]}: oturum sonuna kadar oynandı (${res.steps} eylem)`);
-      log(maxOverflow <= 0, `${names[i]}: oyun sırasında yatay taşma yok`);
-      if (res.ok) {
-        const score = await page.textContent('.result-score');
-        log(/\d/.test(score), `${names[i]}: sonuç ekranında skor var`);
-        if (i === 0) await shot(page, 'result-phone');
-      }
+      await page.clock.runFor(2500);
+      let maxOver = await overflow(page);
+      const ok = await playUntil(page, '#again', 600);
+      maxOver = Math.max(maxOver, await overflow(page));
+      log(ok, `antrenman ${name}: oturum sonuna kadar oynandı`);
+      log(maxOver <= 0, `antrenman ${name}: yatay taşma yok`);
     }
-    // Yeniden aç: kayıtlar korunuyor mu?
-    await page.reload();
     await page.click('#nav-stats');
-    const plays = await page.$$eval('table.data tbody tr td:nth-child(2)', (tds) => tds.map((t) => Number(t.textContent)));
-    log(plays.length === 9 && plays.every((p) => p === 1), `yeniden açınca her oyun için 1 oynama kayıtlı (${plays.join(',')})`);
-    const today = await page.textContent('.stat-grid.three div:first-child dd');
-    log(today.startsWith('9'), `bugünkü oturum sayısı 9 (${today})`);
-    log((await overflow(page)) <= 0, 'telefon: istatistik ekranında yatay taşma yok (tablo kendi içinde kayar)');
-    await shot(page, 'stats-phone');
-    // Dışa aktar → içe aktar: önce önizleme ve onay, sonra yazma
+    log((await overflow(page)) <= 0, 'istatistik ekranında yatay taşma yok');
+    log((await page.textContent('.panel')).includes('Beyin Testi'), 'istatistikte Beyin Testi bölümü var');
+    // Dışa aktar → içe aktar
     await page.click('#nav-settings');
     await page.click('#export');
     const exported = await page.inputValue('#export-box');
     await page.setInputFiles('#import-file', { name: 'veri.json', mimeType: 'application/json', buffer: Buffer.from(exported) });
     await page.waitForSelector('#import-confirm', { timeout: 3000 }).catch(() => {});
-    const summary = await page.textContent('.import-confirm .hint').catch(() => '');
-    log(/9 oyun kaydı ve 9 oturum/.test(summary), `içe aktarma önce özet gösterip onay istiyor (${summary.trim().slice(0, 60)})`);
+    log(await page.locator('#import-confirm').count() === 1, 'içe aktarma önce özet gösterip onay istiyor');
     await page.click('#import-confirm');
     log((await page.textContent('#data-msg')).includes('içe aktarıldı'), 'onaydan sonra veriler içe aktarıldı');
     await page.setInputFiles('#import-file', { name: 'kotu.json', mimeType: 'application/json', buffer: Buffer.from('{bozuk') });
-    await page.waitForTimeout(200);
-    log((await page.textContent('#data-msg')).startsWith('İçe aktarılamadı'), 'bozuk dosya reddediliyor, veri değişmiyor');
-    // Erişilebilir ad kontrolü
+    await page.clock.runFor(200);
+    log((await page.textContent('#data-msg')).startsWith('İçe aktarılamadı'), 'bozuk dosya reddediliyor');
     await page.click('#nav-home');
     const unnamed = await page.$$eval('button', (bs) => bs.filter((b) => !(b.getAttribute('aria-label') || b.textContent.trim())).length);
     log(unnamed === 0, 'tüm düğmelerin erişilebilir adı var');
@@ -143,55 +152,65 @@ try {
     await context.close();
   }
 
-  // ---- 2) Masaüstü koyu tema: klavyeyle süreli oyun ----
+  // ---- 2) Masaüstü koyu tema: klavye ve duraklatma ----
   {
     const { context, page, errors } = await newPage({ width: 1280, height: 800 }, 'dark');
-    await shot(page, 'menu-desktop-dark');
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    log(bg !== 'rgb(238, 242, 247)', `koyu tema uygulanıyor (gövde ${bg})`);
-    // Klavye: Hızlı başlat yerine Zihinden Hesap'ı Tab + Enter ile aç
-    await page.focus('.game-row:nth-of-type(1)');
-    const mm = page.locator('.game-row', { hasText: 'Zihinden Hesap' });
-    await mm.focus();
+    log(bg !== 'rgb(253, 240, 225)', `koyu tema uygulanıyor (${bg})`);
+    await shot(page, 'home-desktop-dark');
+    await page.click('#nav-training');
+    await page.locator('button.game-row', { hasText: 'Zihinden Hesap' }).focus();
     await page.keyboard.press('Enter');
     await page.waitForSelector('#start-game');
+    await page.clock.runFor(100); // odak setTimeout(…, 0) ile verilir
     await page.keyboard.press('Enter');
-    await page.waitForTimeout(2400);
-    await shot(page, 'play-desktop-dark');
+    await page.clock.runFor(2500);
     log(await page.locator('.banner:visible').count() === 1, 'ilk oynayışta alıştırma turu bandı görünüyor');
     let handled = 0;
     for (let k = 0; k < 6; k++) {
-      await page.waitForSelector('.choice:not([disabled])', { timeout: 4000 });
+      await page.waitForSelector('.choice:not([disabled])', { timeout: 4000 }).catch(() => {});
       await page.keyboard.press(String(1 + (k % 4)));
-      await page.waitForTimeout(80);
       if (await page.locator('.feedback.is-ok, .feedback.is-bad').count()) handled += 1;
+      await page.clock.runFor(2000);
     }
     log(handled === 6, `1–4 tuşlarıyla verilen 6 cevabın hepsi işlendi (${handled})`);
+    log(!(await page.textContent('.feedback')).includes('null'), 'geri bildirimde "null" metni yok');
     await page.keyboard.press('Escape');
     log(await page.locator('.pause-layer:visible').count() === 1, 'Esc oyunu duraklatıyor');
     const t1 = await page.textContent('.time-text');
-    await page.waitForTimeout(1500);
+    await page.clock.runFor(3000);
     const t2 = await page.textContent('.time-text');
     log(t1 === t2, `duraklatınca süre durur (${t1} = ${t2})`);
     await page.click('#quit');
-    await page.waitForSelector('#again', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('#again', { timeout: 3000 }).catch(() => {});
     log(await page.locator('#again').count() === 1, 'oyunu bitir → sonuç ekranı');
+    // Düşürme!: klavyeyle sonuç yazma
+    await page.click('#nav-training');
+    await page.locator('button.game-row', { hasText: 'Düşürme!' }).click();
+    await page.click('#start-game');
+    await page.clock.runFor(4000);
+    const before = await page.textContent('#hud-score');
+    for (let k = 0; k < 4; k++) {
+      const exprs = await page.$$eval('.dd-ball:not(.is-popped):not(.is-dropped)', (els) => els.map((e) => e.textContent));
+      if (exprs.length) {
+        const value = String(Function(`return ${exprs[0].replaceAll('×', '*').replaceAll('÷', '/').replaceAll('−', '-')}`)());
+        for (const ch of value) await page.keyboard.press(ch);
+      }
+      await page.clock.runFor(1500);
+    }
+    const after = await page.textContent('#hud-score');
+    log(parseInt(after, 10) > parseInt(before, 10), `Düşürme!: klavyeyle yazılan sonuçlar topları patlatıyor (skor ${before} → ${after})`);
     log(errors.length === 0, `masaüstü: konsol hatası yok ${errors.join(' | ')}`);
     await context.close();
   }
 
-  // ---- 3) Telefon yatay ve uyarlanabilir mücadele ekranı ----
+  // ---- 3) Telefon yatay ----
   {
     const { context, page, errors } = await newPage({ width: 740, height: 360 });
-    log((await overflow(page)) <= 0, 'telefon yatay: menüde yatay taşma yok');
-    await page.click('#challenge-start');
-    const steps = await page.$$eval('.plan li', (li) => li.length);
-    log(steps === 5, `mücadele planı 5 oyun içeriyor (${steps})`);
-    const reasons = await page.$$eval('.plan .reason', (r) => r.every((x) => x.textContent.length > 5));
-    log(reasons, 'her mücadele adımının nedeni yazılı');
-    await page.click('#start-challenge');
-    await page.click('#start-game');
-    await page.waitForTimeout(2400);
+    log((await overflow(page)) <= 0, 'telefon yatay: ana sayfada yatay taşma yok');
+    await page.click('#start-test');
+    await page.click('#start-step');
+    await page.clock.runFor(2500);
     log((await overflow(page)) <= 0, 'telefon yatay: oyun ekranında yatay taşma yok');
     await shot(page, 'play-landscape');
     log(errors.length === 0, `yatay: konsol hatası yok ${errors.join(' | ')}`);

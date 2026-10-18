@@ -54,12 +54,26 @@ Açık/koyu tema (sistem + elle), WCAG AA kontrast testi, renk + desen + metin i
 oynanışı, taşma, klavye, kalıcılık, içe aktarma onayı), Cloudflare security-audit-skill denetimi ve
 6 sertleştirme düzeltmesi (`SECURITY_AUDIT.md`), REA statik analizi (`REA_ANALYSIS.md`).
 
+## Milestone 8 — Brain Buddies'e yakınlaştırma · TAMAM
+
+Kullanıcı geri bildirimi: ilk sürüm Brain Buddies'e benzemiyordu. Yeni kanıtlarla (`REFERENCE_GAPS.md`):
+
+| İş | Dosya | Test |
+|---|---|---|
+| Beyin Testi kuralları: 4 kategori × 60 sn, gram, rekor kuralı, ek süre, açılan oyunlar, kupalar | `src/core/brainTest.js` | `tests/brain.test.mjs` |
+| Sürekli akan oyunlar, ek süre, özel puanlama | `src/core/session.js`, `timer.js` | `tests/brain.test.mjs` |
+| 8 test oyunu | `src/games/{patternShoot,missingSymbol,gearWheel,alphaSort,dontDrop,numberHunt,freezeAlien,bubbles}.js` | tek-cevap testleri |
+| Kayıt şeması 2 (Beyin Testi verisi, v1'den göç) | `src/core/storage.js` | `tests/brain.test.mjs` |
+| Ana sayfa, test adımları, final tartısı, kupalar; Profesör Gram | `src/ui/brainScreens.js`, `mascot.js` | `npm run ui` |
+| Gün batımı laboratuvarı teması | `styles.css` | `tests/a11y.test.mjs` |
+
 ## Bilinen eksikler ve sonraki adımlar
 
 | # | Konu | Neden | Öneri |
 |---|---|---|---|
 | 1 | Gerçek Brain Buddies oyunlarıyla birebir eşleme yok | Arşiv sayfaları bu ortamdan okunamıyor; REA Flash çözümleyemiyor | `web.archive.org` izni ya da `references/` klasörüne görüntü/video/SWF |
-| 2 | Kupa/rozet sistemi yok | Kaynakta "Pokale" var ama kuralları bilinmiyor | Oyun başına bronz/gümüş/altın skor eşikleri |
+| 2 | Arkadaşlarla karşılaştırma yok | Tek oyunculu, sunucusuz kişisel kullanım | Yerine kendi rekor testinle karşılaştırma var |
+| 2b | Bazı orijinal oyunların tam kuralı bilinmiyor (Dişli Çark, Kayıp Sembol, Baloncuklar) | Kanıt yok | Kullanıcının hatırladığı ayrıntılar ya da görüntüyle düzeltilir |
 | 3 | Döndür ya da Aynala ekran okuyucuyla oynanamaz | Görev doğası gereği görsel | Seçenekleri hücre koordinatlarıyla tarif eden metin modu |
 | 4 | Hafıza Izgarası sıra modunda, ezberleme sırasında duraklatma yanıp sönmeyi dondurur ama ekranı gizler | Tasarım tercihi | Devam edince gösterimi baştan oynatma |
 | 5 | PWA / ana ekrana ekleme yok | Tek dosya `file://` ile zaten çevrimdışı | İstenirse manifest + service worker |

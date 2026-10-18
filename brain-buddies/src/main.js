@@ -9,6 +9,7 @@ function boot() {
   const app = createApp({ root, repo });
   app.applySettings();
   root.querySelector('#nav-home').addEventListener('click', app.menu);
+  root.querySelector('#nav-training').addEventListener('click', app.training);
   root.querySelector('#nav-stats').addEventListener('click', app.statsScreen);
   root.querySelector('#nav-settings').addEventListener('click', app.settingsScreen);
   globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').addEventListener?.('change', app.applySettings);

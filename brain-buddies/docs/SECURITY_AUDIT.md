@@ -55,3 +55,6 @@ Denetim bunları açık değil, sertleştirme olarak raporladı. Denetimden **so
 - `file://` ile açılan tek dosyada localStorage'ın hangi sayfalarla paylaşıldığı tarayıcıya bağlıdır.
   Saklanan veri yalnızca oyun ilerlemesidir; gizli bilgi içermez.
 - Sertleştirme düzeltmeleri denetimden sonra yapıldı; yeni bir denetim turu bunları ayrıca gözden geçirmedi.
+- Beyin Testi (8 yeni oyun, `brainTest.js`, kayıt şeması 2) denetimden **sonra** eklendi ve yeniden denetlenmedi.
+  Yeni dış girdi yüzeyi yok: kayıttaki `brain` alanı da `sanitizeBrain()` ile tür/aralık denetiminden geçer
+  (`tests/brain.test.mjs`). Yeni kod da `innerHTML` kullanmaz (ESLint kuralı).

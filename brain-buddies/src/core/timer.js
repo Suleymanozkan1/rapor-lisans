@@ -2,6 +2,7 @@
 // Zamanlayıcı kendi kendine tik atmaz; arayüz döngüsü remaining()/expired() sorar.
 
 export function createTimer({ durationMs, now = () => performance.now() }) {
+  let duration = durationMs;
   let startedAt = null;
   let pausedAt = null;
   let pausedTotal = 0;
@@ -40,14 +41,21 @@ export function createTimer({ durationMs, now = () => performance.now() }) {
     elapsed,
     remaining() {
       if (unlimited) return Infinity;
-      return Math.max(0, durationMs - elapsed());
+      return Math.max(0, duration - elapsed());
     },
     expired() {
-      return !unlimited && startedAt != null && elapsed() >= durationMs;
+      return !unlimited && startedAt != null && elapsed() >= duration;
     },
     fraction() {
       if (unlimited) return 1;
-      return Math.max(0, Math.min(1, 1 - elapsed() / durationMs));
+      return Math.max(0, Math.min(1, 1 - elapsed() / duration));
+    },
+    // Ek süre (ör. art arda 10 doğru). Gösterge oranı yeni toplam süreye göre hesaplanır.
+    extend(ms) {
+      if (!unlimited && ms > 0) duration += ms;
+    },
+    get durationMs() {
+      return duration;
     },
   };
 }
