@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Zihin Molası</title>
+    <meta name="description" content="Kısa turlu, çevrimdışı beyin egzersizi oyunu." />
+    <!-- @inline-css -->
+    <link rel="stylesheet" href="styles.css" />
+    <!-- @end-inline-css -->
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="topbar-inner">
+          <button type="button" class="brand" id="nav-home" aria-label="Zihin Molası, ana menü">
+            <span class="brand-mark" aria-hidden="true">ZM</span>
+            <span class="brand-name">Zihin Molası</span>
+          </button>
+          <nav class="nav" aria-label="Ana gezinme">
+            <button type="button" class="nav-btn" id="nav-stats">İstatistik</button>
+            <button type="button" class="nav-btn" id="nav-settings">Ayarlar</button>
+          </nav>
+        </div>
+      </header>
+      <main id="screen" class="screen"></main>
+      <div id="live" class="visually-hidden" aria-live="polite"></div>
+      <noscript><p class="screen">Bu oyun JavaScript gerektirir.</p></noscript>
+    </div>
+    <!-- @inline-js -->
+    <script type="module" src="src/main.js"></script>
+    <!-- @end-inline-js -->
+  </body>
+</html>
