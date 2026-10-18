@@ -12,7 +12,8 @@ Etiketler: **GÖZLEMLENDİ** (oynanış/ekran görüntüsünde görüldü), **KA
 | Brain Buddies kaynak kodu | Yok (kapalı kaynak Facebook uygulamasıydı) |
 | deutsche-startups.de, "wooga wiegt Gehirne" (14.07.2009) | Okundu |
 | openpr.de basın bülteni "Brain Buddies: 1 Million Nutzer in drei Wochen" | Sayfa 403 döndü; yalnızca arama özeti görüldü |
-| Oynanış videosu / web arşivi | Aranmadı veya bulunamadı; oyun Flash tabanlıydı ve artık çalışmıyor (TAHMİN) |
+| Web arşivi (Wayback) | Dizin API'si 4 anlık görüntü gösteriyor (`apps.facebook.com/brainbuddies` 2010-06-30, `wooga.com/games/brain-buddies/` 2010-09-29, `facebook.com/BrainBuddies` 2010-01-20, `wooga.com/games/` 2010-05-25). İçerikleri okunamadı: bu ortamın ağ politikası `web.archive.org`'u engelliyor |
+| Oynanış videosu | Bulunamadı; oyun Flash tabanlıydı ve artık çalışmıyor (TAHMİN) |
 
 Hiçbir erişim engeli aşılmaya çalışılmadı.
 
@@ -57,5 +58,6 @@ O oyunun kategorileri Brain Buddies'e mal edilmedi.
 ## 4. Kullanıcıdan alınabilecek kanıt
 
 Eğer ekran görüntüsü, oynanış videosu veya o döneme ait notların varsa
-`brain-buddies/references/` klasörüne koy. Hangi mini oyunun neye benzediğini görürsem
+`brain-buddies/references/` klasörüne koy. Ya da ortamın ağ ayarlarında `web.archive.org`'a izin ver;
+yukarıdaki arşiv sayfaları REA ile incelenir (bkz. `REA_ANALYSIS.md`). Hangi mini oyunun neye benzediğini görürsem
 o oyunun kurallarını, süresini ve puanını ona göre ayarlayabilirim.

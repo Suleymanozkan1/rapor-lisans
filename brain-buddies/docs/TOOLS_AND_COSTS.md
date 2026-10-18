@@ -23,23 +23,26 @@
 | Playwright + Chromium | uçtan uca arayüz kontrolü | Apache-2.0 / BSD | Ücretsiz | Evet (kuruluysa) | Yok | Hayır (ortamda global kurulu) |
 | Python 3 + Pillow | yalnızca ekran görüntülerini birleştirmek için (geliştirme oturumunda) | PSF / HPND | Ücretsiz | Evet | Yok | Hayır |
 | Cloudflare security-audit-skill | güvenlik denetimi iş akışı | MIT (LICENSE okundu) | Ücretsiz | Evet (doğrulayıcılar sıfır bağımlılıklı Node betikleri) | Yok | Hayır (projeye kopyalanmadı) |
+| REA (`rea-agents` 6.7.0, morluto/rea) | statik JavaScript analizi | MIT | Ücretsiz | Evet (statik analiz) | Belgelenmemiş; analiz yerelde çalıştı | Hayır (geçici klasöre `--ignore-scripts` ile kuruldu) |
 
 Notlar:
 - `npx eslint .` ESLint kurulu değilse npm kayıt defterinden indirir (ücretsiz, ağ gerekir). Bu oturumda
   global kurulu sürüm kullanıldı; ağdan bir şey indirilmedi.
 - security-audit-skill depoyu `git clone` ile indirmek için bir kez ağ kullanıldı. Kurulum için önerilen
   `npx skills add` kullanılmadı.
-- Brain Buddies hakkında bilgi için iki web araması/okuma yapıldı (`REFERENCE_GAPS.md`). Oyunun kendisi ağ kullanmaz.
+- Brain Buddies hakkında bilgi için web araması ve Wayback dizin sorguları yapıldı (`REFERENCE_GAPS.md`, `REA_ANALYSIS.md`). Oyunun kendisi ağ kullanmaz.
+- `rea-agents` npm kayıt defterinden (ücretsiz) geçici bir klasöre indirildi; proje bağımlılığı değildir.
 
 ## 3. Hangi kontroller gerçekten çalıştırıldı
 
 | Kontrol | Komut | Sonuç |
 |---|---|---|
-| Sözdizimi | `npm run check` | 33/33 dosya geçti |
-| Otomatik testler | `npm test` | 65/65 geçti |
-| Build | `npm run build` | `dist/zihin-molasi.html` üretildi (~164 KB, 24 modül) |
+| Sözdizimi | `npm run check` | 34/34 dosya geçti |
+| Otomatik testler | `npm test` | 75/75 geçti (geliştirme sunucusu testleri dahil) |
+| Build | `npm run build` | `dist/zihin-molasi.html` üretildi (~167 KB, 24 modül) |
 | Lint | `eslint .` | 0 hata, 0 uyarı (1 `prefer-const` hatası bulundu ve düzeltildi) |
-| Uçtan uca arayüz | `npm run ui` | tüm kontroller geçti: 9 oyunun tam oturumu (telefon), taşma (dikey/yatay/masaüstü), klavye, Esc ile duraklatma, kalıcılık, koyu tema, erişilebilir adlar, konsol hatası yok |
+| Uçtan uca arayüz | `npm run ui` | tüm kontroller geçti: 9 oyunun tam oturumu (telefon), taşma (dikey/yatay/masaüstü), klavye, Esc ile duraklatma, kalıcılık, dışa/içe aktarma onayı, koyu tema, erişilebilir adlar, konsol hatası yok |
 | Kontrast (WCAG AA) | `tests/a11y.test.mjs` | açık + koyu tema geçti (2 renk düzeltildi) |
-| Güvenlik denetimi | Cloudflare security-audit-skill, quick profil | bkz. `SECURITY_AUDIT.md` |
+| Güvenlik denetimi | Cloudflare security-audit-skill, quick profil, 6 alt ajan | 0 doğrulanmış açık, 0 doğrulama bekleyen iz, 7 sertleştirme notu (6'sı uygulandı); iki doğrulayıcı PASS. Hedef kod sandbox'ta çalıştırılmadı (bkz. `SECURITY_AUDIT.md`) |
+| REA statik analizi | `rea analyze-javascript-application` | 34 dosya, 0 ayrıştırma hatası; ağ uç noktası yok (bkz. `REA_ANALYSIS.md`) |
 | Bağımlılık denetimi (`npm audit`) | — | Çalıştırılmadı: denetlenecek bağımlılık ve kilit dosyası yok |

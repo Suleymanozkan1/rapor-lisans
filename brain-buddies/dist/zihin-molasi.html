@@ -1379,6 +1379,16 @@ table.data .num {
   font: 0.8rem / 1.4 var(--font-num);
 }
 
+.import-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
 .hint.warn {
   color: var(--bad);
 }
@@ -1525,6 +1535,15 @@ const SCHEMA_VERSION = 1;
 const STORAGE_KEY = 'zihin-molasi:v';
 const HISTORY_LIMIT = 30;
 const SESSION_LIMIT = 500;
+const MAX_IMPORT_BYTES = 1024 * 1024; // içe aktarılan dosya en fazla 1 MB
+
+// Kimlik biçimleri: oyun ve kategori kimlikleri kodda tanımlıdır; kayıttan gelen başka
+// bir değer (ör. "__proto__") kabul edilmez.
+const ID_RE = /^[a-z][a-zA-Z0-9-]{0,40}$/;
+const OPTION_KEY_RE = /^[a-z][a-zA-Z0-9]{0,20}$/;
+const OPTION_VALUE_RE = /^[a-z][a-zA-Z0-9-]{0,20}$/;
+const MAX_OPTION_GAMES = 50;
+const MAX_OPTION_KEYS = 10;
 
 const DEFAULT_SETTINGS = Object.freeze({
   sound: true,
@@ -1553,7 +1572,7 @@ const MIGRATIONS = {
     if (old.settings && typeof old.settings === 'object') data.settings = { ...data.settings, ...old.settings };
     if (old.bestScores && typeof old.bestScores === 'object') {
       for (const [id, value] of Object.entries(old.bestScores)) {
-        if (Number.isFinite(value)) {
+        if (ID_RE.test(id) && Number.isFinite(value)) {
           data.games[id] = { ...defaultGameRecord(), best: { score: value, accuracy: null, avgRtMs: null } };
         }
       }
@@ -1578,6 +1597,9 @@ function migrate(raw) {
 
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
 const finiteOrNull = (v) => (Number.isFinite(v) ? v : null);
+const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+const pctOrNull = (v) => (Number.isFinite(v) ? clamp(v, 0, 100) : null);
+const levelOf = (v) => (Number.isInteger(v) ? clamp(v, 1, 10) : 1);
 
 // Yüklenen veriyi beklenen biçime zorlar; bilinmeyen alanları atar.
 function sanitize(data) {
@@ -1599,15 +1621,15 @@ function sanitize(data) {
   }
   if (isObj(data.games)) {
     for (const [id, rec] of Object.entries(data.games)) {
-      if (!isObj(rec) || !/^[a-z][a-zA-Z0-9-]{0,40}$/.test(id)) continue;
+      if (!isObj(rec) || !ID_RE.test(id)) continue;
       const out = defaultGameRecord();
       out.plays = Number.isInteger(rec.plays) && rec.plays >= 0 ? rec.plays : 0;
-      out.lastLevel = Number.isInteger(rec.lastLevel) ? Math.min(10, Math.max(1, rec.lastLevel)) : 1;
+      out.lastLevel = levelOf(rec.lastLevel);
       out.tutorialSeen = rec.tutorialSeen === true;
       if (isObj(rec.best) && Number.isFinite(rec.best.score)) {
         out.best = {
           score: rec.best.score,
-          accuracy: finiteOrNull(rec.best.accuracy),
+          accuracy: pctOrNull(rec.best.accuracy),
           avgRtMs: finiteOrNull(rec.best.avgRtMs),
         };
       }
@@ -1618,9 +1640,9 @@ function sanitize(data) {
           .map((h) => ({
             at: h.at,
             score: h.score,
-            accuracy: finiteOrNull(h.accuracy) ?? 0,
+            accuracy: pctOrNull(h.accuracy) ?? 0,
             avgRtMs: finiteOrNull(h.avgRtMs),
-            level: Number.isInteger(h.level) ? h.level : 1,
+            level: levelOf(h.level),
           }));
       }
       clean.games[id] = out;
@@ -1628,22 +1650,24 @@ function sanitize(data) {
   }
   if (Array.isArray(data.sessions)) {
     clean.sessions = data.sessions
-      .filter((s) => isObj(s) && Number.isFinite(s.at) && typeof s.gameId === 'string')
+      .filter((s) => isObj(s) && Number.isFinite(s.at) && typeof s.gameId === 'string' && ID_RE.test(s.gameId))
       .slice(-SESSION_LIMIT)
       .map((s) => ({
         at: s.at,
         gameId: s.gameId,
-        category: typeof s.category === 'string' ? s.category : '',
+        category: typeof s.category === 'string' && ID_RE.test(s.category) ? s.category : '',
         score: finiteOrNull(s.score) ?? 0,
-        accuracy: finiteOrNull(s.accuracy) ?? 0,
-        answered: Number.isInteger(s.answered) ? s.answered : 0,
+        accuracy: pctOrNull(s.accuracy) ?? 0,
+        answered: Number.isInteger(s.answered) ? clamp(s.answered, 0, 10000) : 0,
       }));
   }
   if (isObj(data.options)) {
-    for (const [id, opts] of Object.entries(data.options)) {
-      if (!isObj(opts)) continue;
+    for (const [id, opts] of Object.entries(data.options).slice(0, MAX_OPTION_GAMES)) {
+      if (!isObj(opts) || !ID_RE.test(id)) continue;
       clean.options[id] = Object.fromEntries(
-        Object.entries(opts).filter(([, v]) => typeof v === 'string' && v.length < 40),
+        Object.entries(opts)
+          .filter(([k, v]) => OPTION_KEY_RE.test(k) && typeof v === 'string' && OPTION_VALUE_RE.test(v))
+          .slice(0, MAX_OPTION_KEYS),
       );
     }
   }
@@ -1655,7 +1679,10 @@ function createMemoryStore() {
   return {
     persistent: false,
     getItem: (k) => (map.has(k) ? map.get(k) : null),
-    setItem: (k, v) => map.set(k, String(v)),
+    setItem: (k, v) => {
+      map.set(k, String(v));
+      return true;
+    },
     removeItem: (k) => map.delete(k),
   };
 }
@@ -1712,8 +1739,10 @@ function createProgressRepository(store = createMemoryStore()) {
       if (!isObj(parsed)) throw new Error('Kayıt bir nesne değil');
       data = migrate(parsed);
     } catch (err) {
-      store.setItem(`${STORAGE_KEY}:bozuk`, raw);
-      warnings.push(`Kayıt okunamadı ve sıfırlandı (${err.message}). Eski veri yedeklendi.`);
+      const backedUp = store.setItem(`${STORAGE_KEY}:bozuk`, raw) !== false;
+      warnings.push(
+        `Kayıt okunamadı ve sıfırlandı (${err.message}). ${backedUp ? 'Eski veri yedeklendi.' : 'Eski veri yedeklenemedi (depolama dolu olabilir).'}`,
+      );
       data = defaultData();
     }
     save();
@@ -1727,6 +1756,15 @@ function createProgressRepository(store = createMemoryStore()) {
   const game = (id) => {
     if (!data.games[id]) data.games[id] = defaultGameRecord();
     return data.games[id];
+  };
+
+  // Dosyayı doğrular ve özetini döner; hiçbir şeyi değiştirmez.
+  const previewImport = (text) => {
+    if (text.length > MAX_IMPORT_BYTES) throw new Error('Dosya 1 MB’tan büyük');
+    const parsed = JSON.parse(text);
+    if (!isObj(parsed)) throw new Error('Geçersiz dosya');
+    const next = migrate(parsed);
+    return { data: next, games: Object.keys(next.games).length, sessions: next.sessions.length };
   };
 
   load();
@@ -1807,10 +1845,9 @@ function createProgressRepository(store = createMemoryStore()) {
     exportJson() {
       return JSON.stringify(data, null, 2);
     },
+    previewImport,
     importJson(text) {
-      const parsed = JSON.parse(text);
-      if (!isObj(parsed)) throw new Error('Geçersiz dosya');
-      data = migrate(parsed);
+      data = previewImport(text).data;
       save();
       return data;
     },
@@ -1822,7 +1859,7 @@ function createProgressRepository(store = createMemoryStore()) {
   };
 }
 
-return { SCHEMA_VERSION, STORAGE_KEY, HISTORY_LIMIT, SESSION_LIMIT, DEFAULT_SETTINGS, defaultData, defaultGameRecord, MIGRATIONS, migrate, sanitize, createMemoryStore, createBrowserStore, createProgressRepository };
+return { SCHEMA_VERSION, STORAGE_KEY, HISTORY_LIMIT, SESSION_LIMIT, MAX_IMPORT_BYTES, DEFAULT_SETTINGS, defaultData, defaultGameRecord, MIGRATIONS, migrate, sanitize, createMemoryStore, createBrowserStore, createProgressRepository };
 })();
 
 // ---- src/core/rng.js ----
@@ -4466,6 +4503,7 @@ const { GAMES, CATEGORIES, CATEGORY_IDS, gameById, gamesInCategory } = __m8;
 const { h, clear } = __m9;
 const { s } = __m10;
 const { createAudio } = __m11;
+const { MAX_IMPORT_BYTES } = __m0;
 
 const RELAXED_ROUNDS = 12;
 
@@ -4491,11 +4529,16 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
     return !!media?.('(prefers-reduced-motion: reduce)').matches;
   };
 
+  const hostTheme = document.documentElement.dataset.theme;
+
   function applySettings() {
     const html = document.documentElement;
     const theme = repo.settings.theme;
-    if (theme === 'auto') delete html.dataset.theme;
-    else html.dataset.theme = theme;
+    // "Sistem": sayfayı barındıran ortam bir tema seçtiyse ona dokunma
+    if (theme === 'auto') {
+      if (hostTheme) html.dataset.theme = hostTheme;
+      else delete html.dataset.theme;
+    } else html.dataset.theme = theme;
     html.classList.toggle('reduce-motion', reducedMotion());
     html.classList.toggle('motion-ok', repo.settings.reducedMotion === 'off');
   }
@@ -5286,13 +5329,47 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
       const msg = h('p', { class: 'hint', 'aria-live': 'polite', id: 'data-msg' });
       const exportBox = h('textarea', { id: 'export-box', class: 'export-box', rows: 6, readonly: true, hidden: true, 'aria-label': 'Dışa aktarılan veri (JSON)' });
       const fileInput = h('input', { type: 'file', id: 'import-file', accept: 'application/json,.json', class: 'visually-hidden' });
+      // İçe aktarma: önce dosya doğrulanır ve özetlenir, mevcut veri ancak onaydan sonra değişir.
+      const importConfirm = h('div', { class: 'import-confirm', hidden: true, role: 'group', 'aria-label': 'İçe aktarma onayı' });
       fileInput.addEventListener('change', async () => {
         const file = fileInput.files?.[0];
+        fileInput.value = '';
+        importConfirm.hidden = true;
+        clear(importConfirm);
         if (!file) return;
         try {
-          repo.importJson(await file.text());
-          applySettings();
-          msg.textContent = 'Veriler içe aktarıldı.';
+          if (file.size > MAX_IMPORT_BYTES) throw new Error('Dosya 1 MB’tan büyük');
+          const text = await file.text();
+          const preview = repo.previewImport(text);
+          importConfirm.append(
+            h('p', { class: 'hint' }, `Dosyada ${preview.games} oyun kaydı ve ${preview.sessions} oturum var. İçe aktarırsan şu anki ilerlemen bunlarla değiştirilir.`),
+            h(
+              'div',
+              { class: 'row-actions wrap' },
+              h('button', {
+                type: 'button',
+                class: 'btn btn-primary',
+                id: 'import-confirm',
+                onclick: () => {
+                  repo.importJson(text);
+                  applySettings();
+                  importConfirm.hidden = true;
+                  msg.textContent = 'Veriler içe aktarıldı.';
+                },
+              }, 'Mevcut verinin yerine yaz'),
+              h('button', {
+                type: 'button',
+                class: 'btn btn-ghost',
+                onclick: () => {
+                  importConfirm.hidden = true;
+                  msg.textContent = 'İçe aktarma iptal edildi. Verilerin değişmedi.';
+                },
+              }, 'Vazgeç'),
+            ),
+          );
+          importConfirm.hidden = false;
+          msg.textContent = '';
+          importConfirm.querySelector('#import-confirm').focus();
         } catch (err) {
           msg.textContent = `İçe aktarılamadı: ${err.message}. Bu uygulamadan dışa aktarılmış bir JSON dosyası seç.`;
         }
@@ -5363,6 +5440,7 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
             }),
           ),
           fileInput,
+          importConfirm,
           msg,
           exportBox,
         ),

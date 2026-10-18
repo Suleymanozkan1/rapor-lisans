@@ -122,6 +122,19 @@ try {
     log(today.startsWith('9'), `bugünkü oturum sayısı 9 (${today})`);
     log((await overflow(page)) <= 0, 'telefon: istatistik ekranında yatay taşma yok (tablo kendi içinde kayar)');
     await shot(page, 'stats-phone');
+    // Dışa aktar → içe aktar: önce önizleme ve onay, sonra yazma
+    await page.click('#nav-settings');
+    await page.click('#export');
+    const exported = await page.inputValue('#export-box');
+    await page.setInputFiles('#import-file', { name: 'veri.json', mimeType: 'application/json', buffer: Buffer.from(exported) });
+    await page.waitForSelector('#import-confirm', { timeout: 3000 }).catch(() => {});
+    const summary = await page.textContent('.import-confirm .hint').catch(() => '');
+    log(/9 oyun kaydı ve 9 oturum/.test(summary), `içe aktarma önce özet gösterip onay istiyor (${summary.trim().slice(0, 60)})`);
+    await page.click('#import-confirm');
+    log((await page.textContent('#data-msg')).includes('içe aktarıldı'), 'onaydan sonra veriler içe aktarıldı');
+    await page.setInputFiles('#import-file', { name: 'kotu.json', mimeType: 'application/json', buffer: Buffer.from('{bozuk') });
+    await page.waitForTimeout(200);
+    log((await page.textContent('#data-msg')).startsWith('İçe aktarılamadı'), 'bozuk dosya reddediliyor, veri değişmiyor');
     // Erişilebilir ad kontrolü
     await page.click('#nav-home');
     const unnamed = await page.$$eval('button', (bs) => bs.filter((b) => !(b.getAttribute('aria-label') || b.textContent.trim())).length);

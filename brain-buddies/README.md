@@ -21,7 +21,7 @@ Gereken tek şey Node.js 20+ (ücretsiz). `npm install` gerekmez; projede bağı
 
 ```bash
 cd brain-buddies
-npm test          # 65 otomatik test (node:test)
+npm test          # 75 otomatik test (node:test)
 npm run check     # tüm .js/.mjs dosyalarında sözdizimi denetimi
 npm run build     # dist/zihin-molasi.html üretir (tek dosya)
 npm start         # http://localhost:8080 — ES modülleriyle geliştirme sunucusu
@@ -65,5 +65,6 @@ Başka bir dosyanın değişmesi gerekmez.
 - [docs/REFERENCE_GAPS.md](docs/REFERENCE_GAPS.md) — Brain Buddies hakkında bilinenler ve bilinmeyenler
 - [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) — kilometre taşları, bilinen eksikler
 - [docs/SECURITY_AUDIT.md](docs/SECURITY_AUDIT.md) — güvenlik denetimi sonucu
+- [docs/REA_ANALYSIS.md](docs/REA_ANALYSIS.md) — REA ile yapılan inceleme
 - [docs/TOOLS_AND_COSTS.md](docs/TOOLS_AND_COSTS.md) — kullanılan araçlar, lisanslar, maliyet
 - [ASSETS.md](ASSETS.md) — görsel ve ses kaynakları

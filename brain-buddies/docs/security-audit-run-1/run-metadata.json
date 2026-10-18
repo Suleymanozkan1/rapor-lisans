@@ -1,0 +1,45 @@
+{
+ "run_id": "rapor-lisans-run-1",
+ "repo": "Suleymanozkan1/rapor-lisans",
+ "target": "/home/user/rapor-lisans",
+ "source_ref": {
+  "commit": "11d10b5820ccf34d2884b3899f1c0b21d79312a4",
+  "worktree_dirty": true,
+  "note": "brain-buddies/ is uncommitted new work under review; reviewed as the working tree on 2026-10-18"
+ },
+ "profile": "quick",
+ "scope_paths": [
+  "brain-buddies/"
+ ],
+ "budget": 10,
+ "execution_policy": "sandboxed-source-and-local-only",
+ "companions": [
+  "CLIENT-SIDE.md"
+ ],
+ "prior_runs": [],
+ "shared_file_owners": {
+  "run-metadata.json": "parent",
+  "architecture.md": "parent",
+  "coverage-ledger.json": "parent",
+  "findings.json": "parent",
+  "REPORT.md": "parent",
+  "FINDINGS-DETAIL.md": "parent",
+  "NEEDS-VALIDATION.md": "parent"
+ },
+ "run_status": "complete",
+ "budget_note": "parent-proposed: 4 recon + 1 hunter + 1 final critic (quick) + 4 verifier reserve",
+ "agents_spent": {
+  "reconnaissance": 4,
+  "hunters": 1,
+  "final_critic": 1,
+  "verifiers": 0,
+  "total": 6
+ },
+ "final_critic": {
+  "agent_id": "critic-final",
+  "missing_units": 0,
+  "reassign_ids": 0,
+  "stop": true
+ },
+ "target_execution": "blocked: composed sandbox wrapper and trusted promoter not verified; source-only review"
+}

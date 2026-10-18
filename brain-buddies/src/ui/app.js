@@ -10,6 +10,7 @@ import { GAMES, CATEGORIES, CATEGORY_IDS, gameById, gamesInCategory } from '../g
 import { h, clear } from './dom.js';
 import { s } from './svg.js';
 import { createAudio } from './audio.js';
+import { MAX_IMPORT_BYTES } from '../core/storage.js';
 
 const RELAXED_ROUNDS = 12;
 
@@ -35,11 +36,16 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
     return !!media?.('(prefers-reduced-motion: reduce)').matches;
   };
 
+  const hostTheme = document.documentElement.dataset.theme;
+
   function applySettings() {
     const html = document.documentElement;
     const theme = repo.settings.theme;
-    if (theme === 'auto') delete html.dataset.theme;
-    else html.dataset.theme = theme;
+    // "Sistem": sayfayı barındıran ortam bir tema seçtiyse ona dokunma
+    if (theme === 'auto') {
+      if (hostTheme) html.dataset.theme = hostTheme;
+      else delete html.dataset.theme;
+    } else html.dataset.theme = theme;
     html.classList.toggle('reduce-motion', reducedMotion());
     html.classList.toggle('motion-ok', repo.settings.reducedMotion === 'off');
   }
@@ -830,13 +836,47 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
       const msg = h('p', { class: 'hint', 'aria-live': 'polite', id: 'data-msg' });
       const exportBox = h('textarea', { id: 'export-box', class: 'export-box', rows: 6, readonly: true, hidden: true, 'aria-label': 'Dışa aktarılan veri (JSON)' });
       const fileInput = h('input', { type: 'file', id: 'import-file', accept: 'application/json,.json', class: 'visually-hidden' });
+      // İçe aktarma: önce dosya doğrulanır ve özetlenir, mevcut veri ancak onaydan sonra değişir.
+      const importConfirm = h('div', { class: 'import-confirm', hidden: true, role: 'group', 'aria-label': 'İçe aktarma onayı' });
       fileInput.addEventListener('change', async () => {
         const file = fileInput.files?.[0];
+        fileInput.value = '';
+        importConfirm.hidden = true;
+        clear(importConfirm);
         if (!file) return;
         try {
-          repo.importJson(await file.text());
-          applySettings();
-          msg.textContent = 'Veriler içe aktarıldı.';
+          if (file.size > MAX_IMPORT_BYTES) throw new Error('Dosya 1 MB’tan büyük');
+          const text = await file.text();
+          const preview = repo.previewImport(text);
+          importConfirm.append(
+            h('p', { class: 'hint' }, `Dosyada ${preview.games} oyun kaydı ve ${preview.sessions} oturum var. İçe aktarırsan şu anki ilerlemen bunlarla değiştirilir.`),
+            h(
+              'div',
+              { class: 'row-actions wrap' },
+              h('button', {
+                type: 'button',
+                class: 'btn btn-primary',
+                id: 'import-confirm',
+                onclick: () => {
+                  repo.importJson(text);
+                  applySettings();
+                  importConfirm.hidden = true;
+                  msg.textContent = 'Veriler içe aktarıldı.';
+                },
+              }, 'Mevcut verinin yerine yaz'),
+              h('button', {
+                type: 'button',
+                class: 'btn btn-ghost',
+                onclick: () => {
+                  importConfirm.hidden = true;
+                  msg.textContent = 'İçe aktarma iptal edildi. Verilerin değişmedi.';
+                },
+              }, 'Vazgeç'),
+            ),
+          );
+          importConfirm.hidden = false;
+          msg.textContent = '';
+          importConfirm.querySelector('#import-confirm').focus();
         } catch (err) {
           msg.textContent = `İçe aktarılamadı: ${err.message}. Bu uygulamadan dışa aktarılmış bir JSON dosyası seç.`;
         }
@@ -907,6 +947,7 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
             }),
           ),
           fileInput,
+          importConfirm,
           msg,
           exportBox,
         ),

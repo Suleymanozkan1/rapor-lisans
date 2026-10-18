@@ -1,0 +1,574 @@
+[
+ {
+  "coverage_id": "brain-buddies%2Fsrc%2Fcore%2Fstorage.js%23load%20zihin-molasi%3Av::brain-buddies%2Fsrc%2Fcore%2Fstorage.js%23sanitize::profile%2Fquick%2Fall-in-scope-subsystems::CLIENT-SIDE.md%23Browser-storage%20disclosure%20and%20stale%20authorization",
+  "canonical_refs": {
+   "surface": "brain-buddies/src/core/storage.js#load zihin-molasi:v",
+   "boundary": "brain-buddies/src/core/storage.js#sanitize",
+   "subsystem": "profile/quick/all-in-scope-subsystems",
+   "attack_class": "CLIENT-SIDE.md#Browser-storage disclosure and stale authorization"
+  },
+  "surface": "Stored record read at startup",
+  "boundary": "sanitize() on load and corrupt-backup path",
+  "subsystem": "All in-scope subsystems (quick profile)",
+  "attack_class": "Browser-storage disclosure and stale authorization",
+  "starting_paths": [
+   "brain-buddies/src/core/storage.js",
+   "brain-buddies/src/main.js",
+   "brain-buddies/tools/build.mjs"
+  ],
+  "ordinary_attack_class_block": null,
+  "selected_companion_blocks": [
+   "CLIENT-SIDE.md#Core discipline",
+   "CLIENT-SIDE.md#Universal moves",
+   "CLIENT-SIDE.md#Validation rules",
+   "CLIENT-SIDE.md#Browser-storage disclosure and stale authorization"
+  ],
+  "excluded_blocks": [
+   {
+    "block": "CLIENT-SIDE.md#postMessage origin and source trust",
+    "reason": "no message listeners or postMessage in brain-buddies/src"
+   },
+   {
+    "block": "CLIENT-SIDE.md#Service-worker registration and scope takeover",
+    "reason": "no service worker registered anywhere"
+   },
+   {
+    "block": "CLIENT-SIDE.md#Clickjacking",
+    "reason": "no cross-user state-changing action; single local user"
+   }
+  ],
+  "prior_status": "none",
+  "attempts": [],
+  "wave": 1,
+  "status": "covered",
+  "agent_id": "hunter-w1",
+  "reviewed_paths": [
+   "brain-buddies/src/core/storage.js",
+   "brain-buddies/src/main.js",
+   "brain-buddies/src/ui/app.js",
+   "brain-buddies/tools/build.mjs"
+  ],
+  "local_checks": [
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "brain-buddies/src/core/storage.js",
+     "brain-buddies/src/main.js"
+    ],
+    "invariant": "No token, credential, private response or authorization decision is persisted in localStorage where a less-trusted same-origin reader or a later account/session could read or reuse it",
+    "method": "source",
+    "result": "storage.js:6 key zihin-molasi:v and the :bozuk backup (storage.js:196) hold only game settings, per-game scores/history, session tallies and option strings (defaultData storage.js:21-23, sanitize storage.js:64-132). There are no accounts, logins, tokens or authorization decisions anywhere in src (main.js:6-16 builds one repository for the single local player). No stale-authorization lifecycle exists (no logout/account switch); deleteAll (storage.js:298-302) removes both keys. A same-origin reader (another page on 127.0.0.1:<port>, or other file:// pages in browsers that share a file origin) could read only the player's game progress, which has no confidentiality value and no privilege. The class requires a realistic lower-authority reader of sensitive data; none exists.",
+    "artifact": null
+   },
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "brain-buddies/src/core/storage.js",
+     "brain-buddies/src/ui/app.js"
+    ],
+    "invariant": "A record written by another same-origin script and read at startup cannot escape sanitize() into a security-relevant sink",
+    "method": "source",
+    "result": "load() (storage.js:185-202) JSON.parses, requires a plain object, runs migrate (storage.js:47-58; only MIGRATIONS[0], version>1 or a missing step throws) then sanitize. On any error the raw string is copied to zihin-molasi:v:bozuk and a warning containing err.message is shown via h() text nodes (app.js:869). Sanitized values reach only text nodes, setAttribute on non-URL attributes, CSS width (app.js:740), createRng seed (app.js:211) and the memoryGrid variant whitelist (memoryGrid.js:48). A same-origin writer already has full script authority, so no boundary is crossed.",
+    "artifact": null
+   },
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "brain-buddies/tools/build.mjs"
+    ],
+    "invariant": "The file:// bundle does not change storage semantics or introduce a data-driven script sink",
+    "method": "source",
+    "result": "build.mjs inlines unmodified module bodies (build.mjs:21-87) and rejects </script and </style in the inlined code (build.mjs:93-94). The dist bundle contains the same sanitize code (dist/zihin-molasi.html has the same id regex, option length cap and seed slice). Stored data never reaches the build. Whether localStorage is shared across file:// pages depends on the browser, but that only matters for sensitive data, and the stored data is not sensitive.",
+    "artifact": null
+   }
+  ],
+  "result_fingerprints": [],
+  "unresolved": [],
+  "parent_hardening_notes": [
+   "brain-buddies/tools/serve.mjs:20-41: add a Host header allowlist (localhost/127.0.0.1:<port>) and reject methods other than GET/HEAD. This stops DNS-rebinding pages from reading the project tree while the dev server runs (currently only the static app files are exposed).",
+   "brain-buddies/tools/serve.mjs:25-29: to make containment robust against any future symlink placed under ROOT, compare fs.realpath(file) against realpath(ROOT), and stat/read through one opened file handle.",
+   "brain-buddies/src/core/storage.js:123-130: sanitize() accepts any number of option groups and keys, including __proto__, which sets the prototype of clean.options (no gadget today). Restrict option ids to registered game ids (or use Object.create(null) / a Map) and restrict keys to each game's declared option ids and choice values.",
+   "brain-buddies/src/core/storage.js:110-121: sessions gameId/category strings and history level have no length or range limit. Restrict gameId/category to the registry and category ids, and clamp level to 1..10, so imported files cannot fill the storage quota or produce odd stats.",
+   "brain-buddies/src/ui/app.js:833-837 / storage.js:291-297: import overwrites all progress with no size limit and no confirmation. Add a file-size cap before file.text() and an armed confirmation like confirmBtn (app.js:812-829).",
+   "brain-buddies/src/core/storage.js:196-197: the corrupt-record backup ignores the boolean result of setItem. On a quota failure the warning still says the old data was backed up, and a later corruption overwrites the single :bozuk slot. Check the return value and keep timestamped backups.",
+   "lisans.json: looks like a remotely read activation/kill-switch flag in a public repository. Its integrity depends only on who can write to the GitHub repository, and its consumer is outside this repo. Owners should confirm that no external application trusts it as a license or authorization decision without signing it."
+  ]
+ },
+ {
+  "coverage_id": "brain-buddies%2Fsrc%2Fui%2Fapp.js%23settings%20import%20file%20input::brain-buddies%2Fsrc%2Fcore%2Fstorage.js%23importJson::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Feature%20abuse%20and%20data%20leakage",
+  "canonical_refs": {
+   "surface": "brain-buddies/src/ui/app.js#settings import file input",
+   "boundary": "brain-buddies/src/core/storage.js#importJson",
+   "subsystem": "profile/quick/all-in-scope-subsystems",
+   "attack_class": "ATTACK-CLASSES.md#Feature abuse and data leakage"
+  },
+  "surface": "Settings JSON import",
+  "boundary": "importJson overwrite path",
+  "subsystem": "All in-scope subsystems (quick profile)",
+  "attack_class": "Feature abuse and data leakage",
+  "starting_paths": [
+   "brain-buddies/src/core/storage.js",
+   "brain-buddies/src/ui/app.js",
+   "brain-buddies/src/core/stats.js",
+   "brain-buddies/src/core/adaptive.js"
+  ],
+  "ordinary_attack_class_block": "ATTACK-CLASSES.md#Feature abuse and data leakage",
+  "selected_companion_blocks": [],
+  "excluded_blocks": [
+   {
+    "block": "CLIENT-SIDE.md#Core discipline",
+    "reason": "ordinary class is sufficient for import overwrite semantics"
+   }
+  ],
+  "prior_status": "none",
+  "attempts": [],
+  "wave": 1,
+  "status": "covered",
+  "agent_id": "hunter-w1",
+  "reviewed_paths": [
+   "brain-buddies/src/core/adaptive.js",
+   "brain-buddies/src/core/stats.js",
+   "brain-buddies/src/core/storage.js",
+   "brain-buddies/src/ui/app.js"
+  ],
+  "local_checks": [
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "brain-buddies/src/core/storage.js",
+     "brain-buddies/src/ui/app.js"
+    ],
+    "invariant": "Import/restore cannot write data the import-file author should not control, cannot bypass the validation the UI path enforces, and cannot affect any principal other than the player who chose the file",
+    "method": "source",
+    "result": "The import is started only by the player (app.js:898 button, then a file picker at app.js:832-843). importJson (storage.js:291-297) runs the same migrate()->sanitize() path as load(), so imported records get the same type/enum/range/regex/length checks as stored ones. JSON.parse or validation errors throw before data is replaced. The overwrite replaces only the player's own local progress, and the player chose to do it. There is no other user, tenant, collection or permission model to bypass. Overwriting data without a confirmation is a same-principal UX choice, not a privilege gain.",
+    "artifact": null
+   },
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "brain-buddies/src/core/storage.js",
+     "brain-buddies/src/ui/app.js"
+    ],
+    "invariant": "Export does not include data beyond the player's own record",
+    "method": "source",
+    "result": "exportJson (storage.js:288-290) serialises only the in-memory sanitized data. The download uses a same-origin blob URL (app.js:883-888) and the clipboard (app.js:892). It includes no backups, other keys or third-party data.",
+    "artifact": null
+   },
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "brain-buddies/src/core/stats.js",
+     "brain-buddies/src/core/adaptive.js"
+    ],
+    "invariant": "Imported numeric and string fields consumed by stats and challenge planning cannot reach a security sink or corrupt shared state",
+    "method": "source",
+    "result": "categoryStrengths uses a Map keyed by fixed category ids (stats.js:39-41), so a session category such as __proto__ does not resolve to an entry, and there is no object-keyed accumulator. Extreme finite values such as accuracy=1e308 or negative answered can only produce odd numbers on screen (Infinity/NaN text, very wide bar) in the player's own view. planChallenge keys data.games by fixed registry ids (adaptive.js:105-106). There is no search/filter oracle, webhook or SSRF surface (no network code).",
+    "artifact": null
+   }
+  ],
+  "result_fingerprints": [],
+  "unresolved": [],
+  "parent_hardening_notes": [
+   "brain-buddies/tools/serve.mjs:20-41: add a Host header allowlist (localhost/127.0.0.1:<port>) and reject methods other than GET/HEAD. This stops DNS-rebinding pages from reading the project tree while the dev server runs (currently only the static app files are exposed).",
+   "brain-buddies/tools/serve.mjs:25-29: to make containment robust against any future symlink placed under ROOT, compare fs.realpath(file) against realpath(ROOT), and stat/read through one opened file handle.",
+   "brain-buddies/src/core/storage.js:123-130: sanitize() accepts any number of option groups and keys, including __proto__, which sets the prototype of clean.options (no gadget today). Restrict option ids to registered game ids (or use Object.create(null) / a Map) and restrict keys to each game's declared option ids and choice values.",
+   "brain-buddies/src/core/storage.js:110-121: sessions gameId/category strings and history level have no length or range limit. Restrict gameId/category to the registry and category ids, and clamp level to 1..10, so imported files cannot fill the storage quota or produce odd stats.",
+   "brain-buddies/src/ui/app.js:833-837 / storage.js:291-297: import overwrites all progress with no size limit and no confirmation. Add a file-size cap before file.text() and an armed confirmation like confirmBtn (app.js:812-829).",
+   "brain-buddies/src/core/storage.js:196-197: the corrupt-record backup ignores the boolean result of setItem. On a quota failure the warning still says the old data was backed up, and a later corruption overwrites the single :bozuk slot. Check the return value and keep timestamped backups.",
+   "lisans.json: looks like a remotely read activation/kill-switch flag in a public repository. Its integrity depends only on who can write to the GitHub repository, and its consumer is outside this repo. Owners should confirm that no external application trusts it as a license or authorization decision without signing it."
+  ]
+ },
+ {
+  "coverage_id": "brain-buddies%2Fsrc%2Fui%2Fapp.js%23settings%20import%20file%20input::brain-buddies%2Fsrc%2Fcore%2Fstorage.js%23sanitize::profile%2Fquick%2Fall-in-scope-subsystems::CLIENT-SIDE.md%23Prototype%20pollution%20and%20gadget%20chain",
+  "canonical_refs": {
+   "surface": "brain-buddies/src/ui/app.js#settings import file input",
+   "boundary": "brain-buddies/src/core/storage.js#sanitize",
+   "subsystem": "profile/quick/all-in-scope-subsystems",
+   "attack_class": "CLIENT-SIDE.md#Prototype pollution and gadget chain"
+  },
+  "surface": "Settings JSON import",
+  "boundary": "sanitize() schema enforcement",
+  "subsystem": "All in-scope subsystems (quick profile)",
+  "attack_class": "Prototype pollution and gadget chain",
+  "starting_paths": [
+   "brain-buddies/src/core/storage.js",
+   "brain-buddies/src/ui/app.js",
+   "brain-buddies/src/games/memoryGrid.js"
+  ],
+  "ordinary_attack_class_block": null,
+  "selected_companion_blocks": [
+   "CLIENT-SIDE.md#Core discipline",
+   "CLIENT-SIDE.md#Universal moves",
+   "CLIENT-SIDE.md#Validation rules",
+   "CLIENT-SIDE.md#Prototype pollution and gadget chain"
+  ],
+  "excluded_blocks": [
+   {
+    "block": "CLIENT-SIDE.md#postMessage origin and source trust",
+    "reason": "no message listeners or postMessage in brain-buddies/src"
+   },
+   {
+    "block": "CLIENT-SIDE.md#Service-worker registration and scope takeover",
+    "reason": "no service worker registered anywhere"
+   },
+   {
+    "block": "CLIENT-SIDE.md#Clickjacking",
+    "reason": "no cross-user state-changing action; single local user"
+   }
+  ],
+  "prior_status": "none",
+  "attempts": [],
+  "wave": 1,
+  "status": "covered",
+  "agent_id": "hunter-w1",
+  "reviewed_paths": [
+   "brain-buddies/src/core/storage.js",
+   "brain-buddies/src/games/memoryGrid.js",
+   "brain-buddies/src/ui/app.js"
+  ],
+  "local_checks": [
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "brain-buddies/src/core/storage.js"
+    ],
+    "invariant": "No attacker-controlled key from the imported JSON reaches a recursive write or path assignment that modifies Object.prototype",
+    "method": "source",
+    "result": "There is no deep merge or path assignment. The settings merges (storage.js:34, 237) are shallow object spreads (CreateDataProperty), so an own __proto__ key stays an own data property. sanitize copies only fixed DEFAULT_SETTINGS keys (storage.js:67-69). Game ids must match ^[a-z][a-zA-Z0-9-]{0,40}$ (storage.js:83), which rejects __proto__. Names such as constructor or toString are accepted only as own properties of the fresh clean.games object. Two assignments can use __proto__: MIGRATIONS[0] data.games[id]= (storage.js:38) and clean.options[id]= (storage.js:126). Each one only replaces the [[Prototype]] of a freshly created local object (data.games from defaultData, or clean.options). Neither reaches Object.prototype. The migrated games object is then re-read through Object.entries (own keys only), so the polluted entry is dropped. Object.fromEntries (storage.js:126) creates own properties.",
+    "artifact": null
+   },
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "brain-buddies/src/core/storage.js",
+     "brain-buddies/src/ui/app.js",
+     "brain-buddies/src/games/memoryGrid.js"
+    ],
+    "invariant": "An object-local prototype replacement on data.options has no reachable security-relevant gadget",
+    "method": "source",
+    "result": "With options.__proto__ set, clean.options inherits from an object whose values are strings under 40 characters. getOptions (storage.js:229-231) can then return an inherited string. In app.js:139 the spread of a string yields only index keys. createState in memoryGrid.js:48 whitelists variant to order or position. Option values are never rendered or used as attributes, URLs or code. JSON.stringify on save (storage.js:205) drops the non-own prototype, so nothing persists. There is no authorization, navigation, execution or rendering gadget, so validation rule 2 (prove a gadget) is not met.",
+    "artifact": null
+   }
+  ],
+  "result_fingerprints": [],
+  "unresolved": [],
+  "parent_hardening_notes": [
+   "brain-buddies/tools/serve.mjs:20-41: add a Host header allowlist (localhost/127.0.0.1:<port>) and reject methods other than GET/HEAD. This stops DNS-rebinding pages from reading the project tree while the dev server runs (currently only the static app files are exposed).",
+   "brain-buddies/tools/serve.mjs:25-29: to make containment robust against any future symlink placed under ROOT, compare fs.realpath(file) against realpath(ROOT), and stat/read through one opened file handle.",
+   "brain-buddies/src/core/storage.js:123-130: sanitize() accepts any number of option groups and keys, including __proto__, which sets the prototype of clean.options (no gadget today). Restrict option ids to registered game ids (or use Object.create(null) / a Map) and restrict keys to each game's declared option ids and choice values.",
+   "brain-buddies/src/core/storage.js:110-121: sessions gameId/category strings and history level have no length or range limit. Restrict gameId/category to the registry and category ids, and clamp level to 1..10, so imported files cannot fill the storage quota or produce odd stats.",
+   "brain-buddies/src/ui/app.js:833-837 / storage.js:291-297: import overwrites all progress with no size limit and no confirmation. Add a file-size cap before file.text() and an armed confirmation like confirmBtn (app.js:812-829).",
+   "brain-buddies/src/core/storage.js:196-197: the corrupt-record backup ignores the boolean result of setItem. On a quota failure the warning still says the old data was backed up, and a later corruption overwrites the single :bozuk slot. Check the return value and keep timestamped backups.",
+   "lisans.json: looks like a remotely read activation/kill-switch flag in a public repository. Its integrity depends only on who can write to the GitHub repository, and its consumer is outside this repo. Owners should confirm that no external application trusts it as a license or authorization decision without signing it."
+  ]
+ },
+ {
+  "coverage_id": "brain-buddies%2Fsrc%2Fui%2Fapp.js%23settings%20import%20file%20input::brain-buddies%2Fsrc%2Fui%2Fdom.js%23h::profile%2Fquick%2Fall-in-scope-subsystems::CLIENT-SIDE.md%23DOM-based%20XSS",
+  "canonical_refs": {
+   "surface": "brain-buddies/src/ui/app.js#settings import file input",
+   "boundary": "brain-buddies/src/ui/dom.js#h",
+   "subsystem": "profile/quick/all-in-scope-subsystems",
+   "attack_class": "CLIENT-SIDE.md#DOM-based XSS"
+  },
+  "surface": "Settings JSON import",
+  "boundary": "h()/s() text-only DOM rendering",
+  "subsystem": "All in-scope subsystems (quick profile)",
+  "attack_class": "DOM-based XSS",
+  "starting_paths": [
+   "brain-buddies/src/ui/dom.js",
+   "brain-buddies/src/ui/svg.js",
+   "brain-buddies/src/ui/app.js"
+  ],
+  "ordinary_attack_class_block": null,
+  "selected_companion_blocks": [
+   "CLIENT-SIDE.md#Core discipline",
+   "CLIENT-SIDE.md#Universal moves",
+   "CLIENT-SIDE.md#Validation rules",
+   "CLIENT-SIDE.md#DOM-based XSS"
+  ],
+  "excluded_blocks": [
+   {
+    "block": "CLIENT-SIDE.md#postMessage origin and source trust",
+    "reason": "no message listeners or postMessage in brain-buddies/src"
+   },
+   {
+    "block": "CLIENT-SIDE.md#Service-worker registration and scope takeover",
+    "reason": "no service worker registered anywhere"
+   },
+   {
+    "block": "CLIENT-SIDE.md#Clickjacking",
+    "reason": "no cross-user state-changing action; single local user"
+   }
+  ],
+  "prior_status": "none",
+  "attempts": [],
+  "wave": 1,
+  "status": "covered",
+  "agent_id": "hunter-w1",
+  "reviewed_paths": [
+   "brain-buddies/src/ui/app.js",
+   "brain-buddies/src/ui/dom.js",
+   "brain-buddies/src/ui/svg.js"
+  ],
+  "local_checks": [
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "brain-buddies/src/ui/dom.js",
+     "brain-buddies/src/ui/svg.js"
+    ],
+    "invariant": "DOM helpers never interpret data as HTML, script, event handler or executable URL",
+    "method": "source",
+    "result": "h() creates elements with createElement and appends children as Node or createTextNode(String(child)) (dom.js:3-29). An event attribute key becomes a listener only when its value is a function (dom.js:14). All attribute keys and style property names come from code literals. s() uses createElementNS plus setAttribute with code-literal keys (svg.js:86-91). A search of src and index.html found no innerHTML, outerHTML, insertAdjacentHTML, document.write, eval, new Function, string setTimeout, srcdoc, DOMParser or data-driven href/src. The only href is a same-origin blob URL for export (app.js:884). ESLint forbids innerHTML in src (eslint.config.js:110).",
+    "artifact": null
+   },
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "brain-buddies/src/ui/app.js"
+    ],
+    "invariant": "Imported or stored strings reach only text or non-executing attribute sinks",
+    "method": "source",
+    "result": "The imported strings that persist are settings.seed (max 40 characters, used as the input value at app.js:919 and in createRng at app.js:211), sessions gameId/category (used only for comparisons in app.js:118 and stats.js:41), option values (whitelisted as above) and warning or error messages (text nodes at app.js:841 and 869). Numbers reach text, aria-label, SVG numeric attributes (sparkline points use toFixed in app.js:679) and style.width (app.js:740), which is a CSSOM property assignment and not an executing sink. Rendered names, descriptions and reasons all come from code. No path leads from a source to an HTML or script sink, and impact would in any case stay with the player's own view.",
+    "artifact": null
+   }
+  ],
+  "result_fingerprints": [],
+  "unresolved": [],
+  "parent_note": "hunter listed ['brain-buddies/eslint.config.js', 'brain-buddies/index.html'] at unit level without an owning check; not counted as evidence (unit reviewed_paths = union of check paths)",
+  "parent_hardening_notes": [
+   "brain-buddies/tools/serve.mjs:20-41: add a Host header allowlist (localhost/127.0.0.1:<port>) and reject methods other than GET/HEAD. This stops DNS-rebinding pages from reading the project tree while the dev server runs (currently only the static app files are exposed).",
+   "brain-buddies/tools/serve.mjs:25-29: to make containment robust against any future symlink placed under ROOT, compare fs.realpath(file) against realpath(ROOT), and stat/read through one opened file handle.",
+   "brain-buddies/src/core/storage.js:123-130: sanitize() accepts any number of option groups and keys, including __proto__, which sets the prototype of clean.options (no gadget today). Restrict option ids to registered game ids (or use Object.create(null) / a Map) and restrict keys to each game's declared option ids and choice values.",
+   "brain-buddies/src/core/storage.js:110-121: sessions gameId/category strings and history level have no length or range limit. Restrict gameId/category to the registry and category ids, and clamp level to 1..10, so imported files cannot fill the storage quota or produce odd stats.",
+   "brain-buddies/src/ui/app.js:833-837 / storage.js:291-297: import overwrites all progress with no size limit and no confirmation. Add a file-size cap before file.text() and an armed confirmation like confirmBtn (app.js:812-829).",
+   "brain-buddies/src/core/storage.js:196-197: the corrupt-record backup ignores the boolean result of setItem. On a quota failure the warning still says the old data was backed up, and a later corruption overwrites the single :bozuk slot. Check the return value and keep timestamped backups.",
+   "lisans.json: looks like a remotely read activation/kill-switch flag in a public repository. Its integrity depends only on who can write to the GitHub repository, and its consumer is outside this repo. Owners should confirm that no external application trusts it as a license or authorization decision without signing it."
+  ]
+ },
+ {
+  "coverage_id": "brain-buddies%2Ftools%2Fbuild.mjs%23source%20inputs::brain-buddies%2Ftools%2Fbuild.mjs%23inline%20guards::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Injection",
+  "canonical_refs": {
+   "surface": "brain-buddies/tools/build.mjs#source inputs",
+   "boundary": "brain-buddies/tools/build.mjs#inline guards",
+   "subsystem": "profile/quick/all-in-scope-subsystems",
+   "attack_class": "ATTACK-CLASSES.md#Injection"
+  },
+  "surface": "Build inputs",
+  "boundary": "bundler inline guards",
+  "subsystem": "All in-scope subsystems (quick profile)",
+  "attack_class": "Injection",
+  "starting_paths": [
+   "brain-buddies/tools/build.mjs"
+  ],
+  "ordinary_attack_class_block": "ATTACK-CLASSES.md#Injection",
+  "selected_companion_blocks": [],
+  "excluded_blocks": [],
+  "prior_status": "none",
+  "attempts": [],
+  "wave": 1,
+  "status": "not_applicable",
+  "agent_id": null,
+  "reviewed_paths": [],
+  "local_checks": [],
+  "result_fingerprints": [],
+  "unresolved": [
+   "build inputs are the developer's own repository source; no lower-trust principal supplies them"
+  ]
+ },
+ {
+  "coverage_id": "brain-buddies%2Ftools%2Fserve.mjs%23HTTP%20request%20path::brain-buddies%2Ftools%2Fserve.mjs%23ROOT%20containment%20check::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Resource%20and%20file%20handling",
+  "canonical_refs": {
+   "surface": "brain-buddies/tools/serve.mjs#HTTP request path",
+   "boundary": "brain-buddies/tools/serve.mjs#ROOT containment check",
+   "subsystem": "profile/quick/all-in-scope-subsystems",
+   "attack_class": "ATTACK-CLASSES.md#Resource and file handling"
+  },
+  "surface": "Dev server request path",
+  "boundary": "startsWith(ROOT+sep) containment",
+  "subsystem": "All in-scope subsystems (quick profile)",
+  "attack_class": "Resource and file handling",
+  "starting_paths": [
+   "brain-buddies/tools/serve.mjs"
+  ],
+  "ordinary_attack_class_block": "ATTACK-CLASSES.md#Resource and file handling",
+  "selected_companion_blocks": [],
+  "excluded_blocks": [
+   {
+    "block": "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+    "reason": "no sessions, cookies or auth on the dev server"
+   }
+  ],
+  "prior_status": "none",
+  "attempts": [],
+  "wave": 1,
+  "status": "covered",
+  "agent_id": "hunter-w1",
+  "reviewed_paths": [
+   "brain-buddies/tools/serve.mjs"
+  ],
+  "local_checks": [
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "brain-buddies/tools/serve.mjs"
+    ],
+    "invariant": "A request path cannot resolve to a file outside ROOT through dot segments, percent-encoded separators, backslashes, null bytes or a sibling-prefix directory",
+    "method": "source",
+    "result": "ROOT is resolve(fileURLToPath(new URL('..', import.meta.url))) (serve.mjs:9), which is the brain-buddies directory without a trailing separator. The pathname is percent-decoded (serve.mjs:23) before resolve(ROOT, '.'+path) (serve.mjs:25), so encoded ../ and %5C are normalised before the check. The check file===ROOT || startsWith(ROOT+sep) (serve.mjs:27) rejects a sibling prefix such as brain-buddies-evil. Per documented Node behaviour, a NUL byte makes stat throw ERR_INVALID_ARG_VALUE, and malformed percent-encoding throws URIError. Both go to the catch block and return 404 (serve.mjs:36-40). Directories fail isFile and return 404. The only file operations are read-only stat and readFile, with no write, upload or archive handling.",
+    "artifact": null
+   },
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "brain-buddies/tools/serve.mjs"
+    ],
+    "invariant": "Symlink following and the stat/read TOCTOU gap cannot expose files outside ROOT",
+    "method": "source",
+    "result": "stat and readFile follow symlinks, and the containment check is lexical. However, find shows no symlinks anywhere in the repository working tree, and the server cannot create files. Escaping would need a pre-existing symlink placed in ROOT by someone who already has write access to the developer's tree, which grants more authority than the read it would yield. The stat-to-readFile gap needs the same local write authority. Neither is reachable by a lower-trust principal.",
+    "artifact": null
+   }
+  ],
+  "result_fingerprints": [],
+  "unresolved": [],
+  "parent_hardening_notes": [
+   "brain-buddies/tools/serve.mjs:20-41: add a Host header allowlist (localhost/127.0.0.1:<port>) and reject methods other than GET/HEAD. This stops DNS-rebinding pages from reading the project tree while the dev server runs (currently only the static app files are exposed).",
+   "brain-buddies/tools/serve.mjs:25-29: to make containment robust against any future symlink placed under ROOT, compare fs.realpath(file) against realpath(ROOT), and stat/read through one opened file handle.",
+   "brain-buddies/src/core/storage.js:123-130: sanitize() accepts any number of option groups and keys, including __proto__, which sets the prototype of clean.options (no gadget today). Restrict option ids to registered game ids (or use Object.create(null) / a Map) and restrict keys to each game's declared option ids and choice values.",
+   "brain-buddies/src/core/storage.js:110-121: sessions gameId/category strings and history level have no length or range limit. Restrict gameId/category to the registry and category ids, and clamp level to 1..10, so imported files cannot fill the storage quota or produce odd stats.",
+   "brain-buddies/src/ui/app.js:833-837 / storage.js:291-297: import overwrites all progress with no size limit and no confirmation. Add a file-size cap before file.text() and an armed confirmation like confirmBtn (app.js:812-829).",
+   "brain-buddies/src/core/storage.js:196-197: the corrupt-record backup ignores the boolean result of setItem. On a quota failure the warning still says the old data was backed up, and a later corruption overwrites the single :bozuk slot. Check the return value and keep timestamped backups.",
+   "lisans.json: looks like a remotely read activation/kill-switch flag in a public repository. Its integrity depends only on who can write to the GitHub repository, and its consumer is outside this repo. Owners should confirm that no external application trusts it as a license or authorization decision without signing it."
+  ]
+ },
+ {
+  "coverage_id": "brain-buddies%2Ftools%2Fserve.mjs%23HTTP%20request%20path::brain-buddies%2Ftools%2Fserve.mjs%23listen%20127.0.0.1::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Access%20control",
+  "canonical_refs": {
+   "surface": "brain-buddies/tools/serve.mjs#HTTP request path",
+   "boundary": "brain-buddies/tools/serve.mjs#listen 127.0.0.1",
+   "subsystem": "profile/quick/all-in-scope-subsystems",
+   "attack_class": "ATTACK-CLASSES.md#Access control"
+  },
+  "surface": "Dev server request path",
+  "boundary": "loopback-only bind",
+  "subsystem": "All in-scope subsystems (quick profile)",
+  "attack_class": "Access control",
+  "starting_paths": [
+   "brain-buddies/tools/serve.mjs"
+  ],
+  "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+  "selected_companion_blocks": [],
+  "excluded_blocks": [
+   {
+    "block": "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+    "reason": "no sessions, cookies or auth on the dev server"
+   }
+  ],
+  "prior_status": "none",
+  "attempts": [],
+  "wave": 1,
+  "status": "covered",
+  "agent_id": "hunter-w1",
+  "reviewed_paths": [
+   "brain-buddies/tools/serve.mjs"
+  ],
+  "local_checks": [
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "brain-buddies/tools/serve.mjs"
+    ],
+    "invariant": "The dev server exposes no state-changing action and no protected resource to remote, cross-origin or rebinding callers beyond the static app it is meant to serve",
+    "method": "source",
+    "result": "The server listens on 127.0.0.1 only (serve.mjs:43). Every method is handled as a read of a static file (serve.mjs:20-35), so there is no state change, upload, admin or debug endpoint, and requests carry no authority. There is no Host header check, so DNS rebinding by a web page could read files under ROOT. Those files are the game's own static source, docs and tests, which the server exists to hand to any browser. The rebound origin differs from http://127.0.0.1:<port>, so it cannot read the game's localStorage. Cross-origin reads are blocked by same-origin policy (no CORS headers are set). A local user reaching the port gets only files inside ROOT. No authority boundary with a protected resource is crossed.",
+    "artifact": null
+   }
+  ],
+  "result_fingerprints": [],
+  "unresolved": [],
+  "parent_hardening_notes": [
+   "brain-buddies/tools/serve.mjs:20-41: add a Host header allowlist (localhost/127.0.0.1:<port>) and reject methods other than GET/HEAD. This stops DNS-rebinding pages from reading the project tree while the dev server runs (currently only the static app files are exposed).",
+   "brain-buddies/tools/serve.mjs:25-29: to make containment robust against any future symlink placed under ROOT, compare fs.realpath(file) against realpath(ROOT), and stat/read through one opened file handle.",
+   "brain-buddies/src/core/storage.js:123-130: sanitize() accepts any number of option groups and keys, including __proto__, which sets the prototype of clean.options (no gadget today). Restrict option ids to registered game ids (or use Object.create(null) / a Map) and restrict keys to each game's declared option ids and choice values.",
+   "brain-buddies/src/core/storage.js:110-121: sessions gameId/category strings and history level have no length or range limit. Restrict gameId/category to the registry and category ids, and clamp level to 1..10, so imported files cannot fill the storage quota or produce odd stats.",
+   "brain-buddies/src/ui/app.js:833-837 / storage.js:291-297: import overwrites all progress with no size limit and no confirmation. Add a file-size cap before file.text() and an armed confirmation like confirmBtn (app.js:812-829).",
+   "brain-buddies/src/core/storage.js:196-197: the corrupt-record backup ignores the boolean result of setItem. On a quota failure the warning still says the old data was backed up, and a later corruption overwrites the single :bozuk slot. Check the return value and keep timestamped backups.",
+   "lisans.json: looks like a remotely read activation/kill-switch flag in a public repository. Its integrity depends only on who can write to the GitHub repository, and its consumer is outside this repo. Owners should confirm that no external application trusts it as a license or authorization decision without signing it."
+  ]
+ },
+ {
+  "coverage_id": "repository%23tracked%20and%20new%20files::repository%23public%20GitHub%20visibility::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Obvious%20things",
+  "canonical_refs": {
+   "surface": "repository#tracked and new files",
+   "boundary": "repository#public GitHub visibility",
+   "subsystem": "profile/quick/all-in-scope-subsystems",
+   "attack_class": "ATTACK-CLASSES.md#Obvious things"
+  },
+  "surface": "Repository contents",
+  "boundary": "public repository exposure",
+  "subsystem": "All in-scope subsystems (quick profile)",
+  "attack_class": "Obvious things",
+  "starting_paths": [
+   "lisans.json",
+   "brain-buddies/package.json",
+   "brain-buddies/eslint.config.js",
+   "brain-buddies/tools/ui-check.mjs",
+   "brain-buddies/tools/build.mjs"
+  ],
+  "ordinary_attack_class_block": "ATTACK-CLASSES.md#Obvious things",
+  "selected_companion_blocks": [],
+  "excluded_blocks": [],
+  "prior_status": "none",
+  "attempts": [],
+  "wave": 1,
+  "status": "covered",
+  "agent_id": "hunter-w1",
+  "reviewed_paths": [
+   "brain-buddies/docs/REPO_AUDIT.md",
+   "brain-buddies/eslint.config.js",
+   "brain-buddies/package.json",
+   "brain-buddies/tools/build.mjs",
+   "brain-buddies/tools/check-syntax.mjs",
+   "brain-buddies/tools/ui-check.mjs",
+   "lisans.json"
+  ],
+  "local_checks": [
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "lisans.json",
+     "brain-buddies/docs/REPO_AUDIT.md"
+    ],
+    "invariant": "No secret, credential or sensitive configuration is committed to the public repository",
+    "method": "source",
+    "result": "lisans.json contains only {\"aktif\": true, \"mesaj\": \"\", \"bitis\": \"\"}, which holds no secret. No code in the repository reads it (REPO_AUDIT.md:24-29 says the same). A search for password/secret/apikey/token/Bearer/-----BEGIN found only CSS theme token text in tests and docs. There are no .env, *.pem, *.key or credentials files, no dotfiles in the working tree, and no symlinks. No .gitignore exists, but no secret-bearing local files exist either.",
+    "artifact": null
+   },
+   {
+    "agent_id": "hunter-w1",
+    "reviewed_paths": [
+     "brain-buddies/package.json",
+     "brain-buddies/eslint.config.js",
+     "brain-buddies/tools/ui-check.mjs",
+     "brain-buddies/tools/build.mjs",
+     "brain-buddies/tools/check-syntax.mjs"
+    ],
+    "invariant": "No dynamic code execution with untrusted input, no unpinned dependencies, and no unprotected debug, CORS, cookie or redirect surface",
+    "method": "source",
+    "result": "package.json has empty dependencies and devDependencies (no lockfile is needed). check-syntax.mjs:22 calls execFileSync(process.execPath, ['--check', f]) with repository file paths and no shell. ui-check.mjs:22-24 uses a constant import('playwright') and execSync('npm root -g'). CHROMIUM_PATH and SHOTS are developer environment inputs. These are developer-only tools, not shipped. No TODO, FIXME, HACK or XXX markers were found. There is no debug mode, cookie, CORS header, redirect parameter or verbose error: serve.mjs returns fixed plain-text 403/404 bodies. ESLint enables no-eval and no-implied-eval and bans innerHTML in src.",
+    "artifact": null
+   }
+  ],
+  "result_fingerprints": [],
+  "unresolved": [],
+  "parent_hardening_notes": [
+   "brain-buddies/tools/serve.mjs:20-41: add a Host header allowlist (localhost/127.0.0.1:<port>) and reject methods other than GET/HEAD. This stops DNS-rebinding pages from reading the project tree while the dev server runs (currently only the static app files are exposed).",
+   "brain-buddies/tools/serve.mjs:25-29: to make containment robust against any future symlink placed under ROOT, compare fs.realpath(file) against realpath(ROOT), and stat/read through one opened file handle.",
+   "brain-buddies/src/core/storage.js:123-130: sanitize() accepts any number of option groups and keys, including __proto__, which sets the prototype of clean.options (no gadget today). Restrict option ids to registered game ids (or use Object.create(null) / a Map) and restrict keys to each game's declared option ids and choice values.",
+   "brain-buddies/src/core/storage.js:110-121: sessions gameId/category strings and history level have no length or range limit. Restrict gameId/category to the registry and category ids, and clamp level to 1..10, so imported files cannot fill the storage quota or produce odd stats.",
+   "brain-buddies/src/ui/app.js:833-837 / storage.js:291-297: import overwrites all progress with no size limit and no confirmation. Add a file-size cap before file.text() and an armed confirmation like confirmBtn (app.js:812-829).",
+   "brain-buddies/src/core/storage.js:196-197: the corrupt-record backup ignores the boolean result of setItem. On a quota failure the warning still says the old data was backed up, and a later corruption overwrites the single :bozuk slot. Check the return value and keep timestamped backups.",
+   "lisans.json: looks like a remotely read activation/kill-switch flag in a public repository. Its integrity depends only on who can write to the GitHub repository, and its consumer is outside this repo. Owners should confirm that no external application trusts it as a license or authorization decision without signing it."
+  ]
+ }
+]

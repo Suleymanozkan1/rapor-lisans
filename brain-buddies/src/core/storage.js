@@ -6,6 +6,15 @@ export const SCHEMA_VERSION = 1;
 export const STORAGE_KEY = 'zihin-molasi:v';
 export const HISTORY_LIMIT = 30;
 export const SESSION_LIMIT = 500;
+export const MAX_IMPORT_BYTES = 1024 * 1024; // içe aktarılan dosya en fazla 1 MB
+
+// Kimlik biçimleri: oyun ve kategori kimlikleri kodda tanımlıdır; kayıttan gelen başka
+// bir değer (ör. "__proto__") kabul edilmez.
+const ID_RE = /^[a-z][a-zA-Z0-9-]{0,40}$/;
+const OPTION_KEY_RE = /^[a-z][a-zA-Z0-9]{0,20}$/;
+const OPTION_VALUE_RE = /^[a-z][a-zA-Z0-9-]{0,20}$/;
+const MAX_OPTION_GAMES = 50;
+const MAX_OPTION_KEYS = 10;
 
 export const DEFAULT_SETTINGS = Object.freeze({
   sound: true,
@@ -34,7 +43,7 @@ export const MIGRATIONS = {
     if (old.settings && typeof old.settings === 'object') data.settings = { ...data.settings, ...old.settings };
     if (old.bestScores && typeof old.bestScores === 'object') {
       for (const [id, value] of Object.entries(old.bestScores)) {
-        if (Number.isFinite(value)) {
+        if (ID_RE.test(id) && Number.isFinite(value)) {
           data.games[id] = { ...defaultGameRecord(), best: { score: value, accuracy: null, avgRtMs: null } };
         }
       }
@@ -59,6 +68,9 @@ export function migrate(raw) {
 
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
 const finiteOrNull = (v) => (Number.isFinite(v) ? v : null);
+const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+const pctOrNull = (v) => (Number.isFinite(v) ? clamp(v, 0, 100) : null);
+const levelOf = (v) => (Number.isInteger(v) ? clamp(v, 1, 10) : 1);
 
 // Yüklenen veriyi beklenen biçime zorlar; bilinmeyen alanları atar.
 export function sanitize(data) {
@@ -80,15 +92,15 @@ export function sanitize(data) {
   }
   if (isObj(data.games)) {
     for (const [id, rec] of Object.entries(data.games)) {
-      if (!isObj(rec) || !/^[a-z][a-zA-Z0-9-]{0,40}$/.test(id)) continue;
+      if (!isObj(rec) || !ID_RE.test(id)) continue;
       const out = defaultGameRecord();
       out.plays = Number.isInteger(rec.plays) && rec.plays >= 0 ? rec.plays : 0;
-      out.lastLevel = Number.isInteger(rec.lastLevel) ? Math.min(10, Math.max(1, rec.lastLevel)) : 1;
+      out.lastLevel = levelOf(rec.lastLevel);
       out.tutorialSeen = rec.tutorialSeen === true;
       if (isObj(rec.best) && Number.isFinite(rec.best.score)) {
         out.best = {
           score: rec.best.score,
-          accuracy: finiteOrNull(rec.best.accuracy),
+          accuracy: pctOrNull(rec.best.accuracy),
           avgRtMs: finiteOrNull(rec.best.avgRtMs),
         };
       }
@@ -99,9 +111,9 @@ export function sanitize(data) {
           .map((h) => ({
             at: h.at,
             score: h.score,
-            accuracy: finiteOrNull(h.accuracy) ?? 0,
+            accuracy: pctOrNull(h.accuracy) ?? 0,
             avgRtMs: finiteOrNull(h.avgRtMs),
-            level: Number.isInteger(h.level) ? h.level : 1,
+            level: levelOf(h.level),
           }));
       }
       clean.games[id] = out;
@@ -109,22 +121,24 @@ export function sanitize(data) {
   }
   if (Array.isArray(data.sessions)) {
     clean.sessions = data.sessions
-      .filter((s) => isObj(s) && Number.isFinite(s.at) && typeof s.gameId === 'string')
+      .filter((s) => isObj(s) && Number.isFinite(s.at) && typeof s.gameId === 'string' && ID_RE.test(s.gameId))
       .slice(-SESSION_LIMIT)
       .map((s) => ({
         at: s.at,
         gameId: s.gameId,
-        category: typeof s.category === 'string' ? s.category : '',
+        category: typeof s.category === 'string' && ID_RE.test(s.category) ? s.category : '',
         score: finiteOrNull(s.score) ?? 0,
-        accuracy: finiteOrNull(s.accuracy) ?? 0,
-        answered: Number.isInteger(s.answered) ? s.answered : 0,
+        accuracy: pctOrNull(s.accuracy) ?? 0,
+        answered: Number.isInteger(s.answered) ? clamp(s.answered, 0, 10000) : 0,
       }));
   }
   if (isObj(data.options)) {
-    for (const [id, opts] of Object.entries(data.options)) {
-      if (!isObj(opts)) continue;
+    for (const [id, opts] of Object.entries(data.options).slice(0, MAX_OPTION_GAMES)) {
+      if (!isObj(opts) || !ID_RE.test(id)) continue;
       clean.options[id] = Object.fromEntries(
-        Object.entries(opts).filter(([, v]) => typeof v === 'string' && v.length < 40),
+        Object.entries(opts)
+          .filter(([k, v]) => OPTION_KEY_RE.test(k) && typeof v === 'string' && OPTION_VALUE_RE.test(v))
+          .slice(0, MAX_OPTION_KEYS),
       );
     }
   }
@@ -136,7 +150,10 @@ export function createMemoryStore() {
   return {
     persistent: false,
     getItem: (k) => (map.has(k) ? map.get(k) : null),
-    setItem: (k, v) => map.set(k, String(v)),
+    setItem: (k, v) => {
+      map.set(k, String(v));
+      return true;
+    },
     removeItem: (k) => map.delete(k),
   };
 }
@@ -193,8 +210,10 @@ export function createProgressRepository(store = createMemoryStore()) {
       if (!isObj(parsed)) throw new Error('Kayıt bir nesne değil');
       data = migrate(parsed);
     } catch (err) {
-      store.setItem(`${STORAGE_KEY}:bozuk`, raw);
-      warnings.push(`Kayıt okunamadı ve sıfırlandı (${err.message}). Eski veri yedeklendi.`);
+      const backedUp = store.setItem(`${STORAGE_KEY}:bozuk`, raw) !== false;
+      warnings.push(
+        `Kayıt okunamadı ve sıfırlandı (${err.message}). ${backedUp ? 'Eski veri yedeklendi.' : 'Eski veri yedeklenemedi (depolama dolu olabilir).'}`,
+      );
       data = defaultData();
     }
     save();
@@ -208,6 +227,15 @@ export function createProgressRepository(store = createMemoryStore()) {
   const game = (id) => {
     if (!data.games[id]) data.games[id] = defaultGameRecord();
     return data.games[id];
+  };
+
+  // Dosyayı doğrular ve özetini döner; hiçbir şeyi değiştirmez.
+  const previewImport = (text) => {
+    if (text.length > MAX_IMPORT_BYTES) throw new Error('Dosya 1 MB’tan büyük');
+    const parsed = JSON.parse(text);
+    if (!isObj(parsed)) throw new Error('Geçersiz dosya');
+    const next = migrate(parsed);
+    return { data: next, games: Object.keys(next.games).length, sessions: next.sessions.length };
   };
 
   load();
@@ -288,10 +316,9 @@ export function createProgressRepository(store = createMemoryStore()) {
     exportJson() {
       return JSON.stringify(data, null, 2);
     },
+    previewImport,
     importJson(text) {
-      const parsed = JSON.parse(text);
-      if (!isObj(parsed)) throw new Error('Geçersiz dosya');
-      data = migrate(parsed);
+      data = previewImport(text).data;
       save();
       return data;
     },

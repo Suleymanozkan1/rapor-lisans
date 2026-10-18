@@ -21,6 +21,11 @@ döngüsü bulunduğunu varsayıyor. Bu oturumda durum farklı:
 Kullanıcıya soruldu (tek soru), cevap: **"Sıfırdan, bu depoda"**. Bu yüzden oyun,
 `lisans.json`'a dokunmadan ayrı bir `brain-buddies/` klasöründe sıfırdan yazıldı.
 
+**Güncelleme:** Kullanıcı daha sonra REA deposunun `https://github.com/morluto/rea` olduğunu belirtti.
+REA bir oyun deposu değil, MIT lisanslı bir tersine mühendislik aracıdır (MCP sunucusu + `rea` CLI). İçinde
+yeniden kullanılacak oyun kodu yoktur, Flash/SWF desteği de yoktur. Ayrıntılar ve REA ile yapılan analiz:
+`REA_ANALYSIS.md`. Bu oturumun `morluto/rea` deposuna yazma yetkisi yok; oyun `rapor-lisans` deposunda kalır.
+
 ## 2. `lisans.json` hakkında not
 
 Dosya, başka bir uygulamanın uzaktan okuduğu bir lisans/aktiflik anahtarına benziyor

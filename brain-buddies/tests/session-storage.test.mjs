@@ -11,6 +11,7 @@ import {
   migrate,
   sanitize,
   DEFAULT_SETTINGS,
+  MAX_IMPORT_BYTES,
 } from '../src/core/storage.js';
 import { planChallenge, summarizeChallenge } from '../src/core/adaptive.js';
 import { GAMES, CATEGORIES, gameById } from '../src/games/index.js';
@@ -245,6 +246,55 @@ test('kayıt: dışa aktar → içe aktar, sıfırla, tümünü sil', () => {
   third.recordResult(sampleResult());
   third.deleteAll();
   assert.equal(store.getItem(STORAGE_KEY), null);
+});
+
+test('kayıt: seçenek ve oturum alanları sınırlanır; __proto__ anahtarı kabul edilmez', () => {
+  const raw = JSON.parse(
+    '{"options":{"__proto__":{"variant":"order"},"memoryGrid":{"variant":"order","__proto__":"x","kötü anahtar":"y","uzun":"' +
+      'a'.repeat(50) +
+      '"}},"sessions":[{"at":1,"gameId":"__proto__","category":"memory"},{"at":2,"gameId":"memoryGrid","category":"<b>","accuracy":500,"answered":-4}],' +
+      '"games":{"mentalMath":{"history":[{"at":1,"score":5,"level":99,"accuracy":-3}],"best":{"score":1,"accuracy":250}}}}',
+  );
+  const clean = sanitize(raw);
+  assert.equal(Object.getPrototypeOf(clean.options), Object.prototype, 'options prototipi değişmez');
+  assert.deepEqual(Object.keys(clean.options), ['memoryGrid']);
+  assert.deepEqual(clean.options.memoryGrid, { variant: 'order' });
+  assert.equal(clean.sessions.length, 1);
+  assert.deepEqual(
+    [clean.sessions[0].category, clean.sessions[0].accuracy, clean.sessions[0].answered],
+    ['', 100, 0],
+  );
+  assert.equal(clean.games.mentalMath.history[0].level, 10);
+  assert.equal(clean.games.mentalMath.history[0].accuracy, 0);
+  assert.equal(clean.games.mentalMath.best.accuracy, 100);
+  const many = { options: Object.fromEntries(Array.from({ length: 80 }, (_, i) => [`g${i}`, { a: 'b' }])) };
+  assert.equal(Object.keys(sanitize(many).options).length, 50);
+});
+
+test('kayıt: v0 göçünde geçersiz oyun kimliği atılır', () => {
+  const data = migrate(JSON.parse('{"bestScores":{"__proto__":5,"quickMatch":7}}'));
+  assert.deepEqual(Object.keys(data.games), ['quickMatch']);
+});
+
+test('içe aktarma: önizleme veriyi değiştirmez; 1 MB sınırı; onaydan sonra yazılır', () => {
+  const repo = createProgressRepository();
+  repo.recordResult(sampleResult());
+  const other = createProgressRepository();
+  const preview = other.previewImport(repo.exportJson());
+  assert.equal(preview.games, 1);
+  assert.equal(preview.sessions, 1);
+  assert.deepEqual(other.data.games, {}, 'önizleme kaydı değiştirmez');
+  assert.throws(() => other.previewImport(' '.repeat(MAX_IMPORT_BYTES + 1)), /1 MB/);
+  other.importJson(repo.exportJson());
+  assert.equal(other.data.games.mentalMath.plays, 1);
+});
+
+test('kayıt: bozuk kaydın yedeği yazılamazsa uyarı bunu söyler', () => {
+  const inner = createMemoryStore();
+  inner.setItem(STORAGE_KEY, '{bozuk');
+  const store = { ...inner, setItem: (k, v) => (k.endsWith(':bozuk') ? false : inner.setItem(k, v)) };
+  const repo = createProgressRepository(store);
+  assert.match(repo.warnings[0], /yedeklenemedi/);
 });
 
 test('kayıt: migrate() bilinmeyen ara sürümde hata verir', () => {

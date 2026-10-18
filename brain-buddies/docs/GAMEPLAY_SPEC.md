@@ -171,5 +171,7 @@ Gösterim süresi: `600 + kare × max(260, 460 − 20 × seviye)` ms. Sıra modu
 - Yüklenen her kayıt `sanitize()` ile tür ve sınır denetiminden geçer; bilinmeyen alanlar atılır.
 - Oyun başına son 30 sonuç, toplamda son 500 oturum tutulur.
 - localStorage engelliyse oyun bellekte kaydederek çalışır ve bunu menüde/ayarlarda söyler.
-- Ayarlar → Veriler: dışa aktar (JSON indirme + panoya kopya + metin kutusu), içe aktar,
-  istatistikleri sıfırla (ayarlar korunur), tüm verileri sil. Silme işlemleri ikinci basışla onaylanır.
+- Ayarlar → Veriler: dışa aktar (JSON indirme + panoya kopya + metin kutusu), içe aktar (en fazla 1 MB;
+  önce özet gösterilir, "Mevcut verinin yerine yaz" ile onaylanır), istatistikleri sıfırla (ayarlar korunur),
+  tüm verileri sil. Silme işlemleri ikinci basışla onaylanır.
+- Kayıttaki kimlikler (oyun, kategori, seçenek) biçim denetiminden geçer; doğruluk 0–100, seviye 1–10 aralığına çekilir.
