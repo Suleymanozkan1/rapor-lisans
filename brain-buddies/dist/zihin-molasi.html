@@ -1,0 +1,5416 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Zihin Molası</title>
+    <meta name="description" content="Kısa turlu, çevrimdışı beyin egzersizi oyunu." />
+    <style>
+/* Zihin Molası — "test defteri": soğuk kareli kâğıt, mürekkep mavisi, fosforlu kalem sarısı.
+   Düzen: tek sütun, en fazla 760px; oyun ekranında üstte gösterge, ortada sahne. */
+:root {
+  --paper: #eef2f7;
+  --grid-line: #dde4ee;
+  --surface: #ffffff;
+  --ink: #18264a;
+  --muted: #56648a;
+  --line: #cdd6e4;
+  --primary: #2a55c4;
+  --primary-ink: #ffffff;
+  --highlight: #ffd84a;
+  --highlight-ink: #18264a;
+  --good: #137a4c;
+  --good-bg: #dff4e9;
+  --bad: #bd3030;
+  --bad-bg: #fbe3e3;
+  --shape-bg: #ffffff;
+  --cell: #e3e9f3;
+  --cell-lit: #ffd84a;
+
+  --font-display: ui-rounded, 'SF Pro Rounded', 'Nunito', 'Varela Round', 'Arial Rounded MT Bold', system-ui, sans-serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-num: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+
+  --step--1: 0.8125rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.6rem;
+  --step-3: 2.2rem;
+  --step-4: 3rem;
+
+  --radius: 10px;
+  --tap: 48px;
+  --dur: 160ms;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #0f1420;
+    --grid-line: #172033;
+    --surface: #172034;
+    --ink: #e6ecf8;
+    --muted: #a0aecb;
+    --line: #2b3854;
+    --primary: #7ea4ff;
+    --primary-ink: #0f1420;
+    --highlight: #ffd84a;
+    --highlight-ink: #18264a;
+    --good: #46d59a;
+    --good-bg: #123526;
+    --bad: #ff8080;
+    --bad-bg: #3d1a1e;
+    --shape-bg: #172034;
+    --cell: #22304b;
+    --cell-lit: #ffd84a;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --paper: #0f1420;
+  --grid-line: #172033;
+  --surface: #172034;
+  --ink: #e6ecf8;
+  --muted: #a0aecb;
+  --line: #2b3854;
+  --primary: #7ea4ff;
+  --primary-ink: #0f1420;
+  --highlight: #ffd84a;
+  --highlight-ink: #18264a;
+  --good: #46d59a;
+  --good-bg: #123526;
+  --bad: #ff8080;
+  --bad-bg: #3d1a1e;
+  --shape-bg: #172034;
+  --cell: #22304b;
+  --cell-lit: #ffd84a;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+  text-wrap: balance;
+  margin: 0;
+}
+
+/* ---------- Üst çubuk ---------- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--surface);
+}
+
+.topbar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 5;
+  background: var(--surface);
+  border-bottom: 2px solid var(--ink);
+}
+
+.topbar-inner,
+.screen {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 8px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: 0;
+  color: var(--ink);
+  font: 700 var(--step-1) / 1 var(--font-display);
+  cursor: pointer;
+  padding: 6px 0;
+  min-height: var(--tap);
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--highlight);
+  color: var(--highlight-ink);
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  transform: rotate(-4deg);
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-btn {
+  min-height: var(--tap);
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  font: 600 var(--step--1) / 1 var(--font-body);
+  cursor: pointer;
+}
+
+.nav-btn:hover {
+  background: var(--cell);
+}
+
+.screen {
+  padding-block: 24px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.screen:focus {
+  outline: none;
+}
+
+/* ---------- Düğmeler ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--tap);
+  padding: 0 20px;
+  border-radius: var(--radius);
+  border: 2px solid var(--ink);
+  font: 700 var(--step-0) / 1.1 var(--font-display);
+  cursor: pointer;
+  transition: transform var(--dur), box-shadow var(--dur), background var(--dur);
+}
+
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-ink);
+  box-shadow: 0 3px 0 var(--ink);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+.btn-primary:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--ink);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 3px 0 var(--ink);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.btn-danger {
+  color: var(--bad);
+  border-color: var(--bad);
+}
+
+.btn-sm {
+  min-height: 40px;
+  padding: 0 12px;
+  font-size: var(--step--1);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.row-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Menü ---------- */
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-block: 8px;
+}
+
+.hero-title {
+  font-size: clamp(var(--step-2), 7vw, var(--step-4));
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.hl {
+  background: var(--highlight);
+  color: var(--highlight-ink);
+  padding: 0 0.15em;
+  border-radius: 4px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.hero-sub,
+.muted,
+.hint {
+  color: var(--muted);
+  margin: 0;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.section-title {
+  font-size: var(--step-1);
+}
+
+.page-title {
+  font-size: var(--step-3);
+}
+
+.game-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cat-title {
+  font: 700 var(--step--1) / 1.2 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.game-row {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 14px;
+  text-align: left;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font: inherit;
+  transition: border-color var(--dur), transform var(--dur);
+}
+
+.game-row:hover {
+  border-color: var(--ink);
+  transform: translateX(2px);
+}
+
+.game-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 2px solid var(--ink);
+  font: 700 1.3rem / 1 var(--font-display);
+}
+
+.game-icon.big {
+  display: inline-grid;
+  width: 52px;
+  height: 52px;
+  margin-right: 12px;
+  vertical-align: middle;
+  background: var(--highlight);
+  color: var(--highlight-ink);
+}
+
+.game-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.game-text strong {
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+}
+
+.game-text span {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.game-best {
+  text-align: right;
+  font: 700 var(--step-0) / 1.1 var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.game-best small {
+  display: block;
+  font: 600 0.7rem / 1.2 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.note {
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 4px solid var(--highlight);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* ---------- Tanıtım ---------- */
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.eyebrow {
+  margin: 0;
+  font: 700 var(--step--1) / 1.2 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.intro-title {
+  font-size: var(--step-3);
+}
+
+.intro p {
+  margin: 0;
+  max-width: 65ch;
+}
+
+.reason {
+  display: block;
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.howto {
+  margin: 0;
+  padding: 16px 16px 16px 40px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 65ch;
+}
+
+.plan {
+  margin: 0;
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.facts {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.facts dt,
+.stat-grid dt {
+  font: 600 0.72rem / 1.2 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.facts dd,
+.stat-grid dd {
+  margin: 2px 0 0;
+  font: 700 var(--step-1) / 1.2 var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.seg {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.seg legend {
+  font-weight: 700;
+  margin-bottom: 6px;
+  padding: 0;
+}
+
+.seg-item {
+  position: relative;
+}
+
+.seg-item input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.seg-item span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 600;
+}
+
+.seg-item input:checked + span {
+  border-color: var(--ink);
+  background: var(--highlight);
+  color: var(--highlight-ink);
+}
+
+.seg-item input:focus-visible + span {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ---------- Oyun ekranı ---------- */
+.play {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hud {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr 1.4fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.hud-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.hud-item small {
+  font: 600 0.68rem / 1.1 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.hud-val {
+  font: 700 var(--step-1) / 1.1 var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-score .hud-val {
+  font-size: var(--step-2);
+}
+
+.timebar {
+  position: relative;
+  height: 26px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.time-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--primary);
+  transform-origin: left center;
+  transform: scaleX(1);
+}
+
+.timebar.is-low .time-fill {
+  background: var(--bad);
+}
+
+.timebar.is-rounds .time-fill {
+  background: var(--good);
+  transform: scaleX(0);
+}
+
+.time-text {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font: 700 var(--step--1) / 1 var(--font-num);
+  color: var(--ink);
+  background: var(--surface);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.roundbar {
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: transparent;
+}
+
+.round-fill {
+  display: block;
+  height: 100%;
+  background: var(--highlight);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+.banner {
+  margin: 0;
+  padding: 6px 12px;
+  background: var(--highlight);
+  color: var(--highlight-ink);
+  font: 700 var(--step--1) / 1.3 var(--font-body);
+  letter-spacing: 0.04em;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.status {
+  margin: 0;
+  min-height: 1.5em;
+  text-align: center;
+  font: 600 var(--step-1) / 1.3 var(--font-display);
+}
+
+.stage {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.countdown {
+  font: 800 5rem / 1 var(--font-display);
+  margin-top: 40px;
+  animation: pop 600ms ease-out;
+}
+
+.feedback {
+  min-height: 3.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 12px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.feedback.is-ok {
+  background: var(--good-bg);
+  color: var(--good);
+}
+
+.feedback.is-bad {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+.fb-icon {
+  font: 800 1.4rem / 1 var(--font-display);
+}
+
+.fb-pts {
+  font: 700 var(--step-0) / 1 var(--font-num);
+}
+
+.fb-note {
+  flex-basis: 100%;
+  color: var(--ink);
+  font-size: var(--step--1);
+}
+
+.fb-level {
+  flex-basis: 100%;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.pause-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--paper);
+  border-radius: var(--radius);
+}
+
+/* Ortak seçenek ızgarası */
+.choices {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.choice {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 72px;
+  padding: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font: inherit;
+  transition: border-color var(--dur), transform var(--dur);
+}
+
+.choice:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+
+.choice:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.choice:disabled {
+  cursor: default;
+}
+
+.choice-key {
+  position: absolute;
+  top: 4px;
+  left: 7px;
+  font: 600 0.7rem / 1 var(--font-num);
+  color: var(--muted);
+}
+
+.choice.is-correct {
+  border-color: var(--good);
+  background: var(--good-bg);
+  box-shadow: inset 0 0 0 2px var(--good);
+}
+
+.choice.is-correct::after {
+  content: '✓';
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  color: var(--good);
+  font-weight: 800;
+}
+
+.choice.is-wrong {
+  border-color: var(--bad);
+  background: var(--bad-bg);
+}
+
+.choice.is-wrong::after {
+  content: '✕';
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  color: var(--bad);
+  font-weight: 800;
+}
+
+.label {
+  font: 600 0.7rem / 1.2 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.shape-bg {
+  fill: var(--shape-bg);
+}
+
+.shape-bg-stop {
+  stop-color: var(--shape-bg);
+}
+
+svg.shape {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Hafıza Izgarası */
+.mg-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  gap: 8px;
+  width: min(100%, 420px);
+}
+
+.mg-cell {
+  aspect-ratio: 1;
+  max-width: 100%;
+  border-radius: 10px;
+  border: 2px solid var(--line);
+  background: var(--cell);
+  color: var(--highlight-ink);
+  font: 800 var(--step-1) / 1 var(--font-num);
+  cursor: pointer;
+  transition: background var(--dur), transform var(--dur);
+}
+
+.mg-cell:disabled {
+  cursor: default;
+}
+
+.mg-cell.mg-lit {
+  background: var(--cell-lit);
+  border-color: var(--ink);
+  transform: scale(1.04);
+}
+
+.mg-cell.mg-ok {
+  background: var(--good-bg);
+  border-color: var(--good);
+  box-shadow: inset 0 0 0 3px var(--good);
+}
+
+.mg-cell.mg-wrong {
+  background: var(--bad-bg);
+  border-color: var(--bad);
+}
+
+.mg-cell.mg-wrong::after {
+  content: '✕';
+  color: var(--bad);
+}
+
+.mg-cell.mg-missed {
+  background: var(--cell-lit);
+  border: 3px dashed var(--ink);
+}
+
+/* Hızlı Eşleştirme */
+.qm-target,
+.ps-head,
+.mr-ref {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 24px;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+}
+
+/* Zihinden Hesap */
+.mm-problem {
+  font: 800 clamp(2rem, 9vw, 3.4rem) / 1.1 var(--font-num);
+  font-variant-numeric: tabular-nums;
+  padding: 12px 20px;
+  background: var(--surface);
+  border-bottom: 4px solid var(--highlight);
+  text-align: center;
+}
+
+.mm-num {
+  font: 700 var(--step-2) / 1 var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Çift Odak */
+.df-rule {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 16px;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.df-rule.is-new {
+  border-color: var(--ink);
+  background: var(--highlight);
+  color: var(--highlight-ink);
+}
+
+.df-rule.is-new .label {
+  color: var(--highlight-ink);
+}
+
+.df-stage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.df-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 160px;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+}
+
+.df-number {
+  font: 800 4.5rem / 1 var(--font-num);
+}
+
+.df-caption {
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.df-distractors {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  opacity: 0.55;
+  font: 700 var(--step--1) / 1 var(--font-num);
+}
+
+.df-d {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.df-press {
+  min-width: 200px;
+  min-height: 64px;
+  font-size: var(--step-2);
+}
+
+.df-press kbd {
+  font: 600 0.7rem / 1 var(--font-body);
+  opacity: 0.8;
+}
+
+/* Değişen Örüntü */
+.ps-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 52px;
+}
+
+.ps-card.ps-target {
+  min-height: 64px;
+}
+
+/* Mantık Devresi */
+.lc-board {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 460px;
+  padding: 14px;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+}
+
+.lc-inputs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.lc-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  font: 700 var(--step-0) / 1 var(--font-num);
+}
+
+.lc-input.is-on {
+  background: var(--highlight);
+  color: var(--highlight-ink);
+  border-color: var(--ink);
+}
+
+.lc-input.is-hidden {
+  border-style: dashed;
+  border-color: var(--ink);
+}
+
+.lc-gates {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font: 600 var(--step-0) / 1.4 var(--font-num);
+}
+
+.lc-out {
+  font-weight: 800;
+}
+
+.lc-op {
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: var(--cell);
+  font-weight: 800;
+}
+
+.lc-question {
+  margin: 0;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Dizi Dedektifi */
+.sd-seq {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.sd-term {
+  display: grid;
+  place-items: center;
+  min-width: 56px;
+  min-height: 56px;
+  padding: 4px 8px;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+}
+
+.sd-num {
+  font: 700 var(--step-1) / 1 var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.sd-missing {
+  border: 2px dashed var(--ink);
+  background: var(--highlight);
+  color: var(--highlight-ink);
+  font: 800 var(--step-1) / 1 var(--font-display);
+}
+
+.choice .sd-term {
+  border: 0;
+  background: transparent;
+}
+
+/* Kelime Kutuları */
+.ws-word {
+  font: 800 clamp(1.8rem, 8vw, 3rem) / 1.1 var(--font-display);
+  padding: 16px 24px;
+  background: var(--surface);
+  border-bottom: 4px solid var(--highlight);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.ws-bin {
+  font: 700 var(--step-1) / 1.2 var(--font-display);
+  overflow-wrap: anywhere;
+}
+
+/* Döndür ya da Aynala */
+.piece-bg {
+  fill: var(--cell);
+}
+
+.piece-cell {
+  fill: var(--primary);
+}
+
+svg.piece {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.mg-ready {
+  margin-top: 4px;
+}
+
+/* ---------- Sonuç ---------- */
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.result-score {
+  display: flex;
+  flex-direction: column;
+  font: 800 clamp(3rem, 16vw, 5.5rem) / 1 var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.result-score small {
+  font: 700 var(--step--1) / 1.2 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.badge {
+  align-self: flex-start;
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  font-weight: 700;
+}
+
+.badge-record {
+  background: var(--highlight);
+  color: var(--highlight-ink);
+  border-color: var(--ink);
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  margin: 0;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.stat-grid > div {
+  padding: 12px 14px;
+  background: var(--surface);
+}
+
+.stat-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pill {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--highlight);
+  color: var(--highlight-ink);
+  font: 700 0.7rem / 1.4 var(--font-body);
+  vertical-align: middle;
+}
+
+/* ---------- İstatistik ---------- */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+
+.week-chart {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+}
+
+.week-chart .axis {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.week-chart .bar {
+  fill: var(--primary);
+  opacity: 0.55;
+}
+
+.week-chart .bar-today {
+  opacity: 1;
+}
+
+.week-chart .bar-val,
+.week-chart .bar-label {
+  fill: var(--muted);
+  font: 600 11px var(--font-body);
+}
+
+.week-chart .bar-val {
+  fill: var(--ink);
+}
+
+.bars {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bars li {
+  display: grid;
+  grid-template-columns: minmax(0, 9rem) 1fr 5.5rem;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar-track {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--cell);
+  overflow: hidden;
+}
+
+.bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+}
+
+.bar-num {
+  text-align: right;
+  font: 600 var(--step--1) / 1 var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+table.data {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: var(--step--1);
+}
+
+table.data th,
+table.data td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+table.data td:last-child {
+  white-space: normal;
+}
+
+table.data thead th {
+  font: 700 0.7rem / 1.2 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+table.data .num {
+  text-align: right;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.spark-line {
+  stroke: var(--primary);
+  stroke-width: 2;
+  fill: none;
+}
+
+.spark-dot {
+  fill: var(--primary);
+}
+
+/* ---------- Ayarlar ---------- */
+.form .field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form label {
+  font-weight: 600;
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.switch input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--primary);
+}
+
+.form select,
+.form input[type='text'],
+.export-box {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  max-width: 100%;
+}
+
+.export-box {
+  width: 100%;
+  font: 0.8rem / 1.4 var(--font-num);
+}
+
+.hint.warn {
+  color: var(--bad);
+}
+
+.row-actions.wrap .btn {
+  flex: 0 1 auto;
+}
+
+/* ---------- Hareket ---------- */
+@keyframes pop {
+  from {
+    transform: scale(1.4);
+    opacity: 0.2;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.motion-ok) *,
+  html:not(.motion-ok) *::before,
+  html:not(.motion-ok) *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+/* ---------- Dar ekran ---------- */
+@media (max-width: 480px) {
+  .hud {
+    grid-template-columns: auto 1fr 1fr 1.3fr;
+    gap: 6px;
+  }
+  .stat-grid.three {
+    grid-template-columns: 1fr;
+  }
+  .bars li {
+    grid-template-columns: 1fr 5.5rem;
+  }
+  .bars .bar-track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .df-panel {
+    min-height: 130px;
+  }
+  .df-number {
+    font-size: 3.6rem;
+  }
+  .choice {
+    min-height: 64px;
+  }
+  .game-row {
+    grid-template-columns: 44px 1fr auto;
+    gap: 10px;
+  }
+}
+
+/* Yatay telefon: göstergeler solda, sahne sağda */
+@media (max-height: 480px) and (orientation: landscape) {
+  .screen {
+    padding-block: 12px 24px;
+    gap: 12px;
+    max-width: 960px;
+  }
+  .topbar-inner {
+    max-width: 960px;
+    padding-block: 2px;
+  }
+  .play {
+    display: grid;
+    grid-template-columns: minmax(200px, 34%) minmax(0, 1fr);
+    grid-auto-flow: dense;
+    align-items: start;
+    column-gap: 20px;
+  }
+  .play > :not(.stage):not(.pause-layer) {
+    grid-column: 1;
+  }
+  .play > .stage {
+    grid-column: 2;
+    grid-row: 1 / span 8;
+    min-height: 0;
+  }
+  .hud {
+    grid-template-columns: auto 1fr 1fr;
+  }
+  .hud-score {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .status {
+    text-align: left;
+    font-size: var(--step-0);
+  }
+  .df-panel {
+    min-height: 100px;
+  }
+  .mg-grid {
+    width: min(100%, 300px);
+  }
+}
+</style>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="topbar-inner">
+          <button type="button" class="brand" id="nav-home" aria-label="Zihin Molası, ana menü">
+            <span class="brand-mark" aria-hidden="true">ZM</span>
+            <span class="brand-name">Zihin Molası</span>
+          </button>
+          <nav class="nav" aria-label="Ana gezinme">
+            <button type="button" class="nav-btn" id="nav-stats">İstatistik</button>
+            <button type="button" class="nav-btn" id="nav-settings">Ayarlar</button>
+          </nav>
+        </div>
+      </header>
+      <main id="screen" class="screen"></main>
+      <div id="live" class="visually-hidden" aria-live="polite"></div>
+      <noscript><p class="screen">Bu oyun JavaScript gerektirir.</p></noscript>
+    </div>
+    <script>
+(() => {
+'use strict';
+// ---- src/core/storage.js ----
+const __m0 = (() => {
+// ProgressRepository: ayarlar, kişisel rekorlar, istatistikler. Yalnızca yerel kayıt.
+// Şema sürümlüdür; eski kayıt migrate() ile dönüştürülür, bozuk kayıt yedeklenip
+// varsayılana dönülür. Hiçbir veri dış servise gönderilmez.
+
+const SCHEMA_VERSION = 1;
+const STORAGE_KEY = 'zihin-molasi:v';
+const HISTORY_LIMIT = 30;
+const SESSION_LIMIT = 500;
+
+const DEFAULT_SETTINGS = Object.freeze({
+  sound: true,
+  reducedMotion: 'auto', // 'auto' | 'on' | 'off'
+  relaxed: false, // süre baskısı kapalı: süresiz, turlu oturum
+  adaptive: true, // otomatik zorluk
+  startLevel: 'auto', // 'auto' | 1..10
+  durationSec: 60,
+  theme: 'auto', // 'auto' | 'light' | 'dark'
+  seed: '', // boş değilse içerik deterministik
+});
+
+function defaultData() {
+  return { version: SCHEMA_VERSION, settings: { ...DEFAULT_SETTINGS }, games: {}, sessions: [], options: {} };
+}
+
+function defaultGameRecord() {
+  return { plays: 0, best: null, lastLevel: 1, history: [], tutorialSeen: false };
+}
+
+// Sürüm n'den n+1'e dönüştürücüler.
+const MIGRATIONS = {
+  // 0: sürüm alanı olmayan ilk taslak kayıtlar ({ settings, bestScores: { oyunId: skor } })
+  0(old) {
+    const data = defaultData();
+    if (old.settings && typeof old.settings === 'object') data.settings = { ...data.settings, ...old.settings };
+    if (old.bestScores && typeof old.bestScores === 'object') {
+      for (const [id, value] of Object.entries(old.bestScores)) {
+        if (Number.isFinite(value)) {
+          data.games[id] = { ...defaultGameRecord(), best: { score: value, accuracy: null, avgRtMs: null } };
+        }
+      }
+    }
+    data.version = 1;
+    return data;
+  },
+};
+
+function migrate(raw) {
+  let data = raw;
+  let version = Number.isInteger(data.version) ? data.version : 0;
+  if (version > SCHEMA_VERSION) throw new Error(`Kayıt sürümü (${version}) bu uygulamadan yeni`);
+  while (version < SCHEMA_VERSION) {
+    const step = MIGRATIONS[version];
+    if (!step) throw new Error(`Sürüm ${version} için dönüştürücü yok`);
+    data = step(data);
+    version = data.version;
+  }
+  return sanitize(data);
+}
+
+const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
+const finiteOrNull = (v) => (Number.isFinite(v) ? v : null);
+
+// Yüklenen veriyi beklenen biçime zorlar; bilinmeyen alanları atar.
+function sanitize(data) {
+  const clean = defaultData();
+  if (isObj(data.settings)) {
+    for (const key of Object.keys(DEFAULT_SETTINGS)) {
+      if (key in data.settings && typeof data.settings[key] === typeof DEFAULT_SETTINGS[key]) {
+        clean.settings[key] = data.settings[key];
+      } else if (key === 'startLevel' && Number.isInteger(data.settings[key])) {
+        clean.settings[key] = Math.min(10, Math.max(1, data.settings[key]));
+      }
+    }
+    const s = clean.settings;
+    if (![45, 60, 90].includes(s.durationSec)) s.durationSec = 60;
+    if (!['auto', 'on', 'off'].includes(s.reducedMotion)) s.reducedMotion = 'auto';
+    if (!['auto', 'light', 'dark'].includes(s.theme)) s.theme = 'auto';
+    if (s.startLevel !== 'auto' && !Number.isInteger(s.startLevel)) s.startLevel = 'auto';
+    s.seed = s.seed.slice(0, 40);
+  }
+  if (isObj(data.games)) {
+    for (const [id, rec] of Object.entries(data.games)) {
+      if (!isObj(rec) || !/^[a-z][a-zA-Z0-9-]{0,40}$/.test(id)) continue;
+      const out = defaultGameRecord();
+      out.plays = Number.isInteger(rec.plays) && rec.plays >= 0 ? rec.plays : 0;
+      out.lastLevel = Number.isInteger(rec.lastLevel) ? Math.min(10, Math.max(1, rec.lastLevel)) : 1;
+      out.tutorialSeen = rec.tutorialSeen === true;
+      if (isObj(rec.best) && Number.isFinite(rec.best.score)) {
+        out.best = {
+          score: rec.best.score,
+          accuracy: finiteOrNull(rec.best.accuracy),
+          avgRtMs: finiteOrNull(rec.best.avgRtMs),
+        };
+      }
+      if (Array.isArray(rec.history)) {
+        out.history = rec.history
+          .filter((h) => isObj(h) && Number.isFinite(h.score) && Number.isFinite(h.at))
+          .slice(-HISTORY_LIMIT)
+          .map((h) => ({
+            at: h.at,
+            score: h.score,
+            accuracy: finiteOrNull(h.accuracy) ?? 0,
+            avgRtMs: finiteOrNull(h.avgRtMs),
+            level: Number.isInteger(h.level) ? h.level : 1,
+          }));
+      }
+      clean.games[id] = out;
+    }
+  }
+  if (Array.isArray(data.sessions)) {
+    clean.sessions = data.sessions
+      .filter((s) => isObj(s) && Number.isFinite(s.at) && typeof s.gameId === 'string')
+      .slice(-SESSION_LIMIT)
+      .map((s) => ({
+        at: s.at,
+        gameId: s.gameId,
+        category: typeof s.category === 'string' ? s.category : '',
+        score: finiteOrNull(s.score) ?? 0,
+        accuracy: finiteOrNull(s.accuracy) ?? 0,
+        answered: Number.isInteger(s.answered) ? s.answered : 0,
+      }));
+  }
+  if (isObj(data.options)) {
+    for (const [id, opts] of Object.entries(data.options)) {
+      if (!isObj(opts)) continue;
+      clean.options[id] = Object.fromEntries(
+        Object.entries(opts).filter(([, v]) => typeof v === 'string' && v.length < 40),
+      );
+    }
+  }
+  return clean;
+}
+
+function createMemoryStore() {
+  const map = new Map();
+  return {
+    persistent: false,
+    getItem: (k) => (map.has(k) ? map.get(k) : null),
+    setItem: (k, v) => map.set(k, String(v)),
+    removeItem: (k) => map.delete(k),
+  };
+}
+
+// Tarayıcı deposu; erişilemiyorsa (gizli pencere, engelli site verisi) bellek deposu.
+function createBrowserStore() {
+  try {
+    const ls = globalThis.localStorage;
+    const probe = '__zm_probe__';
+    ls.setItem(probe, '1');
+    ls.removeItem(probe);
+    return {
+      persistent: true,
+      getItem: (k) => {
+        try {
+          return ls.getItem(k);
+        } catch {
+          return null;
+        }
+      },
+      setItem: (k, v) => {
+        try {
+          ls.setItem(k, v);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      removeItem: (k) => {
+        try {
+          ls.removeItem(k);
+        } catch {
+          /* yok say */
+        }
+      },
+    };
+  } catch {
+    return createMemoryStore();
+  }
+}
+
+function createProgressRepository(store = createMemoryStore()) {
+  let data = defaultData();
+  const warnings = [];
+
+  const load = () => {
+    const raw = store.getItem(STORAGE_KEY);
+    if (raw == null) {
+      data = defaultData();
+      return data;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      if (!isObj(parsed)) throw new Error('Kayıt bir nesne değil');
+      data = migrate(parsed);
+    } catch (err) {
+      store.setItem(`${STORAGE_KEY}:bozuk`, raw);
+      warnings.push(`Kayıt okunamadı ve sıfırlandı (${err.message}). Eski veri yedeklendi.`);
+      data = defaultData();
+    }
+    save();
+    return data;
+  };
+
+  const save = () => {
+    store.setItem(STORAGE_KEY, JSON.stringify(data));
+  };
+
+  const game = (id) => {
+    if (!data.games[id]) data.games[id] = defaultGameRecord();
+    return data.games[id];
+  };
+
+  load();
+
+  return {
+    get data() {
+      return data;
+    },
+    get settings() {
+      return data.settings;
+    },
+    get persistent() {
+      return store.persistent !== false;
+    },
+    warnings,
+    load,
+    save,
+    game,
+    getOptions(id) {
+      return data.options[id] || {};
+    },
+    setOption(id, key, value) {
+      data.options[id] = { ...(data.options[id] || {}), [key]: String(value) };
+      save();
+    },
+    updateSettings(patch) {
+      data = sanitize({ ...data, settings: { ...data.settings, ...patch } });
+      save();
+      return data.settings;
+    },
+    markTutorialSeen(id) {
+      game(id).tutorialSeen = true;
+      save();
+    },
+    // GameResult kaydeder; önceki rekoru döndürür.
+    recordResult(result, { category = '' } = {}) {
+      const rec = game(result.gameId);
+      const previousBest = rec.best ? { ...rec.best } : null;
+      rec.plays += 1;
+      rec.lastLevel = result.level;
+      if (result.answered > 0) {
+        const best = rec.best || { score: 0, accuracy: null, avgRtMs: null };
+        rec.best = {
+          score: Math.max(best.score, result.score),
+          accuracy: best.accuracy == null ? result.accuracy : Math.max(best.accuracy, result.accuracy),
+          avgRtMs:
+            result.avgRtMs == null
+              ? best.avgRtMs
+              : best.avgRtMs == null
+                ? result.avgRtMs
+                : Math.min(best.avgRtMs, result.avgRtMs),
+        };
+      }
+      rec.history.push({
+        at: result.startedAt ?? Date.now(),
+        score: result.score,
+        accuracy: result.accuracy,
+        avgRtMs: result.avgRtMs,
+        level: result.level,
+      });
+      if (rec.history.length > HISTORY_LIMIT) rec.history.splice(0, rec.history.length - HISTORY_LIMIT);
+      data.sessions.push({
+        at: result.startedAt ?? Date.now(),
+        gameId: result.gameId,
+        category,
+        score: result.score,
+        accuracy: result.accuracy,
+        answered: result.answered,
+      });
+      if (data.sessions.length > SESSION_LIMIT) data.sessions.splice(0, data.sessions.length - SESSION_LIMIT);
+      save();
+      return previousBest;
+    },
+    resetStats() {
+      data = { ...defaultData(), settings: data.settings };
+      save();
+    },
+    exportJson() {
+      return JSON.stringify(data, null, 2);
+    },
+    importJson(text) {
+      const parsed = JSON.parse(text);
+      if (!isObj(parsed)) throw new Error('Geçersiz dosya');
+      data = migrate(parsed);
+      save();
+      return data;
+    },
+    deleteAll() {
+      store.removeItem(STORAGE_KEY);
+      store.removeItem(`${STORAGE_KEY}:bozuk`);
+      data = defaultData();
+    },
+  };
+}
+
+return { SCHEMA_VERSION, STORAGE_KEY, HISTORY_LIMIT, SESSION_LIMIT, DEFAULT_SETTINGS, defaultData, defaultGameRecord, MIGRATIONS, migrate, sanitize, createMemoryStore, createBrowserStore, createProgressRepository };
+})();
+
+// ---- src/core/rng.js ----
+const __m2 = (() => {
+// Tohumlu, deterministik rastgele sayı üreteci (mulberry32) ve yardımcılar.
+// Aynı tohum her zaman aynı soruları üretir; testler buna dayanır.
+
+function createRng(seed = Date.now()) {
+  let state = hashSeed(seed) >>> 0;
+  const next = () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const rng = {
+    seed,
+    next,
+    // [min, max] aralığında tam sayı (iki uç dahil)
+    int(min, max) {
+      return min + Math.floor(next() * (max - min + 1));
+    },
+    chance(p) {
+      return next() < p;
+    },
+    pick(list) {
+      if (!list.length) throw new Error('pick: boş liste');
+      return list[Math.floor(next() * list.length)];
+    },
+    shuffle(list) {
+      const out = list.slice();
+      for (let i = out.length - 1; i > 0; i--) {
+        const j = Math.floor(next() * (i + 1));
+        [out[i], out[j]] = [out[j], out[i]];
+      }
+      return out;
+    },
+    sample(list, count) {
+      return rng.shuffle(list).slice(0, count);
+    },
+    fork(label) {
+      return createRng(`${seed}:${label}`);
+    },
+  };
+  return rng;
+}
+
+function hashSeed(seed) {
+  const text = String(seed);
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+// Aynı oturumda aynı soru anahtarının tekrar çıkmasını sınırlar.
+// generate() aday üretir, keyOf() adayın kimliğini verir. Denemeler biterse
+// en az kullanılmış aday kabul edilir; oyun asla kilitlenmez.
+function createRepeatGuard({ memory = 30, attempts = 25 } = {}) {
+  const recent = [];
+  const seen = new Set();
+  return {
+    take(generate, keyOf) {
+      let candidate = null;
+      for (let i = 0; i < attempts; i++) {
+        candidate = generate();
+        if (!seen.has(keyOf(candidate))) break;
+      }
+      const key = keyOf(candidate);
+      if (!seen.has(key)) {
+        seen.add(key);
+        recent.push(key);
+        if (recent.length > memory) seen.delete(recent.shift());
+      }
+      return candidate;
+    },
+    has(key) {
+      return seen.has(key);
+    },
+    get size() {
+      return seen.size;
+    },
+  };
+}
+
+return { createRng, hashSeed, createRepeatGuard };
+})();
+
+// ---- src/core/score.js ----
+const __m4 = (() => {
+// Puanlama: arayüzden bağımsız, saf fonksiyonlar. Formül GAMEPLAY_SPEC.md'de anlatılır.
+
+const OUTCOME = Object.freeze({
+  CORRECT: 'correct',
+  WRONG: 'wrong',
+  FALSE_ALARM: 'falseAlarm', // hedef değilken cevap vermek
+  MISS: 'miss', // hedef varken cevap vermemek
+  TIMEOUT: 'timeout', // tur süresi doldu
+  SKIP: 'skip', // oyuncu turu boş bıraktı
+  IGNORE: 'ignore', // hedef değildi ve oyuncu doğru biçimde bekledi; sayılmaz
+});
+
+const COUNTED_OUTCOMES = [
+  OUTCOME.CORRECT,
+  OUTCOME.WRONG,
+  OUTCOME.FALSE_ALARM,
+  OUTCOME.MISS,
+  OUTCOME.TIMEOUT,
+  OUTCOME.SKIP,
+];
+
+const DEFAULT_SCORING = Object.freeze({
+  base: 100,
+  levelStep: 0.1, // her seviye tabana %10 ekler (seviye 10 = x1.9)
+  speedBonusMax: 0.5, // hız bonusu tabanın en fazla %50'si
+  streakStep: 10, // seri başına +10
+  streakCap: 50, // seri bonusu en fazla +50
+  extraBonusMax: 0.5, // oyuna özel ek bonus tabanın en fazla %50'si
+  penalties: Object.freeze({
+    wrong: 25,
+    falseAlarm: 30,
+    miss: 20,
+    timeout: 15,
+    skip: 0,
+  }),
+});
+
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+function levelMultiplier(level, cfg = DEFAULT_SCORING) {
+  const safeLevel = clamp(Math.round(level || 1), 1, 10);
+  return 1 + cfg.levelStep * (safeLevel - 1);
+}
+
+// Tepki süresi hedefin yarısı veya daha kısaysa tam bonus, 1.5 katı veya daha uzunsa sıfır.
+function speedFraction(rtMs, targetRtMs) {
+  if (!Number.isFinite(rtMs) || !Number.isFinite(targetRtMs) || targetRtMs <= 0) return 0;
+  const ratio = rtMs / targetRtMs;
+  return clamp(1.5 - ratio, 0, 1);
+}
+
+// Tek bir cevabın puanı. streak: bu cevaptan ÖNCEKİ art arda doğru sayısı.
+function scoreAnswer(
+  { outcome, level = 1, rtMs, targetRtMs, streak = 0, extraBonus = 0 },
+  cfg = DEFAULT_SCORING,
+) {
+  const breakdown = { base: 0, speed: 0, streak: 0, extra: 0, penalty: 0 };
+  if (outcome === OUTCOME.CORRECT) {
+    const base = cfg.base * levelMultiplier(level, cfg);
+    breakdown.base = Math.round(base);
+    breakdown.speed = Math.round(base * cfg.speedBonusMax * speedFraction(rtMs, targetRtMs));
+    breakdown.streak = Math.min(cfg.streakCap, cfg.streakStep * Math.max(0, streak));
+    breakdown.extra = Math.round(clamp(extraBonus, 0, base * cfg.extraBonusMax));
+  } else if (outcome in cfg.penalties) {
+    breakdown.penalty = -cfg.penalties[outcome];
+  } else if (outcome !== OUTCOME.IGNORE) {
+    throw new Error(`Bilinmeyen sonuç türü: ${outcome}`);
+  }
+  const points = breakdown.base + breakdown.speed + breakdown.streak + breakdown.extra + breakdown.penalty;
+  return { points, breakdown };
+}
+
+// Doğruluk yüzdesi = doğru / toplam cevap × 100, tek ondalık. Toplam 0 ise 0.
+function accuracyPercent(counts) {
+  const total = COUNTED_OUTCOMES.reduce((sum, key) => sum + (counts[key] || 0), 0);
+  if (total === 0) return 0;
+  return Math.round(((counts.correct || 0) / total) * 1000) / 10;
+}
+
+function emptyCounts() {
+  return Object.fromEntries(COUNTED_OUTCOMES.map((key) => [key, 0]));
+}
+
+function createScoreCalculator(cfg = DEFAULT_SCORING) {
+  let score = 0;
+  let streak = 0;
+  let bestStreak = 0;
+  let counts = emptyCounts();
+  let correctRts = [];
+
+  return {
+    record({ outcome, level, rtMs, targetRtMs, extraBonus }) {
+      const result = scoreAnswer({ outcome, level, rtMs, targetRtMs, streak, extraBonus }, cfg);
+      // Toplam skor sıfırın altına inmez; uygulanan değişim geri döndürülür.
+      const before = score;
+      score = Math.max(0, score + result.points);
+      if (outcome === OUTCOME.CORRECT) {
+        streak += 1;
+        bestStreak = Math.max(bestStreak, streak);
+        if (Number.isFinite(rtMs)) correctRts.push(rtMs);
+      } else if (outcome !== OUTCOME.IGNORE) {
+        streak = 0;
+      }
+      if (outcome in counts) counts[outcome] += 1;
+      return { ...result, applied: score - before, score, streak };
+    },
+    get score() {
+      return score;
+    },
+    get streak() {
+      return streak;
+    },
+    summary() {
+      const avgRtMs = correctRts.length
+        ? Math.round(correctRts.reduce((a, b) => a + b, 0) / correctRts.length)
+        : null;
+      const answered = COUNTED_OUTCOMES.reduce((sum, key) => sum + counts[key], 0);
+      return {
+        score,
+        counts: { ...counts },
+        answered,
+        accuracy: accuracyPercent(counts),
+        avgRtMs,
+        bestStreak,
+      };
+    },
+    reset() {
+      score = 0;
+      streak = 0;
+      bestStreak = 0;
+      counts = emptyCounts();
+      correctRts = [];
+    },
+  };
+}
+
+// Oturum sonu sonucu ve kişisel rekor karşılaştırması.
+// best: { score, accuracy, avgRtMs } veya null.
+function buildResult({ gameId, summary, durationMs, startedAt, level, maxLevel, best = null }) {
+  // Sıfır puan ya da sıfır doğruluk rekor sayılmaz.
+  const isScoreBest = summary.score > 0 && (!best || summary.score > (best.score ?? -1));
+  const isAccuracyBest = summary.accuracy > 0 && (!best || summary.accuracy > (best.accuracy ?? -1));
+  const isRtBest =
+    summary.avgRtMs != null && (!best || best.avgRtMs == null || summary.avgRtMs < best.avgRtMs);
+  return {
+    gameId,
+    startedAt,
+    durationMs: Math.max(0, Math.round(durationMs)),
+    level,
+    maxLevel,
+    ...summary,
+    records: {
+      score: summary.answered > 0 && isScoreBest,
+      accuracy: isAccuracyBest,
+      avgRtMs: isRtBest,
+    },
+    // Rekora kalan fark (yeni rekor değilse)
+    toBest: best && !isScoreBest ? Math.max(0, best.score - summary.score) : 0,
+  };
+}
+
+return { OUTCOME, COUNTED_OUTCOMES, DEFAULT_SCORING, levelMultiplier, speedFraction, scoreAnswer, accuracyPercent, emptyCounts, createScoreCalculator, buildResult };
+})();
+
+// ---- src/core/difficulty.js ----
+const __m12 = (() => {
+// Zorluk ayarı: yalnızca toplam skora değil; son cevapların doğruluğuna ve
+// tepki süresine bakar. Her değişiklik bir açıklama (reason) ile döner.
+
+const MIN_LEVEL = 1;
+const MAX_LEVEL = 10;
+
+const DEFAULT_DIFFICULTY = Object.freeze({
+  window: 4, // son kaç cevaba bakılır
+  upAccuracy: 0.75, // pencerede en az bu doğrulukla yüksel
+  upRtRatio: 1.2, // ve ortalama tepki süresi hedefin en fazla 1.2 katıysa
+  downAccuracy: 0.5, // pencerede en fazla bu doğrulukta düş
+  minAnswersBetweenChanges: 3, // iki değişiklik arasında en az bu kadar cevap (küçük adımlar)
+});
+
+const clampLevel = (level) => Math.min(MAX_LEVEL, Math.max(MIN_LEVEL, Math.round(level)));
+
+function createDifficultyController({
+  startLevel = 1,
+  adaptive = true,
+  cfg = DEFAULT_DIFFICULTY,
+} = {}) {
+  let level = clampLevel(startLevel);
+  let maxLevel = level;
+  let history = [];
+  let sinceChange = 0;
+
+  return {
+    get level() {
+      return level;
+    },
+    get maxLevel() {
+      return maxLevel;
+    },
+    get adaptive() {
+      return adaptive;
+    },
+    // answer: { correct: boolean, rtMs?: number, targetRtMs?: number }
+    // Dönen değer: { level, changed: -1 | 0 | 1, reason }
+    record({ correct, rtMs, targetRtMs }) {
+      history.push({ correct: !!correct, rtMs, targetRtMs });
+      if (history.length > cfg.window) history.shift();
+      sinceChange += 1;
+      if (!adaptive) return { level, changed: 0, reason: 'Uyarlama kapalı' };
+      if (sinceChange < cfg.minAnswersBetweenChanges || history.length < cfg.minAnswersBetweenChanges) {
+        return { level, changed: 0, reason: '' };
+      }
+      const acc = history.filter((h) => h.correct).length / history.length;
+      const timed = history.filter((h) => h.correct && Number.isFinite(h.rtMs) && h.targetRtMs > 0);
+      const rtRatio = timed.length
+        ? timed.reduce((sum, h) => sum + h.rtMs / h.targetRtMs, 0) / timed.length
+        : 1;
+      const last = history[history.length - 1];
+
+      if (acc >= cfg.upAccuracy && last.correct && rtRatio <= cfg.upRtRatio && level < MAX_LEVEL) {
+        level += 1;
+        maxLevel = Math.max(maxLevel, level);
+        sinceChange = 0;
+        history = [];
+        return {
+          level,
+          changed: 1,
+          reason: `Son cevaplarda %${Math.round(acc * 100)} doğruluk ve hızlı tepki`,
+        };
+      }
+      if (acc <= cfg.downAccuracy && !last.correct && level > MIN_LEVEL) {
+        level -= 1;
+        sinceChange = 0;
+        history = [];
+        return {
+          level,
+          changed: -1,
+          reason: `Son cevaplarda %${Math.round(acc * 100)} doğruluk; biraz kolaylaştı`,
+        };
+      }
+      return { level, changed: 0, reason: '' };
+    },
+  };
+}
+
+return { MIN_LEVEL, MAX_LEVEL, DEFAULT_DIFFICULTY, createDifficultyController };
+})();
+
+// ---- src/core/timer.js ----
+const __m5 = (() => {
+// Geri sayım zamanlayıcısı. Saat enjekte edilebilir (testlerde sahte saat).
+// Zamanlayıcı kendi kendine tik atmaz; arayüz döngüsü remaining()/expired() sorar.
+
+function createTimer({ durationMs, now = () => performance.now() }) {
+  let startedAt = null;
+  let pausedAt = null;
+  let pausedTotal = 0;
+  const unlimited = !Number.isFinite(durationMs);
+
+  const elapsed = () => {
+    if (startedAt == null) return 0;
+    const end = pausedAt ?? now();
+    return Math.max(0, end - startedAt - pausedTotal);
+  };
+
+  return {
+    get unlimited() {
+      return unlimited;
+    },
+    get running() {
+      return startedAt != null && pausedAt == null;
+    },
+    get paused() {
+      return pausedAt != null;
+    },
+    start() {
+      startedAt = now();
+      pausedAt = null;
+      pausedTotal = 0;
+    },
+    pause() {
+      if (startedAt != null && pausedAt == null) pausedAt = now();
+    },
+    resume() {
+      if (pausedAt != null) {
+        pausedTotal += now() - pausedAt;
+        pausedAt = null;
+      }
+    },
+    elapsed,
+    remaining() {
+      if (unlimited) return Infinity;
+      return Math.max(0, durationMs - elapsed());
+    },
+    expired() {
+      return !unlimited && startedAt != null && elapsed() >= durationMs;
+    },
+    fraction() {
+      if (unlimited) return 1;
+      return Math.max(0, Math.min(1, 1 - elapsed() / durationMs));
+    },
+  };
+}
+
+// Tek bir tur için sayaç (ör. Dual Focus uyaran süresi). Aynı arayüz.
+const createRoundTimer = (durationMs, now) => createTimer({ durationMs, now });
+
+return { createTimer, createRoundTimer };
+})();
+
+// ---- src/core/session.js ----
+const __m3 = (() => {
+// GameSession: tek bir mini oyun oturumunun durum makinesi. DOM bilmez.
+//
+// Durumlar:  ready → (start) → playing:presenting → (presented) → playing:awaiting
+//            → (submit) → playing:feedback → (nextRound) → ... → ended
+// Süreli modda süre dolunca, turlu modda tur sayısı bitince oturum biter.
+// Alıştırma turları puanlanmaz, zorluğu etkilemez ve süreyi başlatmaz.
+
+const { createScoreCalculator, buildResult, OUTCOME } = __m4;
+const { createDifficultyController } = __m12;
+const { createTimer } = __m5;
+
+const PHASE = Object.freeze({
+  READY: 'ready',
+  PRESENTING: 'presenting', // tur gösteriliyor (ör. hafıza ızgarası yanıp sönüyor)
+  AWAITING: 'awaiting', // oyuncunun cevabı bekleniyor
+  FEEDBACK: 'feedback', // doğru/yanlış gösteriliyor
+  PAUSED: 'paused',
+  ENDED: 'ended',
+});
+
+function createSession({
+  game,
+  rng,
+  startLevel = 1,
+  adaptive = true,
+  durationMs = 60000, // Infinity ise turlu mod
+  rounds = 12, // turlu modda tur sayısı
+  practiceRounds = 0,
+  options = {},
+  best = null,
+  now = () => performance.now(),
+  clock = () => Date.now(),
+}) {
+  const def = game.definition;
+  const timed = Number.isFinite(durationMs);
+  const timer = createTimer({ durationMs: timed ? durationMs : Infinity, now });
+  const score = createScoreCalculator();
+  const difficulty = createDifficultyController({ startLevel, adaptive });
+  const gameState = game.createState({ rng, options });
+
+  let phase = PHASE.READY;
+  let pausedFrom = null;
+  let round = null;
+  let roundNumber = 0; // puanlanan turlar
+  let practiceLeft = practiceRounds;
+  let presentedAt = null;
+  let startedAtWall = null;
+  let lastResult = null;
+  const log = [];
+
+  const assertPhase = (...allowed) => {
+    if (!allowed.includes(phase)) {
+      throw new Error(`Geçersiz geçiş: ${phase} durumunda (beklenen: ${allowed.join(', ')})`);
+    }
+  };
+
+  const isOver = () => {
+    if (phase === PHASE.ENDED) return true;
+    if (practiceLeft > 0) return false;
+    if (timed) return timer.expired();
+    return roundNumber >= rounds;
+  };
+
+  const session = {
+    get phase() {
+      return phase;
+    },
+    get round() {
+      return round;
+    },
+    get level() {
+      return difficulty.level;
+    },
+    get score() {
+      return score.score;
+    },
+    get streak() {
+      return score.streak;
+    },
+    get roundNumber() {
+      return roundNumber;
+    },
+    get totalRounds() {
+      return timed ? null : rounds;
+    },
+    get practice() {
+      return practiceLeft > 0;
+    },
+    get timed() {
+      return timed;
+    },
+    get lastResult() {
+      return lastResult;
+    },
+    get log() {
+      return log;
+    },
+    timer,
+    definition: def,
+    gameState,
+
+    start() {
+      assertPhase(PHASE.READY);
+      startedAtWall = clock();
+      if (practiceLeft === 0) timer.start();
+      return session.nextRound();
+    },
+
+    // Yeni tur üretir. Oturum bittiyse null döner ve ENDED olur.
+    nextRound() {
+      assertPhase(PHASE.READY, PHASE.FEEDBACK);
+      if (isOver()) {
+        phase = PHASE.ENDED;
+        round = null;
+        return null;
+      }
+      round = game.nextRound(gameState, { rng, level: difficulty.level, practice: practiceLeft > 0 });
+      phase = PHASE.PRESENTING;
+      presentedAt = null;
+      return round;
+    },
+
+    // Oyuncunun cevap verebildiği an; tepki süresi buradan ölçülür.
+    presented() {
+      assertPhase(PHASE.PRESENTING);
+      phase = PHASE.AWAITING;
+      presentedAt = now();
+    },
+
+    // input oyuna özeldir. { timeout: true } tur süresi dolduğunda gönderilir.
+    submit(input) {
+      assertPhase(PHASE.AWAITING, PHASE.PRESENTING);
+      const rtMs = input && Number.isFinite(input.rtMs) ? input.rtMs : presentedAt == null ? null : now() - presentedAt;
+      const verdict = game.evaluate(gameState, round, { ...input, rtMs });
+      const outcome = verdict.outcome;
+      const wasPractice = practiceLeft > 0;
+      let scored = { points: 0, applied: 0, breakdown: null };
+      let levelChange = { level: difficulty.level, changed: 0, reason: '' };
+
+      if (wasPractice) {
+        practiceLeft -= 1;
+        if (practiceLeft === 0) timer.start();
+      } else {
+        const level = difficulty.level;
+        scored = score.record({
+          outcome,
+          level,
+          rtMs: verdict.rtMs ?? rtMs,
+          targetRtMs: verdict.targetRtMs ?? def.targetRtMs,
+          extraBonus: verdict.extraBonus || 0,
+        });
+        if (outcome !== OUTCOME.IGNORE) {
+          roundNumber += 1;
+          levelChange = difficulty.record({
+            correct: outcome === OUTCOME.CORRECT,
+            rtMs: verdict.rtMs ?? rtMs,
+            targetRtMs: verdict.targetRtMs ?? def.targetRtMs,
+          });
+        }
+      }
+
+      lastResult = {
+        ...verdict,
+        outcome,
+        rtMs: verdict.rtMs ?? rtMs,
+        practice: wasPractice,
+        points: scored.applied,
+        breakdown: scored.breakdown,
+        levelChange,
+        round,
+      };
+      log.push({ key: round?.key, outcome, rtMs: lastResult.rtMs, level: levelChange.level, practice: wasPractice });
+      phase = PHASE.FEEDBACK;
+      return lastResult;
+    },
+
+    pause() {
+      if (phase === PHASE.PAUSED || phase === PHASE.ENDED || phase === PHASE.READY) return;
+      pausedFrom = phase;
+      phase = PHASE.PAUSED;
+      timer.pause();
+    },
+
+    resume() {
+      if (phase !== PHASE.PAUSED) return;
+      phase = pausedFrom;
+      pausedFrom = null;
+      timer.resume();
+    },
+
+    isOver,
+
+    // Süre/tur bitmeden oturumu sonlandırır (ör. oyuncu çıkış yaptı).
+    end() {
+      phase = PHASE.ENDED;
+      round = null;
+    },
+
+    result() {
+      const summary = score.summary();
+      return buildResult({
+        gameId: def.id,
+        summary,
+        durationMs: timed ? Math.min(durationMs, timer.elapsed()) : timer.elapsed(),
+        startedAt: startedAtWall,
+        level: difficulty.level,
+        maxLevel: difficulty.maxLevel,
+        best,
+      });
+    },
+  };
+  return session;
+}
+
+return { PHASE, createSession };
+})();
+
+// ---- src/core/stats.js ----
+const __m6 = (() => {
+// İstatistik hesapları: günlük/haftalık oturum sayısı, oyun bazında gelişim, güçlü alanlar.
+
+// Son 7 günün (bugün dahil) gün gün oturum sayısı, en eski gün başta.
+function dailyCounts(sessions, now = Date.now(), days = 7) {
+  const d = new Date(now);
+  const out = [];
+  // Gün sınırları takvimden alınır; yaz saati geçişlerinde 23/25 saatlik günler doğru sayılır.
+  for (let i = days - 1; i >= 0; i--) {
+    const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate() - i).getTime();
+    const dayEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate() - i + 1).getTime();
+    out.push({ dayStart, count: sessions.filter((s) => s.at >= dayStart && s.at < dayEnd).length });
+  }
+  return out;
+}
+
+function sessionSummary(sessions, now = Date.now()) {
+  const days = dailyCounts(sessions, now, 7);
+  return {
+    today: days[days.length - 1].count,
+    week: days.reduce((sum, d) => sum + d.count, 0),
+    total: sessions.length,
+    days,
+  };
+}
+
+const mean = (list) => (list.length ? list.reduce((a, b) => a + b, 0) / list.length : null);
+
+// Son 5 oyunun ortalaması ile önceki 5 oyunun ortalaması arasındaki fark.
+function trend(history, key = 'score', span = 5) {
+  if (history.length < 2) return null;
+  const recent = history.slice(-span).map((h) => h[key]);
+  const before = history.slice(-2 * span, -span).map((h) => h[key]);
+  if (!before.length) return null;
+  return Math.round(mean(recent) - mean(before));
+}
+
+// Kategori bazında, cevap sayısıyla ağırlıklı doğruluk. En güçlü başta.
+function categoryStrengths(sessions, categories) {
+  const acc = new Map(categories.map((c) => [c, { category: c, answered: 0, correctWeighted: 0, sessions: 0 }]));
+  for (const s of sessions) {
+    const entry = acc.get(s.category);
+    if (!entry || !s.answered) continue;
+    entry.answered += s.answered;
+    entry.correctWeighted += (s.accuracy / 100) * s.answered;
+    entry.sessions += 1;
+  }
+  return [...acc.values()]
+    .map((e) => ({
+      category: e.category,
+      sessions: e.sessions,
+      answered: e.answered,
+      accuracy: e.answered ? Math.round((e.correctWeighted / e.answered) * 1000) / 10 : null,
+    }))
+    .sort((a, b) => (b.accuracy ?? -1) - (a.accuracy ?? -1));
+}
+
+return { dailyCounts, sessionSummary, trend, categoryStrengths };
+})();
+
+// ---- src/core/adaptive.js ----
+const __m7 = (() => {
+// F. Adaptive Challenge — Uyarlanabilir Mücadele planlayıcısı.
+// Güçlü ve zayıf alanları dengeli sınayan kısa bir oyun listesi seçer ve
+// her seçimin nedenini oyuncuya gösterilecek biçimde açıklar.
+
+const { categoryStrengths } = __m6;
+
+const CHALLENGE_STEPS = 5;
+const STEP_DURATION_MS = 30000;
+
+// games: [{ definition }], categories: { id: { name } }, data: ProgressRepository.data
+// adaptive=false: uyarlama kapalı; kategoriler rastgele seçilir, seviyeler sabit kalır.
+function planChallenge({ games, categories, data, rng, steps = CHALLENGE_STEPS, adaptive = true, fixedLevel = null }) {
+  const catIds = Object.keys(categories).filter((c) => games.some((g) => g.definition.category === c));
+  if (!adaptive) {
+    return rng.sample(catIds, steps).map((category) => {
+      const game = rng.pick(games.filter((g) => g.definition.category === category));
+      return {
+        gameId: game.definition.id,
+        category,
+        categoryName: categories[category].name,
+        startLevel: fixedLevel ?? 1,
+        durationMs: STEP_DURATION_MS,
+        reason: 'Rastgele seçim (otomatik uyarlama kapalı)',
+      };
+    });
+  }
+  const strengths = categoryStrengths(data.sessions, catIds);
+  const played = strengths.filter((s) => s.accuracy != null);
+  const unplayed = rng.shuffle(strengths.filter((s) => s.accuracy == null));
+  const picks = [];
+  const take = (entry, reason) => {
+    if (!entry || picks.some((p) => p.category === entry.category) || picks.length >= steps) return;
+    picks.push({ category: entry.category, reason });
+  };
+  const pct = (e) => `%${Math.round(e.accuracy)}`;
+
+  // 1) Isınma: en güçlü alan
+  if (played.length) take(played[0], `En güçlü alanın (${pct(played[0])}): ısınma turu`);
+  // 2) En zayıf iki alan
+  const weakest = played.slice(1).reverse();
+  weakest.slice(0, 2).forEach((e) => take(e, `Gelişime açık alan (${pct(e)} doğruluk)`));
+  // 3) Hiç oynanmamış alanlar
+  unplayed.forEach((e) => take(e, 'Henüz denemediğin bir alan'));
+  // 4) Kalanlar rastgele, denge için
+  rng.shuffle(played).forEach((e) => take(e, `Denge için (${pct(e)} doğruluk)`));
+
+  return picks.map(({ category, reason }) => {
+    const options = games.filter((g) => g.definition.category === category);
+    const game = rng.pick(options);
+    const id = game.definition.id;
+    const rec = data.games[id];
+    return {
+      gameId: id,
+      category,
+      categoryName: categories[category].name,
+      startLevel: fixedLevel ?? (rec ? rec.lastLevel : 1),
+      durationMs: STEP_DURATION_MS,
+      reason,
+    };
+  });
+}
+
+// Adım sonuçlarını tek bir özet hâline getirir.
+function summarizeChallenge(results) {
+  const total = results.reduce((sum, r) => sum + r.score, 0);
+  const answered = results.reduce((sum, r) => sum + r.answered, 0);
+  const correct = results.reduce((sum, r) => sum + r.counts.correct, 0);
+  return {
+    score: total,
+    answered,
+    correct,
+    accuracy: answered ? Math.round((correct / answered) * 1000) / 10 : 0,
+    steps: results,
+  };
+}
+
+return { CHALLENGE_STEPS, STEP_DURATION_MS, planChallenge, summarizeChallenge };
+})();
+
+// ---- src/ui/dom.js ----
+const __m9 = (() => {
+// Küçük DOM yardımcıları. innerHTML kullanılmaz; metin her zaman textContent ile yazılır.
+
+function h(tag, attrs = {}, ...children) {
+  const el = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs || {})) {
+    if (value == null || value === false) continue;
+    if (key === 'class') el.className = value;
+    else if (key === 'style' && typeof value === 'object') {
+      for (const [prop, v] of Object.entries(value)) {
+        if (prop.startsWith('--')) el.style.setProperty(prop, String(v));
+        else el.style[prop] = v;
+      }
+    }
+    else if (key.startsWith('on') && typeof value === 'function') el.addEventListener(key.slice(2), value);
+    else if (key === 'dataset') Object.assign(el.dataset, value);
+    else if (value === true) el.setAttribute(key, '');
+    else el.setAttribute(key, String(value));
+  }
+  append(el, children);
+  return el;
+}
+
+function append(el, children) {
+  for (const child of children.flat(Infinity)) {
+    if (child == null || child === false) continue;
+    el.append(child instanceof Node ? child : document.createTextNode(String(child)));
+  }
+  return el;
+}
+
+function clear(el) {
+  while (el.firstChild) el.firstChild.remove();
+  return el;
+}
+
+// Numaralı seçenek düğmeleri. 1–9 tuşlarıyla da seçilebilir (ctx.onKey ile bağlanır).
+// items: [{ content: Node|string, label: string, value }]
+function choiceGrid(ctx, items, onPick, { columns, className = '' } = {}) {
+  let locked = false;
+  const buttons = items.map((item, i) =>
+    h(
+      'button',
+      {
+        type: 'button',
+        class: 'choice',
+        'aria-label': `${i + 1}. seçenek: ${item.label}`,
+        onclick: () => pick(i),
+      },
+      h('span', { class: 'choice-key', 'aria-hidden': 'true' }, i < 9 ? String(i + 1) : ''),
+      item.content,
+    ),
+  );
+  const grid = h(
+    'div',
+    {
+      class: `choices ${className}`,
+      role: 'group',
+      'aria-label': 'Seçenekler',
+      style: { '--cols': columns || Math.min(items.length, items.length === 4 ? 2 : 3) },
+    },
+    buttons,
+  );
+  function pick(i) {
+    if (locked) return;
+    locked = true;
+    buttons.forEach((b) => (b.disabled = true));
+    onPick(items[i].value, i, buttons[i]);
+  }
+  ctx.onKey((e) => {
+    const n = Number.parseInt(e.key, 10);
+    if (n >= 1 && n <= items.length) {
+      pick(n - 1);
+      return true;
+    }
+    return false;
+  });
+  return { el: grid, buttons, mark: (i, cls) => buttons[i]?.classList.add(cls) };
+}
+
+return { h, append, clear, choiceGrid };
+})();
+
+// ---- src/games/memoryGrid.js ----
+const __m13 = (() => {
+// B. Memory Grid — Hafıza Izgarası
+// Kısa süre yanan hücreleri hatırla ve aynı hücreleri seç. "Sıra" varyantında aynı sırayla.
+
+const { OUTCOME } = __m4;
+const { createRepeatGuard } = __m2;
+const { h } = __m9;
+
+// [ızgara kenarı, yanan hücre sayısı] — seviye 1..10
+const LEVELS = [
+  [3, 3], [3, 4], [4, 4], [4, 5], [4, 6], [5, 6], [5, 7], [5, 8], [6, 8], [6, 9],
+];
+
+const definition = {
+  id: 'memoryGrid',
+  name: 'Hafıza Izgarası',
+  category: 'memory',
+  icon: '▦',
+  description: 'Yanan kareleri ezberle, sonra aynı kareleri seç.',
+  howTo: [
+    'Bazı kareler kısa bir süre yanar.',
+    'Işıklar sönünce aynı karelere dokun.',
+    '"Sıra" modunda kareleri yandıkları sırayla seç.',
+    'Yanlış kareye dokunursan tur biter ve doğru kareler gösterilir.',
+  ],
+  targetRtMs: 2500,
+  options: [
+    {
+      id: 'variant',
+      label: 'Mod',
+      choices: [
+        { value: 'position', label: 'Konum' },
+        { value: 'order', label: 'Sıra' },
+      ],
+      default: 'position',
+    },
+  ],
+};
+
+const levelConfig = (level) => {
+  const [size, count] = LEVELS[Math.min(LEVELS.length, Math.max(1, level)) - 1];
+  // Daha çok hücre = daha uzun gösterim; seviye arttıkça hücre başına süre kısalır.
+  const showMs = Math.round(600 + count * Math.max(260, 460 - level * 20));
+  return { size, count, showMs, stepMs: Math.max(420, 750 - level * 30) };
+};
+
+function createState({ options = {} } = {}) {
+  return {
+    variant: options.variant === 'order' ? 'order' : 'position',
+    guard: createRepeatGuard({ memory: 20 }),
+  };
+}
+
+function nextRound(state, { rng, level }) {
+  const cfg = levelConfig(level);
+  const total = cfg.size * cfg.size;
+  const indices = [...Array(total).keys()];
+  return state.guard.take(
+    () => {
+      const targets = rng.sample(indices, cfg.count);
+      const keyCells = state.variant === 'order' ? targets : targets.slice().sort((a, b) => a - b);
+      return { ...cfg, targets, variant: state.variant, key: `${cfg.size}:${keyCells.join('-')}` };
+    },
+    (r) => r.key,
+  );
+}
+
+// Kısmi seçim kontrolü: 'continue' | 'correct' | 'wrong'
+function checkPicks(round, picks) {
+  if (new Set(picks).size !== picks.length) return 'wrong';
+  for (let i = 0; i < picks.length; i++) {
+    const ok = round.variant === 'order' ? picks[i] === round.targets[i] : round.targets.includes(picks[i]);
+    if (!ok) return 'wrong';
+  }
+  return picks.length === round.targets.length ? 'correct' : 'continue';
+}
+
+function evaluate(_state, round, input) {
+  const targetRtMs = 700 * round.count;
+  if (input.timeout) return { outcome: OUTCOME.TIMEOUT, targetRtMs };
+  const status = checkPicks(round, input.picks || []);
+  if (status === 'correct') return { outcome: OUTCOME.CORRECT, targetRtMs };
+  if (status === 'continue') return { outcome: OUTCOME.SKIP, targetRtMs, explanation: 'Tur yarım kaldı.' };
+  return {
+    outcome: OUTCOME.WRONG,
+    targetRtMs,
+    explanation:
+      round.variant === 'order' ? 'Sıra karıştı. Doğru sıra numaralarla gösterildi.' : 'Bu kare yanmamıştı.',
+  };
+}
+
+function render(ctx) {
+  const { round } = ctx;
+  const picks = [];
+  let accepting = false;
+  const cells = [];
+  const grid = h('div', {
+    class: 'mg-grid',
+    role: 'grid',
+    'aria-label': `${round.size} x ${round.size} hafıza ızgarası`,
+    style: { '--n': round.size },
+  });
+  for (let i = 0; i < round.size * round.size; i++) {
+    const cell = h('button', {
+      type: 'button',
+      class: 'mg-cell',
+      'aria-label': `Satır ${Math.floor(i / round.size) + 1}, sütun ${(i % round.size) + 1}`,
+      onclick: () => tap(i),
+      disabled: true,
+    });
+    cells.push(cell);
+    grid.append(cell);
+  }
+  ctx.root.append(grid);
+
+  const reveal = () => {
+    round.targets.forEach((t, order) => {
+      if (!picks.includes(t) || round.variant === 'order') {
+        cells[t].classList.add(picks.includes(t) ? 'mg-ok' : 'mg-missed');
+        if (round.variant === 'order') cells[t].textContent = String(order + 1);
+      }
+    });
+  };
+
+  function tap(i) {
+    if (!accepting || picks.includes(i)) return;
+    picks.push(i);
+    const status = checkPicks(round, picks);
+    cells[i].classList.add(status === 'wrong' ? 'mg-wrong' : 'mg-ok');
+    cells[i].setAttribute('aria-pressed', 'true');
+    ctx.sound(status === 'wrong' ? 'wrong' : 'tick');
+    if (status !== 'continue') {
+      accepting = false;
+      cells.forEach((c) => (c.disabled = true));
+      if (status === 'wrong') reveal();
+      ctx.answer({ picks: picks.slice() });
+    }
+  }
+
+  const startInput = () => {
+    cells.forEach((c) => {
+      c.classList.remove('mg-lit');
+      c.textContent = '';
+      c.disabled = false;
+    });
+    accepting = true;
+    ctx.status(round.variant === 'order' ? 'Şimdi aynı sırayla seç.' : `Şimdi ${round.count} kareyi seç.`);
+    ctx.presented();
+    cells[0].focus({ preventScroll: true });
+  };
+
+  ctx.status('Ezberle…');
+  if (round.variant === 'order') {
+    round.targets.forEach((t, i) => {
+      ctx.later(() => {
+        cells[t].classList.add('mg-lit');
+        cells[t].textContent = String(i + 1);
+      }, i * round.stepMs);
+      ctx.later(() => {
+        cells[t].classList.remove('mg-lit');
+        cells[t].textContent = '';
+      }, i * round.stepMs + round.stepMs * 0.8);
+    });
+  } else {
+    round.targets.forEach((t) => cells[t].classList.add('mg-lit'));
+  }
+  const showFor = round.variant === 'order' ? round.targets.length * round.stepMs : round.showMs;
+
+  if (ctx.relaxed) {
+    // Süre baskısı kapalı: oyuncu hazır olduğunda kendisi başlatır.
+    const ready = h('button', { type: 'button', class: 'btn btn-secondary mg-ready', onclick: () => {
+      ready.remove();
+      startInput();
+    } }, 'Ezberledim');
+    ctx.root.append(ready);
+    if (round.variant === 'order') ready.disabled = true;
+    ctx.later(() => (ready.disabled = false), showFor);
+  } else {
+    ctx.later(startInput, showFor);
+  }
+
+  // Ok tuşlarıyla hücreler arasında gezinme
+  ctx.onKey((e) => {
+    const idx = cells.indexOf(document.activeElement);
+    if (idx < 0) return false;
+    const n = round.size;
+    const moves = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: n, ArrowUp: -n };
+    if (!(e.key in moves)) return false;
+    const next = idx + moves[e.key];
+    if (next >= 0 && next < cells.length) cells[next].focus();
+    return true;
+  });
+}
+
+return { LEVELS, definition, levelConfig, createState, nextRound, checkPicks, evaluate, render };
+})();
+
+// ---- src/core/shapes.js ----
+const __m22 = (() => {
+// Ortak şekil ve renk kataloğu. Her rengin kendine ait bir dolgu deseni vardır;
+// böylece renk körlüğünde de iki öğe yalnızca renkle ayırt edilmek zorunda kalmaz.
+
+const SHAPES = Object.freeze([
+  { id: 'circle', name: 'Daire' },
+  { id: 'square', name: 'Kare' },
+  { id: 'triangle', name: 'Üçgen' },
+  { id: 'star', name: 'Yıldız' },
+  { id: 'diamond', name: 'Baklava' },
+  { id: 'hexagon', name: 'Altıgen' },
+]);
+
+const COLORS = Object.freeze([
+  { id: 'red', name: 'Kırmızı', hex: '#e5484d', pattern: 'solid', patternName: 'düz' },
+  { id: 'blue', name: 'Mavi', hex: '#2f7ae5', pattern: 'stripes', patternName: 'çizgili' },
+  { id: 'green', name: 'Yeşil', hex: '#1f9d63', pattern: 'dots', patternName: 'noktalı' },
+  { id: 'yellow', name: 'Sarı', hex: '#b58100', pattern: 'grid', patternName: 'kareli' },
+  { id: 'purple', name: 'Mor', hex: '#8b5cf6', pattern: 'hollow', patternName: 'içi boş' },
+  { id: 'orange', name: 'Turuncu', hex: '#cf6a00', pattern: 'half', patternName: 'yarım' },
+]);
+
+const SHAPE_IDS = SHAPES.map((s) => s.id);
+const COLOR_IDS = COLORS.map((c) => c.id);
+
+const shapeName = (id) => SHAPES.find((s) => s.id === id)?.name ?? id;
+const colorInfo = (id) => COLORS.find((c) => c.id === id);
+const colorName = (id) => colorInfo(id)?.name ?? id;
+
+// Ekran okuyucu ve renk-dışı ipucu için metin: "Mavi çizgili üçgen"
+function describeItem({ shape, color, count }) {
+  const c = colorInfo(color);
+  const base = `${c ? `${c.name} ${c.patternName} ` : ''}${shapeName(shape).toLocaleLowerCase('tr')}`;
+  return count && count > 1 ? `${count} adet ${base}` : base;
+}
+
+return { SHAPES, COLORS, SHAPE_IDS, COLOR_IDS, shapeName, colorInfo, colorName, describeItem };
+})();
+
+// ---- src/ui/svg.js ----
+const __m10 = (() => {
+// Kodla çizilen özgün SVG görselleri: şekiller, oklar, ızgara parçaları.
+
+const { colorInfo, describeItem } = __m22;
+
+const NS = 'http://www.w3.org/2000/svg';
+let uid = 0;
+
+function s(tag, attrs = {}, ...children) {
+  const el = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) if (v != null) el.setAttribute(k, String(v));
+  for (const c of children.flat()) if (c) el.append(c);
+  return el;
+}
+
+function polygonPoints(sides, radius, rotation = -90, cx = 50, cy = 50, inner = null) {
+  const pts = [];
+  const total = inner ? sides * 2 : sides;
+  for (let i = 0; i < total; i++) {
+    const r = inner && i % 2 ? inner : radius;
+    const a = ((rotation + (360 / total) * i) * Math.PI) / 180;
+    pts.push(`${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`);
+  }
+  return pts.join(' ');
+}
+
+const SHAPE_BUILDERS = {
+  circle: (a) => s('circle', { cx: 50, cy: 50, r: 40, ...a }),
+  square: (a) => s('rect', { x: 12, y: 12, width: 76, height: 76, rx: 8, ...a }),
+  triangle: (a) => s('polygon', { points: '50,9 92,88 8,88', ...a }),
+  star: (a) => s('polygon', { points: polygonPoints(5, 44, -90, 50, 53, 19), ...a }),
+  diamond: (a) => s('polygon', { points: '50,5 92,50 50,95 8,50', ...a }),
+  hexagon: (a) => s('polygon', { points: polygonPoints(6, 42, 0), ...a }),
+};
+
+function fillDefs(pattern, hex, id) {
+  switch (pattern) {
+    case 'stripes':
+      return s(
+        'pattern',
+        { id, width: 12, height: 12, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' },
+        s('rect', { width: 12, height: 12, class: 'shape-bg' }),
+        s('rect', { width: 6, height: 12, fill: hex }),
+      );
+    case 'dots':
+      return s(
+        'pattern',
+        { id, width: 12, height: 12, patternUnits: 'userSpaceOnUse' },
+        s('rect', { width: 12, height: 12, class: 'shape-bg' }),
+        s('circle', { cx: 6, cy: 6, r: 3.6, fill: hex }),
+      );
+    case 'grid':
+      return s(
+        'pattern',
+        { id, width: 14, height: 14, patternUnits: 'userSpaceOnUse' },
+        s('rect', { width: 14, height: 14, fill: hex }),
+        s('rect', { x: 3, y: 3, width: 8, height: 8, class: 'shape-bg' }),
+      );
+    case 'half':
+      return s(
+        'linearGradient',
+        { id, x1: 0, y1: 0, x2: 1, y2: 0 },
+        s('stop', { offset: '50%', 'stop-color': hex }),
+        s('stop', { offset: '50%', class: 'shape-bg-stop' }),
+      );
+    default:
+      return null;
+  }
+}
+
+// item: { shape, color, rotation?, scale? }
+function shapeSvg(item, { size = 64, label = true } = {}) {
+  const info = colorInfo(item.color) || { hex: 'currentColor', pattern: 'solid' };
+  const id = `zm-fill-${++uid}`;
+  const defs = fillDefs(info.pattern, info.hex, id);
+  const fill = info.pattern === 'solid' ? info.hex : info.pattern === 'hollow' ? 'none' : `url(#${id})`;
+  const scale = item.scale ?? 1;
+  const rot = item.rotation ?? 0;
+  const body = (SHAPE_BUILDERS[item.shape] || SHAPE_BUILDERS.circle)({
+    fill,
+    stroke: info.hex,
+    'stroke-width': info.pattern === 'hollow' ? 9 : 4,
+    'stroke-linejoin': 'round',
+  });
+  const svg = s(
+    'svg',
+    {
+      viewBox: '0 0 100 100',
+      width: size,
+      height: size,
+      class: 'shape',
+      role: label ? 'img' : null,
+      'aria-hidden': label ? null : 'true',
+      focusable: 'false',
+    },
+    defs ? s('defs', {}, defs) : null,
+    s('g', { transform: `rotate(${rot} 50 50) translate(50 50) scale(${scale}) translate(-50 -50)` }, body),
+  );
+  if (label) svg.append(s('title', {}, document.createTextNode(describeItem(item))));
+  return svg;
+}
+
+// Yön oku; deg: 0 = yukarı, saat yönünde.
+function arrowSvg(deg, { size = 56, title } = {}) {
+  return s(
+    'svg',
+    { viewBox: '0 0 100 100', width: size, height: size, class: 'arrow', role: 'img', focusable: 'false' },
+    title ? s('title', {}, document.createTextNode(title)) : null,
+    s(
+      'g',
+      { transform: `rotate(${deg} 50 50)` },
+      s('path', {
+        d: 'M50 10 L80 46 H61 V90 H39 V46 H20 Z',
+        fill: 'currentColor',
+        'stroke-linejoin': 'round',
+      }),
+    ),
+  );
+}
+
+// Izgara üzerinde dolu hücrelerden oluşan parça. cells: [[r,c], ...], n: ızgara boyutu
+function pieceSvg(cells, n, { size = 84, title } = {}) {
+  const cell = 100 / n;
+  return s(
+    'svg',
+    { viewBox: '-2 -2 104 104', width: size, height: size, class: 'piece', role: 'img', focusable: 'false' },
+    title ? s('title', {}, document.createTextNode(title)) : null,
+    s('rect', { x: 0, y: 0, width: 100, height: 100, rx: 4, class: 'piece-bg' }),
+    cells.map(([r, c]) =>
+      s('rect', {
+        x: c * cell + 1.5,
+        y: r * cell + 1.5,
+        width: cell - 3,
+        height: cell - 3,
+        rx: 3,
+        class: 'piece-cell',
+      }),
+    ),
+  );
+}
+
+return { s, shapeSvg, arrowSvg, pieceSvg };
+})();
+
+// ---- src/games/quickMatch.js ----
+const __m14 = (() => {
+// Hızlı Eşleştirme: üstte gösterilen şeklin aynısını (şekil + renk/desen) bul.
+
+const { OUTCOME } = __m4;
+const { createRepeatGuard } = __m2;
+const { SHAPE_IDS, COLOR_IDS, describeItem } = __m22;
+const { h, choiceGrid } = __m9;
+const { shapeSvg } = __m10;
+
+const OPTION_COUNTS = [4, 4, 6, 6, 6, 9, 9, 9, 12, 12];
+
+const definition = {
+  id: 'quickMatch',
+  name: 'Hızlı Eşleştirme',
+  category: 'match',
+  icon: '◈',
+  description: 'Üstteki şeklin tıpatıp aynısını bul.',
+  howTo: [
+    'Üstte bir hedef şekil görünür.',
+    'Aşağıdakilerden şekli ve rengi/deseni aynı olanı seç.',
+    'İleri seviyelerde şekiller döndürülmüş olabilir; döndürme farkı önemsizdir.',
+    'Her rengin kendine özgü bir deseni vardır.',
+  ],
+  targetRtMs: 1600,
+};
+
+function levelConfig(level) {
+  const l = Math.min(10, Math.max(1, level));
+  return {
+    options: OPTION_COUNTS[l - 1],
+    similar: l >= 6 ? 1 : l >= 3 ? 0.5 : 0, // hedefle bir özelliği paylaşan çeldirici oranı
+    rotate: l >= 8,
+    columns: OPTION_COUNTS[l - 1] >= 12 ? 4 : OPTION_COUNTS[l - 1] >= 6 ? 3 : 2,
+  };
+}
+
+const createState = () => ({ guard: createRepeatGuard({ memory: 12 }) });
+
+function nextRound(state, { rng, level }) {
+  const cfg = levelConfig(level);
+  return state.guard.take(
+    () => {
+      const target = { shape: rng.pick(SHAPE_IDS), color: rng.pick(COLOR_IDS) };
+      const used = new Set([`${target.shape}/${target.color}`]);
+      const all = [];
+      for (const shape of SHAPE_IDS) {
+        for (const color of COLOR_IDS) {
+          if (!used.has(`${shape}/${color}`)) all.push({ shape, color });
+        }
+      }
+      const similarPool = rng.shuffle(all.filter((o) => o.shape === target.shape || o.color === target.color));
+      const otherPool = rng.shuffle(all.filter((o) => o.shape !== target.shape && o.color !== target.color));
+      const distractorCount = cfg.options - 1;
+      const similarCount = Math.min(similarPool.length, Math.round(distractorCount * cfg.similar));
+      const distractors = [
+        ...similarPool.slice(0, similarCount),
+        ...otherPool.slice(0, distractorCount - similarCount),
+      ];
+      const items = rng.shuffle([{ ...target, isTarget: true }, ...distractors]).map((o) => ({
+        ...o,
+        rotation: cfg.rotate && o.shape !== 'circle' ? rng.pick([0, 45, 90, 135, 180, 270]) : 0,
+      }));
+      return {
+        target,
+        items,
+        answer: items.findIndex((o) => o.isTarget),
+        columns: cfg.columns,
+        key: `${target.shape}/${target.color}:${items.length}`,
+      };
+    },
+    (r) => r.key,
+  );
+}
+
+function evaluate(_state, round, input) {
+  if (input.timeout) return { outcome: OUTCOME.TIMEOUT };
+  return input.choice === round.answer
+    ? { outcome: OUTCOME.CORRECT }
+    : { outcome: OUTCOME.WRONG, explanation: `Doğrusu: ${describeItem(round.target)}.` };
+}
+
+function render(ctx) {
+  const { round } = ctx;
+  ctx.root.append(
+    h('div', { class: 'qm-target' }, h('span', { class: 'label' }, 'Hedef'), shapeSvg(round.target, { size: 88 })),
+  );
+  const grid = choiceGrid(
+    ctx,
+    round.items.map((item, i) => ({ content: shapeSvg(item, { size: 60, label: false }), label: describeItem(item), value: i })),
+    (choice, i) => {
+      grid.mark(round.answer, 'is-correct');
+      if (i !== round.answer) grid.mark(i, 'is-wrong');
+      ctx.answer({ choice });
+    },
+    { columns: round.columns, className: 'qm-choices' },
+  );
+  ctx.root.append(grid.el);
+  ctx.status('Aynısını bul');
+  ctx.presented();
+}
+
+return { definition, levelConfig, createState, nextRound, evaluate, render };
+})();
+
+// ---- src/games/mentalMath.js ----
+const __m15 = (() => {
+// Sayısal akıl yürütme: zihinden hesap. Dört seçenekten doğru sonucu seç.
+
+const { OUTCOME } = __m4;
+const { createRepeatGuard } = __m2;
+const { h, choiceGrid } = __m9;
+
+const definition = {
+  id: 'mentalMath',
+  name: 'Zihinden Hesap',
+  category: 'numeric',
+  icon: '∑',
+  description: 'İşlemin sonucunu dört seçenek arasından hızlıca bul.',
+  howTo: [
+    'Ekranda bir işlem görünür.',
+    'Doğru sonucu seç (1–4 tuşlarıyla da seçebilirsin).',
+    'Seviye arttıkça sayılar büyür; çarpma, bölme ve iki adımlı işlemler gelir.',
+  ],
+  targetRtMs: 2600,
+};
+
+const OPS = {
+  '+': (a, b) => a + b,
+  '−': (a, b) => a - b,
+  '×': (a, b) => a * b,
+  '÷': (a, b) => a / b,
+};
+
+function levelConfig(level) {
+  const l = Math.min(10, Math.max(1, level));
+  const max = [9, 12, 20, 30, 50, 50, 80, 99, 99, 150][l - 1];
+  const ops = l <= 2 ? ['+', '−'] : l <= 4 ? ['+', '−', '×'] : ['+', '−', '×', '÷'];
+  return { max, ops, twoStep: l >= 7, tableMax: l <= 4 ? 6 : l <= 7 ? 9 : 12 };
+}
+
+function makeBinary(rng, op, cfg) {
+  if (op === '×') {
+    const a = rng.int(2, cfg.tableMax);
+    const b = rng.int(2, cfg.tableMax);
+    return { a, b };
+  }
+  if (op === '÷') {
+    const b = rng.int(2, cfg.tableMax);
+    const q = rng.int(2, cfg.tableMax);
+    return { a: b * q, b };
+  }
+  if (op === '−') {
+    const a = rng.int(2, cfg.max);
+    return { a, b: rng.int(1, a) };
+  }
+  return { a: rng.int(1, cfg.max), b: rng.int(1, cfg.max) };
+}
+
+function buildProblem(rng, level) {
+  const cfg = levelConfig(level);
+  const op1 = rng.pick(cfg.ops);
+  const { a, b } = makeBinary(rng, op1, cfg);
+  let value = OPS[op1](a, b);
+  let text = `${a} ${op1} ${b}`;
+  if (cfg.twoStep && rng.chance(0.6)) {
+    const op2 = rng.pick(['+', '−']);
+    const c = op2 === '−' ? rng.int(1, Math.max(1, value)) : rng.int(1, 20);
+    // Önce soldaki işlem yapılır; parantez işlem önceliğini açık eder.
+    text = `(${text}) ${op2} ${c}`;
+    value = OPS[op2](value, c);
+  }
+  return { text, value };
+}
+
+// Benzersiz, negatif olmayan, akla yatkın çeldiriciler.
+function makeOptions(rng, value, count = 4) {
+  const deltas = rng.shuffle([1, -1, 2, -2, 10, -10, 5, -5, 3, -3, 11, -9]);
+  const out = new Set([value]);
+  for (const d of deltas) {
+    if (out.size >= count) break;
+    const v = value + d;
+    if (v >= 0) out.add(v);
+  }
+  let extra = value + 4;
+  while (out.size < count) out.add(extra++);
+  return rng.shuffle([...out]);
+}
+
+const createState = () => ({ guard: createRepeatGuard({ memory: 40 }) });
+
+function nextRound(state, { rng, level }) {
+  return state.guard.take(
+    () => {
+      const p = buildProblem(rng, level);
+      const options = makeOptions(rng, p.value);
+      return { text: p.text, value: p.value, options, answer: options.indexOf(p.value), key: p.text };
+    },
+    (r) => r.key,
+  );
+}
+
+function evaluate(_state, round, input) {
+  if (input.timeout) return { outcome: OUTCOME.TIMEOUT };
+  return round.options[input.choice] === round.value
+    ? { outcome: OUTCOME.CORRECT }
+    : { outcome: OUTCOME.WRONG, explanation: `${round.text} = ${round.value}` };
+}
+
+function render(ctx) {
+  const { round } = ctx;
+  ctx.root.append(h('div', { class: 'mm-problem', 'aria-live': 'polite' }, `${round.text} = ?`));
+  const grid = choiceGrid(
+    ctx,
+    round.options.map((v, i) => ({ content: h('span', { class: 'mm-num' }, String(v)), label: String(v), value: i })),
+    (choice, i) => {
+      grid.mark(round.answer, 'is-correct');
+      if (i !== round.answer) grid.mark(i, 'is-wrong');
+      ctx.answer({ choice });
+    },
+    { columns: 2 },
+  );
+  ctx.root.append(grid.el);
+  ctx.status('Sonuç kaç?');
+  ctx.presented();
+}
+
+return { definition, levelConfig, buildProblem, makeOptions, createState, nextRound, evaluate, render };
+})();
+
+// ---- src/games/dualFocus.js ----
+const __m16 = (() => {
+// A. Dual Focus — Çift Odak
+// Solda şekil, sağda sayı akar. Yalnızca kural sağlandığında BAS'a bas.
+// İlk seviyeler tek koşulla öğretir, sonra iki koşul ve dikkat dağıtıcılar gelir.
+
+const { OUTCOME } = __m4;
+const { SHAPE_IDS, COLOR_IDS, shapeName, colorName, describeItem } = __m22;
+const { h } = __m9;
+const { shapeSvg } = __m10;
+
+const definition = {
+  id: 'dualFocus',
+  name: 'Çift Odak',
+  category: 'attention',
+  icon: '◐',
+  description: 'İki bilgi akışını izle; yalnızca kural tuttuğunda bas.',
+  howTo: [
+    'Solda bir şekil, sağda bir sayı görünür ve kısa süre sonra değişir.',
+    'Ekrandaki kural tutuyorsa BAS düğmesine (veya boşluk tuşuna) bas.',
+    'Kural tutmuyorsa bekle. Yanlış basmak ve kaçırmak puan düşürür.',
+    'Seviye arttıkça iki koşul aynı anda aranır, süre kısalır, dikkat dağıtıcılar eklenir.',
+  ],
+  targetRtMs: 700,
+};
+
+const TARGET_PROBABILITY = 0.35;
+
+function levelConfig(level) {
+  const l = Math.min(10, Math.max(1, level));
+  return {
+    tier: l <= 2 ? 1 : l <= 3 ? 2 : 3, // 1: şekil, 2: sayı, 3: iki koşul
+    showMs: Math.max(800, 1700 - l * 90),
+    distractors: l >= 7 ? Math.min(4, l - 5) : 0,
+  };
+}
+
+const NUMBER_CONDS = [
+  { type: 'parity', value: 'even', text: 'sayı çift' },
+  { type: 'parity', value: 'odd', text: 'sayı tek' },
+  { type: 'gt', value: 5, text: 'sayı 5’ten büyük' },
+  { type: 'lt', value: 5, text: 'sayı 5’ten küçük' },
+];
+
+function matches(cond, stim) {
+  switch (cond.type) {
+    case 'shape':
+      return stim.shape === cond.value;
+    case 'color':
+      return stim.color === cond.value;
+    case 'parity':
+      return (stim.number % 2 === 0) === (cond.value === 'even');
+    case 'gt':
+      return stim.number > cond.value;
+    case 'lt':
+      return stim.number < cond.value;
+    default:
+      throw new Error(`Bilinmeyen koşul: ${cond.type}`);
+  }
+}
+
+const isTarget = (rule, stim) => rule.conds.every((c) => matches(c, stim));
+
+const shapeCond = (value) => ({ type: 'shape', value, text: `şekil ${shapeName(value)}` });
+const colorCond = (value) => ({ type: 'color', value, text: `renk ${colorName(value)}` });
+
+function makeRule(rng, tier) {
+  if (tier === 1) return { tier, conds: [shapeCond(rng.pick(SHAPE_IDS))] };
+  const visual = rng.chance(0.5) ? shapeCond(rng.pick(SHAPE_IDS)) : colorCond(rng.pick(COLOR_IDS));
+  const num = { ...rng.pick(NUMBER_CONDS) };
+  if (tier === 2) return { tier, conds: [num] };
+  return { tier, conds: [visual, num] };
+}
+
+const ruleText = (rule) => rule.conds.map((c) => c.text).join(' VE ');
+
+function randomStim(rng) {
+  return { shape: rng.pick(SHAPE_IDS), color: rng.pick(COLOR_IDS), number: rng.int(1, 9) };
+}
+
+// Kurala uyan ya da uymayan uyaran üretir; tutarlılığı doğrulayarak döner.
+function makeStimulus(rng, rule, wantTarget) {
+  for (let i = 0; i < 200; i++) {
+    const stim = randomStim(rng);
+    if (wantTarget) {
+      for (const c of rule.conds) {
+        if (c.type === 'shape') stim.shape = c.value;
+        if (c.type === 'color') stim.color = c.value;
+      }
+    } else if (rule.conds.length > 1 && rng.chance(0.6)) {
+      // "Yarı hedef": bir koşulu sağlar, diğerini sağlamaz; iki koşulu birlikte aramayı zorunlu kılar.
+      const keep = rng.pick(rule.conds);
+      if (keep.type === 'shape') stim.shape = keep.value;
+      if (keep.type === 'color') stim.color = keep.value;
+    }
+    if (isTarget(rule, stim) === wantTarget) return stim;
+  }
+  throw new Error('Uyaran üretilemedi');
+}
+
+function createState() {
+  return { rule: null, sinceTarget: 0 };
+}
+
+function nextRound(state, { rng, level }) {
+  const cfg = levelConfig(level);
+  let ruleChanged = false;
+  if (!state.rule || state.rule.tier !== cfg.tier) {
+    state.rule = makeRule(rng, cfg.tier);
+    ruleChanged = true;
+  }
+  // Uzun süre hedef gelmezse olasılık artar (en fazla 5 hedefsiz uyaran).
+  const wantTarget = state.sinceTarget >= 5 || rng.chance(TARGET_PROBABILITY);
+  state.sinceTarget = wantTarget ? 0 : state.sinceTarget + 1;
+  const stim = makeStimulus(rng, state.rule, wantTarget);
+  const distractors = Array.from({ length: cfg.distractors }, () => randomStim(rng));
+  return {
+    rule: state.rule,
+    ruleChanged,
+    stim,
+    target: wantTarget,
+    distractors,
+    showMs: cfg.showMs,
+    key: `${stim.shape}/${stim.color}/${stim.number}`,
+  };
+}
+
+function evaluate(_state, round, input) {
+  if (input.pressed) {
+    return round.target
+      ? { outcome: OUTCOME.CORRECT }
+      : { outcome: OUTCOME.FALSE_ALARM, explanation: `Kural tutmuyordu: ${ruleText(round.rule)}.` };
+  }
+  return round.target
+    ? { outcome: OUTCOME.MISS, explanation: 'Kural tutuyordu, basmalıydın.' }
+    : { outcome: OUTCOME.IGNORE };
+}
+
+function render(ctx) {
+  const { round } = ctx;
+  const showMs = ctx.relaxed ? Math.round(round.showMs * 1.6) : round.showMs;
+  ctx.root.append(
+    h(
+      'div',
+      { class: `df-rule${round.ruleChanged ? ' is-new' : ''}` },
+      h('span', { class: 'label' }, round.ruleChanged ? 'Yeni kural' : 'Kural'),
+      h('strong', {}, `Bas: ${ruleText(round.rule)}`),
+    ),
+  );
+  const left = h(
+    'div',
+    { class: 'df-panel df-left', 'aria-label': 'Şekil' },
+    shapeSvg(round.stim, { size: 96 }),
+    h('span', { class: 'df-caption' }, describeItem(round.stim)),
+  );
+  const right = h('div', { class: 'df-panel df-right', 'aria-label': 'Sayı' }, h('span', { class: 'df-number' }, String(round.stim.number)));
+  const stage = h('div', { class: 'df-stage' }, left, right);
+  if (round.distractors.length) {
+    stage.append(
+      h(
+        'div',
+        { class: 'df-distractors', 'aria-hidden': 'true' },
+        round.distractors.map((d) => h('span', { class: 'df-d' }, shapeSvg(d, { size: 30, label: false }), String(d.number))),
+      ),
+    );
+  }
+  ctx.root.append(stage);
+  const press = h(
+    'button',
+    { type: 'button', class: 'btn btn-primary df-press', onclick: () => go() },
+    'BAS',
+    h('kbd', {}, 'Boşluk'),
+  );
+  ctx.root.append(press);
+  let done = false;
+  function go() {
+    if (done) return;
+    done = true;
+    press.disabled = true;
+    ctx.answer({ pressed: true });
+  }
+  ctx.onKey((e) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      go();
+      return true;
+    }
+    return false;
+  });
+  ctx.status(round.ruleChanged ? 'Kural değişti, dikkat!' : 'Kural tutuyorsa bas');
+  ctx.presented();
+  ctx.limit(showMs, () => {
+    done = true;
+    return { pressed: false };
+  });
+  press.focus({ preventScroll: true });
+}
+
+return { definition, TARGET_PROBABILITY, levelConfig, matches, isTarget, makeRule, ruleText, makeStimulus, createState, nextRound, evaluate, render };
+})();
+
+// ---- src/games/patternShift.js ----
+const __m17 = (() => {
+// C. Pattern Shift — Değişen Örüntü
+// Kart, gizli bir kurala göre (renk, şekil, adet, boyut) eşleştirilir. Kural, birkaç
+// doğru cevaptan sonra değişir; oyuncu eski kurala takılmadan yenisini bulmalıdır.
+// Her seçenek hedefle TAM OLARAK bir özellikte eşleşir; bu yüzden her kuralın tek cevabı vardır.
+
+const { OUTCOME } = __m4;
+const { SHAPE_IDS, COLOR_IDS, describeItem } = __m22;
+const { h, choiceGrid } = __m9;
+const { shapeSvg } = __m10;
+
+const DIMENSIONS = {
+  color: { name: 'Renk', values: COLOR_IDS.slice(0, 4) },
+  shape: { name: 'Şekil', values: SHAPE_IDS.slice(0, 4) },
+  count: { name: 'Adet', values: [1, 2, 3] },
+  size: { name: 'Boyut', values: ['small', 'large'] },
+};
+
+const SWITCH_BONUS = 40;
+
+const definition = {
+  id: 'patternShift',
+  name: 'Değişen Örüntü',
+  category: 'pattern',
+  icon: '⇄',
+  description: 'Gizli eşleştirme kuralını bul; kural değişince hemen fark et.',
+  howTo: [
+    'Üstteki kartı alttaki kartlardan biriyle eşleştir.',
+    'Eşleştirme kuralı renk, şekil, adet veya boyut olabilir.',
+    'Geri bildirime bakarak kuralı keşfet. Birkaç doğrudan sonra kural değişir!',
+    'İlk seviyelerde kural yazılı; sonra yalnızca değişim duyurulur, en sonunda hiç duyurulmaz.',
+    'Değişimden hemen sonra yeni kuralı bulursan bonus kazanırsın.',
+  ],
+  targetRtMs: 2200,
+};
+
+function levelConfig(level) {
+  const l = Math.min(10, Math.max(1, level));
+  return {
+    dims: l >= 6 ? ['color', 'shape', 'count', 'size'] : ['color', 'shape', 'count'],
+    visibility: l <= 2 ? 'shown' : l <= 4 ? 'announced' : 'silent',
+    streak: l <= 4 ? [4, 5] : [3, 5],
+  };
+}
+
+const other = (rng, values, not) => rng.pick(values.filter((v) => v !== not));
+
+function makeCards(rng, dims) {
+  const target = {
+    color: rng.pick(DIMENSIONS.color.values),
+    shape: rng.pick(DIMENSIONS.shape.values),
+    count: rng.pick(DIMENSIONS.count.values),
+    size: dims.includes('size') ? rng.pick(DIMENSIONS.size.values) : 'large',
+  };
+  const choices = dims.map((dim) => {
+    const card = { dim };
+    for (const d of Object.keys(DIMENSIONS)) {
+      if (d === 'size' && !dims.includes('size')) card.size = 'large';
+      else card[d] = d === dim ? target[d] : other(rng, DIMENSIONS[d].values, target[d]);
+    }
+    return card;
+  });
+  return { target, choices: rng.shuffle(choices) };
+}
+
+// Kartın verilen kurala göre eşleşen seçeneklerinin indeksleri (her zaman tek olmalı).
+const matchingChoices = (round, dim) =>
+  round.choices.map((c, i) => (c[dim] === round.target[dim] ? i : -1)).filter((i) => i >= 0);
+
+function createState() {
+  return { rule: null, previousRule: null, streak: 0, needed: 0, sinceChange: 0, changePending: true, changes: 0 };
+}
+
+function nextRound(state, { rng, level }) {
+  const cfg = levelConfig(level);
+  let ruleChanged = false;
+  if (state.changePending || !cfg.dims.includes(state.rule)) {
+    state.previousRule = state.rule;
+    state.rule = rng.pick(cfg.dims.filter((d) => d !== state.rule));
+    state.needed = rng.int(cfg.streak[0], cfg.streak[1]);
+    state.streak = 0;
+    state.sinceChange = 0;
+    state.changePending = false;
+    ruleChanged = state.previousRule != null;
+    if (ruleChanged) state.changes += 1;
+  }
+  const { target, choices } = makeCards(rng, cfg.dims);
+  const round = { target, choices, rule: state.rule, previousRule: state.previousRule, ruleChanged, visibility: cfg.visibility };
+  round.answer = matchingChoices(round, state.rule)[0];
+  round.key = `${state.changes}:${JSON.stringify(target)}`;
+  return round;
+}
+
+function evaluate(state, round, input) {
+  state.sinceChange += 1;
+  if (input.timeout) {
+    state.streak = 0;
+    return { outcome: OUTCOME.TIMEOUT };
+  }
+  if (input.choice === round.answer) {
+    state.streak += 1;
+    // Değişimden sonraki ilk iki denemede yeni kuralı bulmak = hızlı fark etme bonusu.
+    const quick = round.previousRule && state.changes > 0 && state.sinceChange <= 2 && state.streak === state.sinceChange;
+    if (state.streak >= state.needed) state.changePending = true;
+    return { outcome: OUTCOME.CORRECT, extraBonus: quick ? SWITCH_BONUS : 0, quickSwitch: !!quick };
+  }
+  state.streak = 0;
+  const chosen = round.choices[input.choice];
+  const perseverative = round.previousRule && chosen && chosen[round.previousRule] === round.target[round.previousRule];
+  return {
+    outcome: OUTCOME.WRONG,
+    perseverative: !!perseverative,
+    explanation: perseverative
+      ? 'Eski kurala göre seçtin. Kural değişti!'
+      : round.visibility === 'shown'
+        ? `Kural: ${DIMENSIONS[round.rule].name}.`
+        : 'Bu kural değil. Başka bir özelliği dene.',
+  };
+}
+
+function cardEl(card, big = false) {
+  const n = card.count;
+  const size = (big ? 46 : 34) * (card.size === 'small' ? 0.62 : 1);
+  return h(
+    'div',
+    { class: `ps-card${big ? ' ps-target' : ''}` },
+    Array.from({ length: n }, () => shapeSvg({ shape: card.shape, color: card.color }, { size, label: false })),
+  );
+}
+
+const cardLabel = (c) =>
+  `${describeItem({ shape: c.shape, color: c.color, count: c.count })}, ${c.size === 'small' ? 'küçük' : 'büyük'}`;
+
+function render(ctx) {
+  const { round } = ctx;
+  const ruleLine =
+    round.visibility === 'shown'
+      ? `Kural: ${DIMENSIONS[round.rule].name}`
+      : round.ruleChanged && round.visibility === 'announced'
+        ? 'Kural değişti!'
+        : 'Kuralı bul';
+  ctx.root.append(
+    h('div', { class: 'ps-head' }, h('span', { class: 'label' }, 'Bu kart'), cardEl(round.target, true)),
+    h('p', { class: 'visually-hidden' }, cardLabel(round.target)),
+  );
+  const grid = choiceGrid(
+    ctx,
+    round.choices.map((c, i) => ({ content: cardEl(c), label: cardLabel(c), value: i })),
+    (choice, i) => {
+      grid.mark(round.answer, 'is-correct');
+      if (i !== round.answer) grid.mark(i, 'is-wrong');
+      ctx.answer({ choice });
+    },
+    { columns: round.choices.length === 4 ? 2 : 3 },
+  );
+  ctx.root.append(grid.el);
+  ctx.status(ruleLine);
+  ctx.presented();
+}
+
+return { DIMENSIONS, SWITCH_BONUS, definition, levelConfig, makeCards, matchingChoices, createState, nextRound, evaluate, cardLabel, render };
+})();
+
+// ---- src/games/logicCircuit.js ----
+const __m18 = (() => {
+// D. Logic Circuit — Mantık Devresi
+// Basit mantık kapılarından oluşan bir devrenin çıkışını, eksik girişini veya
+// ÇIKIŞ=1 yapan giriş ikilisini bul. Üretilen her sorunun tek doğru cevabı doğrulanır.
+
+const { OUTCOME } = __m4;
+const { createRepeatGuard } = __m2;
+const { h, choiceGrid } = __m9;
+
+const GATES = {
+  AND: { name: 'VE', arity: 2, fn: (a, b) => a & b, hint: 'İkisi de 1 ise 1' },
+  OR: { name: 'VEYA', arity: 2, fn: (a, b) => a | b, hint: 'En az biri 1 ise 1' },
+  NOT: { name: 'DEĞİL', arity: 1, fn: (a) => 1 - a, hint: 'Tersini verir' },
+  XOR: { name: 'YA DA', arity: 2, fn: (a, b) => a ^ b, hint: 'Yalnızca biri 1 ise 1' },
+  NAND: { name: 'VE-DEĞİL', arity: 2, fn: (a, b) => 1 - (a & b), hint: 'İkisi de 1 ise 0, yoksa 1' },
+};
+
+const definition = {
+  id: 'logicCircuit',
+  name: 'Mantık Devresi',
+  category: 'logic',
+  icon: '⊻',
+  description: 'Mantık kapılarını izleyerek doğru çıkışı bul.',
+  howTo: [
+    'Girişler 1 (açık) ya da 0 (kapalı) değerindedir.',
+    'VE: ikisi de 1 ise 1 · VEYA: en az biri 1 ise 1 · DEĞİL: tersini verir.',
+    'YA DA: yalnızca biri 1 ise 1 · VE-DEĞİL: VE’nin tersi.',
+    'Kapıları yukarıdan aşağı sırayla hesapla. Yanlış cevaptan sonra çözüm adım adım gösterilir.',
+  ],
+  targetRtMs: 4500,
+};
+
+function levelConfig(level) {
+  const l = Math.min(10, Math.max(1, level));
+  const ops = l <= 1 ? ['AND', 'OR'] : l <= 2 ? ['AND', 'OR', 'NOT'] : l <= 7 ? ['AND', 'OR', 'NOT', 'XOR'] : Object.keys(GATES);
+  const shape = l <= 2 ? 'single' : l <= 6 ? 'chain' : 'tree';
+  const questions = l <= 3 ? ['output'] : l <= 5 ? ['output', 'missing'] : ['output', 'missing', 'combo'];
+  return { ops, shape, questions };
+}
+
+function evaluateCircuit(circuit, inputs) {
+  const values = { ...inputs };
+  for (const g of circuit.gates) values[g.id] = GATES[g.op].fn(...g.args.map((a) => values[a]));
+  return values;
+}
+
+function explain(circuit, inputs) {
+  const values = evaluateCircuit(circuit, inputs);
+  return circuit.gates.map(
+    (g) => `${g.id === 'OUT' ? 'ÇIKIŞ' : g.id} = ${GATES[g.op].name}(${g.args.map((a) => `${a}=${values[a]}`).join(', ')}) = ${values[g.id]}`,
+  );
+}
+
+function gate(rng, ops, id, args) {
+  const op = rng.pick(ops);
+  return GATES[op].arity === 1 ? { id, op, args: [args[0]] } : { id, op, args };
+}
+
+function makeCircuit(rng, cfg) {
+  const twoInput = cfg.ops.filter((o) => GATES[o].arity === 2);
+  if (cfg.shape === 'single') {
+    const g = gate(rng, cfg.ops, 'OUT', ['A', 'B']);
+    return { inputs: g.args.length === 1 ? ['A'] : ['A', 'B'], gates: [g] };
+  }
+  if (cfg.shape === 'chain') {
+    const g1 = gate(rng, twoInput, 'G1', ['A', 'B']);
+    const last = rng.chance(0.25) ? { id: 'OUT', op: 'NOT', args: ['G1'] } : gate(rng, twoInput, 'OUT', ['G1', 'C']);
+    return { inputs: last.args.includes('C') ? ['A', 'B', 'C'] : ['A', 'B'], gates: [g1, last] };
+  }
+  const g1 = gate(rng, twoInput, 'G1', ['A', 'B']);
+  const g2 = gate(rng, cfg.ops, 'G2', ['C', 'D']);
+  const out = gate(rng, twoInput, 'OUT', ['G1', 'G2']);
+  return { inputs: g2.args.length === 1 ? ['A', 'B', 'C'] : ['A', 'B', 'C', 'D'], gates: [g1, g2, out] };
+}
+
+const randomInputs = (rng, names) => Object.fromEntries(names.map((n) => [n, rng.int(0, 1)]));
+const COMBOS = [[0, 0], [0, 1], [1, 0], [1, 1]];
+
+// Soruyu üretir; tek cevaplı değilse null döner (çağıran yeniden dener).
+function makeQuestion(rng, circuit, type) {
+  const inputs = randomInputs(rng, circuit.inputs);
+  if (type === 'output') {
+    const out = evaluateCircuit(circuit, inputs).OUT;
+    return { type, inputs, options: [0, 1], answer: out, solution: inputs };
+  }
+  if (type === 'missing') {
+    const hidden = rng.pick(circuit.inputs);
+    const out = evaluateCircuit(circuit, inputs).OUT;
+    const fits = [0, 1].filter((v) => evaluateCircuit(circuit, { ...inputs, [hidden]: v }).OUT === out);
+    if (fits.length !== 1) return null;
+    return { type, inputs, hidden, out, options: [0, 1], answer: fits[0], solution: inputs };
+  }
+  // combo: A ve B bilinmiyor; ÇIKIŞ=want yapan TEK (A,B) ikilisini bul
+  if (!circuit.inputs.includes('B')) return null;
+  const want = rng.int(0, 1);
+  const fits = COMBOS.filter(([a, b]) => evaluateCircuit(circuit, { ...inputs, A: a, B: b }).OUT === want);
+  if (fits.length !== 1) return null;
+  const [a, b] = fits[0];
+  return {
+    type,
+    inputs,
+    want,
+    options: COMBOS.map(([x, y]) => `A=${x}, B=${y}`),
+    answer: `A=${a}, B=${b}`,
+    solution: { ...inputs, A: a, B: b },
+  };
+}
+
+const createState = () => ({ guard: createRepeatGuard({ memory: 20 }) });
+
+function nextRound(state, { rng, level }) {
+  const cfg = levelConfig(level);
+  return state.guard.take(
+    () => {
+      for (let i = 0; i < 100; i++) {
+        const circuit = makeCircuit(rng, cfg);
+        const q = makeQuestion(rng, circuit, rng.pick(cfg.questions));
+        if (q) {
+          const key = `${q.type}:${JSON.stringify(circuit.gates)}:${JSON.stringify(q.inputs)}:${q.hidden ?? ''}:${q.want ?? ''}`;
+          return { circuit, ...q, key };
+        }
+      }
+      // Her zaman tek cevaplı yedek soru
+      const circuit = { inputs: ['A', 'B'], gates: [{ id: 'OUT', op: 'AND', args: ['A', 'B'] }] };
+      return { circuit, type: 'output', inputs: { A: 1, B: 1 }, options: [0, 1], answer: 1, solution: { A: 1, B: 1 }, key: 'fallback' };
+    },
+    (r) => r.key,
+  );
+}
+
+function evaluate(_state, round, input) {
+  const steps = explain(round.circuit, round.solution);
+  if (input.timeout) return { outcome: OUTCOME.TIMEOUT, steps };
+  const value = round.options[input.choice];
+  return value === round.answer
+    ? { outcome: OUTCOME.CORRECT, steps }
+    : { outcome: OUTCOME.WRONG, steps, explanation: steps.join(' · ') };
+}
+
+function lamp(name, value) {
+  const hidden = value == null;
+  return h(
+    'span',
+    { class: `lc-input${hidden ? ' is-hidden' : value ? ' is-on' : ''}` },
+    h('span', { class: 'lc-name' }, name),
+    h('span', { class: 'lc-val' }, hidden ? '?' : String(value)),
+  );
+}
+
+function render(ctx) {
+  const { round } = ctx;
+  const unknown = new Set(round.type === 'missing' ? [round.hidden] : round.type === 'combo' ? ['A', 'B'] : []);
+  const inputs = h('div', { class: 'lc-inputs' }, round.circuit.inputs.map((n) => lamp(n, unknown.has(n) ? null : round.inputs[n])));
+  const gates = h(
+    'ol',
+    { class: 'lc-gates' },
+    round.circuit.gates.map((g) =>
+      h(
+        'li',
+        { class: 'lc-gate' },
+        h('span', { class: 'lc-out' }, g.id === 'OUT' ? 'ÇIKIŞ' : g.id),
+        ' = ',
+        h('span', { class: `lc-op op-${g.op}`, title: GATES[g.op].hint }, GATES[g.op].name),
+        ` ( ${g.args.join(', ')} )`,
+      ),
+    ),
+  );
+  const question =
+    round.type === 'output'
+      ? 'ÇIKIŞ kaç?'
+      : round.type === 'missing'
+        ? `ÇIKIŞ = ${round.out}. ${round.hidden} kaç olmalı?`
+        : `ÇIKIŞ = ${round.want} yapan tek A, B ikilisi hangisi?`;
+  ctx.root.append(h('div', { class: 'lc-board' }, inputs, gates), h('p', { class: 'lc-question' }, question));
+  const grid = choiceGrid(
+    ctx,
+    round.options.map((o, i) => ({ content: h('span', { class: 'mm-num' }, String(o)), label: String(o), value: i })),
+    (choice) => {
+      const correctIndex = round.options.indexOf(round.answer);
+      grid.mark(correctIndex, 'is-correct');
+      if (choice !== correctIndex) grid.mark(choice, 'is-wrong');
+      ctx.answer({ choice });
+    },
+    { columns: 2 },
+  );
+  ctx.root.append(grid.el);
+  ctx.status(question);
+  ctx.presented();
+}
+
+return { GATES, definition, levelConfig, evaluateCircuit, explain, makeCircuit, makeQuestion, createState, nextRound, evaluate, render };
+})();
+
+// ---- src/games/sequenceDetective.js ----
+const __m19 = (() => {
+// E. Sequence Detective — Dizi Dedektifi
+// Sayı, ok veya şekil dizisindeki kuralı bul ve eksik öğeyi seç.
+// Doğrulama: çeldiricilerin hiçbiri, desteklenen HİÇBİR kurala uyan bir dizi oluşturmaz.
+
+const { OUTCOME } = __m4;
+const { createRepeatGuard } = __m2;
+const { SHAPE_IDS, shapeName } = __m22;
+const { h, choiceGrid } = __m9;
+const { arrowSvg, shapeSvg } = __m10;
+
+const definition = {
+  id: 'sequenceDetective',
+  name: 'Dizi Dedektifi',
+  category: 'pattern',
+  icon: '⋯',
+  description: 'Dizinin kuralını çöz, eksik parçayı bul.',
+  howTo: [
+    'Bir dizi görünür; bir öğesi “?” ile gizlenmiştir.',
+    'Kural; sabit artış, katlanma, iki dizinin iç içe geçmesi, kareler, önceki ikisinin toplamı, ok dönüşü veya tekrar eden şekil olabilir.',
+    'Eksik öğeyi seçeneklerden seç.',
+  ],
+  targetRtMs: 4000,
+};
+
+// ---- Sayı kuralları: tam bir dizinin bu kurala uyup uymadığını söyler ----
+const diffs = (s) => s.slice(1).map((v, i) => v - s[i]);
+const allEqual = (list) => list.every((v) => v === list[0]);
+
+const NUMBER_RULES = {
+  arithmetic: (s) => allEqual(diffs(s)),
+  geometric: (s) => {
+    if (s[0] === 0 || s[1] % s[0] !== 0) return false;
+    const r = s[1] / s[0];
+    return Math.abs(r) >= 2 && s.every((v, i) => i === 0 || v === s[i - 1] * r);
+  },
+  alternating: (s) =>
+    s.length >= 6 && allEqual(diffs(s.filter((_, i) => i % 2 === 0))) && allEqual(diffs(s.filter((_, i) => i % 2 === 1))),
+  squares: (s) => {
+    const k = Math.round(Math.sqrt(s[0]));
+    return s[0] >= 0 && s.every((v, i) => v === (k + i) * (k + i));
+  },
+  fibonacci: (s) => s.every((v, i) => i < 2 || v === s[i - 1] + s[i - 2]),
+  secondOrder: (s) => {
+    const d = diffs(s);
+    const dd = diffs(d);
+    return dd.length >= 2 && allEqual(dd) && dd[0] !== 0;
+  },
+};
+
+const fitsAnyNumberRule = (s) => Object.values(NUMBER_RULES).some((fits) => fits(s));
+
+// Oklar: sabit açıyla dönme (mod 360)
+const fitsArrowRule = (s) => allEqual(s.slice(1).map((v, i) => (((v - s[i]) % 360) + 360) % 360));
+
+// Şekiller: 2, 3 veya 4 periyotla tekrar
+const fitsShapeRule = (s) => [2, 3, 4].some((p) => s.length >= 2 * p && s.every((v, i) => i < p || v === s[i - p]));
+
+function levelConfig(level) {
+  const l = Math.min(10, Math.max(1, level));
+  const rules = ['arithmetic'];
+  if (l >= 3) rules.push('geometric');
+  if (l >= 4) rules.push('alternating');
+  if (l >= 6) rules.push('squares');
+  if (l >= 7) rules.push('fibonacci');
+  if (l >= 8) rules.push('secondOrder');
+  const kinds = l === 1 ? ['number'] : l === 2 ? ['number', 'arrow'] : ['number', 'number', 'arrow', 'shape'];
+  return { rules, kinds, interior: l >= 5, length: l >= 9 ? 7 : l >= 4 ? 6 : 5, scale: l >= 9 ? 3 : l >= 6 ? 2 : 1, negative: l >= 2 };
+}
+
+function numberSequence(rng, rule, len, cfg) {
+  switch (rule) {
+    case 'arithmetic': {
+      const d = rng.int(1, 4 + 3 * cfg.scale) * (cfg.negative && rng.chance(0.3) ? -1 : 1);
+      const a = d < 0 ? rng.int(-d * len, -d * len + 20) : rng.int(1, 10 * cfg.scale);
+      return Array.from({ length: len }, (_, i) => a + i * d);
+    }
+    case 'geometric': {
+      const r = rng.pick(len >= 6 ? [2] : [2, 3]);
+      const a = rng.int(1, cfg.scale + 2);
+      return Array.from({ length: len }, (_, i) => a * r ** i);
+    }
+    case 'alternating': {
+      const x = rng.int(1, 10);
+      const y = rng.int(20, 40);
+      const dx = rng.int(1, 5);
+      const dy = rng.int(1, 5) * (rng.chance(0.5) ? -1 : 1);
+      return Array.from({ length: len }, (_, i) => (i % 2 === 0 ? x + (i / 2) * dx : y + ((i - 1) / 2) * dy));
+    }
+    case 'squares': {
+      const k = rng.int(1, 4 * cfg.scale);
+      return Array.from({ length: len }, (_, i) => (k + i) ** 2);
+    }
+    case 'fibonacci': {
+      const s = [rng.int(1, 5), rng.int(1, 8)];
+      while (s.length < len) s.push(s[s.length - 1] + s[s.length - 2]);
+      return s;
+    }
+    case 'secondOrder': {
+      const a = rng.int(1, 10);
+      const d0 = rng.int(1, 4);
+      const step = rng.int(1, 3);
+      const s = [a];
+      for (let i = 1; i < len; i++) s.push(s[i - 1] + d0 + step * (i - 1));
+      return s;
+    }
+    default:
+      throw new Error(`Bilinmeyen kural: ${rule}`);
+  }
+}
+
+function numberDistractors(rng, seq, missing) {
+  const truth = seq[missing];
+  const step = Math.abs(seq[1] - seq[0]) || 2;
+  const cands = rng.shuffle([1, -1, 2, -2, step, -step, 3, -3, 5, -5, 10, -10, step + 1, -(step + 1)]).map((d) => truth + d);
+  return cands.filter((v, i) => v !== truth && cands.indexOf(v) === i);
+}
+
+const fill = (seq, missing, value) => seq.map((v, i) => (i === missing ? value : v));
+
+// Kuralı ve seçenekleri doğrulanmış bir soru üretir; başaramazsa null.
+function makeQuestion(rng, level) {
+  const cfg = levelConfig(level);
+  const kind = rng.pick(cfg.kinds);
+  const len = kind === 'number' ? cfg.length : 6;
+  const missing = cfg.interior ? rng.int(1, len - 1) : len - 1;
+  let seq;
+  let rule;
+  let pool;
+  let fits;
+  if (kind === 'number') {
+    rule = rng.pick(cfg.rules);
+    seq = numberSequence(rng, rule, rule === 'alternating' ? Math.max(6, len) : len, cfg);
+    fits = fitsAnyNumberRule;
+    pool = numberDistractors(rng, seq, missing);
+  } else if (kind === 'arrow') {
+    rule = 'rotation';
+    const step = rng.pick([45, 90, 135, -45, -90]);
+    const start = rng.pick([0, 45, 90, 135, 180, 225, 270, 315]);
+    seq = Array.from({ length: len }, (_, i) => (((start + i * step) % 360) + 360) % 360);
+    fits = fitsArrowRule;
+    pool = rng.shuffle([0, 45, 90, 135, 180, 225, 270, 315]);
+  } else {
+    rule = 'cycle';
+    const period = rng.pick([2, 3]);
+    const unit = rng.sample(SHAPE_IDS, period);
+    seq = Array.from({ length: len }, (_, i) => unit[i % period]);
+    fits = fitsShapeRule;
+    pool = rng.shuffle(SHAPE_IDS);
+  }
+  const truth = seq[missing];
+  if (!fits(seq)) return null;
+  const distractors = pool.filter((v) => v !== truth && !fits(fill(seq, missing, v))).slice(0, 3);
+  if (distractors.length < 3) return null;
+  const options = rng.shuffle([truth, ...distractors]);
+  return {
+    kind,
+    rule,
+    terms: fill(seq, missing, null),
+    full: seq,
+    missing,
+    options,
+    answer: options.indexOf(truth),
+    key: `${kind}:${seq.join(',')}:${missing}`,
+  };
+}
+
+const createState = () => ({ guard: createRepeatGuard({ memory: 25 }) });
+
+function nextRound(state, { rng, level }) {
+  return state.guard.take(
+    () => {
+      for (let i = 0; i < 100; i++) {
+        const q = makeQuestion(rng, level);
+        if (q) return q;
+      }
+      throw new Error('Dizi sorusu üretilemedi');
+    },
+    (r) => r.key,
+  );
+}
+
+const RULE_TEXT = {
+  arithmetic: 'Her adımda aynı sayı ekleniyor/çıkarılıyor.',
+  geometric: 'Her adımda aynı sayıyla çarpılıyor.',
+  alternating: 'İki ayrı dizi iç içe ilerliyor.',
+  squares: 'Ardışık sayıların kareleri.',
+  fibonacci: 'Her sayı önceki ikisinin toplamı.',
+  secondOrder: 'Aradaki farklar düzenli artıyor.',
+  rotation: 'Ok her adımda aynı açıyla dönüyor.',
+  cycle: 'Şekiller aynı sırayla tekrar ediyor.',
+};
+const ruleText = (rule) => RULE_TEXT[rule];
+
+function evaluate(_state, round, input) {
+  if (input.timeout) return { outcome: OUTCOME.TIMEOUT };
+  return input.choice === round.answer
+    ? { outcome: OUTCOME.CORRECT }
+    : { outcome: OUTCOME.WRONG, explanation: RULE_TEXT[round.rule] };
+}
+
+const DIR_NAMES = { 0: 'yukarı', 45: 'sağ üst', 90: 'sağ', 135: 'sağ alt', 180: 'aşağı', 225: 'sol alt', 270: 'sol', 315: 'sol üst' };
+
+function termEl(kind, v, size) {
+  if (v == null) return h('span', { class: 'sd-term sd-missing', 'aria-label': 'eksik' }, '?');
+  if (kind === 'arrow') return h('span', { class: 'sd-term' }, arrowSvg(v, { size, title: DIR_NAMES[v] }));
+  if (kind === 'shape') return h('span', { class: 'sd-term' }, shapeSvg({ shape: v, color: 'blue' }, { size }));
+  return h('span', { class: 'sd-term sd-num' }, String(v));
+}
+
+const optionLabel = (kind, v) => (kind === 'arrow' ? DIR_NAMES[v] : kind === 'shape' ? shapeName(v) : String(v));
+
+function render(ctx) {
+  const { round } = ctx;
+  ctx.root.append(
+    h(
+      'div',
+      { class: `sd-seq sd-${round.kind}`, role: 'list', 'aria-label': 'Dizi' },
+      round.terms.map((v) => h('span', { role: 'listitem' }, termEl(round.kind, v, 44))),
+    ),
+  );
+  const grid = choiceGrid(
+    ctx,
+    round.options.map((v, i) => ({ content: termEl(round.kind, v, 48), label: optionLabel(round.kind, v), value: i })),
+    (choice, i) => {
+      grid.mark(round.answer, 'is-correct');
+      if (i !== round.answer) grid.mark(i, 'is-wrong');
+      ctx.answer({ choice });
+    },
+    { columns: 2 },
+  );
+  ctx.root.append(grid.el);
+  ctx.status('Eksik öğe hangisi?');
+  ctx.presented();
+}
+
+return { definition, NUMBER_RULES, fitsAnyNumberRule, fitsArrowRule, fitsShapeRule, levelConfig, makeQuestion, createState, nextRound, ruleText, evaluate, render };
+})();
+
+// ---- src/games/wordSort.js ----
+const __m20 = (() => {
+// Sözel kategori: kelimeyi doğru gruba ayır; ileri seviyede "hangisi farklı?" sorulur.
+// Kelime listeleri birbirinden ayrıktır; her kelimenin tek bir kategorisi vardır (testle doğrulanır).
+
+const { OUTCOME } = __m4;
+const { createRepeatGuard } = __m2;
+const { h, choiceGrid } = __m9;
+
+const CATEGORIES = {
+  meyve: { name: 'Meyve', words: ['elma', 'armut', 'kiraz', 'muz', 'çilek', 'karpuz', 'kavun', 'şeftali', 'erik', 'üzüm', 'incir', 'nar', 'ayva', 'vişne'] },
+  sebze: { name: 'Sebze', words: ['havuç', 'ıspanak', 'pırasa', 'patlıcan', 'kabak', 'lahana', 'brokoli', 'bezelye', 'enginar', 'turp', 'kereviz', 'bamya'] },
+  memeli: { name: 'Memeli', words: ['kedi', 'köpek', 'aslan', 'kaplan', 'zürafa', 'fil', 'tavşan', 'kurt', 'ayı', 'at', 'inek', 'koyun', 'tilki', 'yunus'] },
+  kus: { name: 'Kuş', words: ['serçe', 'kartal', 'güvercin', 'papağan', 'baykuş', 'leylek', 'karga', 'martı', 'şahin', 'kumru', 'flamingo', 'penguen'] },
+  meslek: { name: 'Meslek', words: ['doktor', 'öğretmen', 'aşçı', 'pilot', 'hemşire', 'avukat', 'mimar', 'terzi', 'berber', 'çiftçi', 'marangoz', 'itfaiyeci'] },
+  renk: { name: 'Renk', words: ['mavi', 'yeşil', 'kırmızı', 'sarı', 'mor', 'turuncu', 'pembe', 'gri', 'siyah', 'beyaz', 'lacivert', 'kahverengi'] },
+  ulke: { name: 'Ülke', words: ['Türkiye', 'Japonya', 'Mısır', 'Brezilya', 'Kanada', 'İtalya', 'Almanya', 'Hindistan', 'Meksika', 'Norveç', 'Fas', 'Peru'] },
+  muzik: { name: 'Müzik aleti', words: ['bağlama', 'gitar', 'keman', 'piyano', 'davul', 'flüt', 'ney', 'kanun', 'ud', 'zurna', 'trompet', 'akordeon'] },
+  tasit: { name: 'Taşıt', words: ['otobüs', 'tren', 'uçak', 'gemi', 'bisiklet', 'kamyon', 'tramvay', 'metro', 'motosiklet', 'helikopter', 'vapur', 'taksi'] },
+  mutfak: { name: 'Mutfak eşyası', words: ['tencere', 'tava', 'kaşık', 'çatal', 'bıçak', 'rende', 'kepçe', 'süzgeç', 'oklava', 'cezve', 'çaydanlık', 'tabak'] },
+  spor: { name: 'Spor dalı', words: ['futbol', 'basketbol', 'voleybol', 'tenis', 'yüzme', 'güreş', 'okçuluk', 'boks', 'eskrim', 'kayak', 'judo', 'hentbol'] },
+};
+
+// Anlamca yakın, ayırt etmesi daha zor kategori çiftleri (ileri seviye)
+const CLOSE_PAIRS = [['meyve', 'sebze'], ['memeli', 'kus'], ['tasit', 'spor'], ['muzik', 'mutfak']];
+
+const CATEGORY_IDS = Object.keys(CATEGORIES);
+
+const categoryOf = (word) => CATEGORY_IDS.filter((id) => CATEGORIES[id].words.includes(word));
+
+const definition = {
+  id: 'wordSort',
+  name: 'Kelime Kutuları',
+  category: 'verbal',
+  icon: 'Aa',
+  description: 'Kelimeyi doğru kutuya at; sonra farklı olanı bul.',
+  howTo: [
+    'Ortada bir kelime görünür. Hangi kutuya ait olduğunu seç.',
+    'Klavyede 1, 2, 3 veya ← → ok tuşlarını kullanabilirsin.',
+    'İleri seviyede dört kelimeden farklı olanı bulursun.',
+  ],
+  targetRtMs: 1800,
+};
+
+function levelConfig(level) {
+  const l = Math.min(10, Math.max(1, level));
+  return { mode: l <= 5 ? 'sort' : 'odd', bins: l <= 3 ? 2 : 3, close: l >= 8 || l === 3 };
+}
+
+const createState = () => ({ guard: createRepeatGuard({ memory: 40 }) });
+
+function pickCategories(rng, count, close) {
+  if (close) {
+    const pair = rng.pick(CLOSE_PAIRS);
+    const rest = rng.sample(CATEGORY_IDS.filter((c) => !pair.includes(c)), Math.max(0, count - 2));
+    return rng.shuffle([...pair, ...rest]).slice(0, count);
+  }
+  return rng.sample(CATEGORY_IDS, count);
+}
+
+function nextRound(state, { rng, level }) {
+  const cfg = levelConfig(level);
+  return state.guard.take(
+    () => {
+      if (cfg.mode === 'sort') {
+        const bins = pickCategories(rng, cfg.bins, cfg.close);
+        const correct = rng.pick(bins);
+        const word = rng.pick(CATEGORIES[correct].words);
+        return { mode: 'sort', word, bins, answer: bins.indexOf(correct), key: word };
+      }
+      const [main, odd] = pickCategories(rng, 2, cfg.close);
+      const words = rng.shuffle([...rng.sample(CATEGORIES[main].words, 3), rng.pick(CATEGORIES[odd].words)]);
+      const oddWord = words.find((w) => CATEGORIES[odd].words.includes(w));
+      return { mode: 'odd', words, main, odd, answer: words.indexOf(oddWord), key: `odd:${oddWord}` };
+    },
+    (r) => r.key,
+  );
+}
+
+function evaluate(_state, round, input) {
+  if (input.timeout) return { outcome: OUTCOME.TIMEOUT };
+  if (input.choice === round.answer) return { outcome: OUTCOME.CORRECT };
+  const explanation =
+    round.mode === 'sort'
+      ? `“${round.word}” bir ${CATEGORIES[round.bins[round.answer]].name.toLocaleLowerCase('tr')}.`
+      : `“${round.words[round.answer]}” ${CATEGORIES[round.odd].name.toLocaleLowerCase('tr')}; diğerleri ${CATEGORIES[round.main].name.toLocaleLowerCase('tr')}.`;
+  return { outcome: OUTCOME.WRONG, explanation };
+}
+
+function render(ctx) {
+  const { round } = ctx;
+  if (round.mode === 'sort') {
+    ctx.root.append(h('div', { class: 'ws-word', 'aria-live': 'polite' }, round.word));
+    const grid = choiceGrid(
+      ctx,
+      round.bins.map((id, i) => ({ content: h('span', { class: 'ws-bin' }, CATEGORIES[id].name), label: CATEGORIES[id].name, value: i })),
+      (choice, i) => {
+        grid.mark(round.answer, 'is-correct');
+        if (i !== round.answer) grid.mark(i, 'is-wrong');
+        ctx.answer({ choice });
+      },
+      { columns: round.bins.length, className: 'ws-bins' },
+    );
+    ctx.root.append(grid.el);
+    ctx.onKey((e) => {
+      if (round.bins.length !== 2) return false;
+      if (e.key === 'ArrowLeft') grid.buttons[0].click();
+      else if (e.key === 'ArrowRight') grid.buttons[1].click();
+      else return false;
+      return true;
+    });
+    ctx.status('Hangi kutuya ait?');
+  } else {
+    const grid = choiceGrid(
+      ctx,
+      round.words.map((w, i) => ({ content: h('span', { class: 'ws-bin' }, w), label: w, value: i })),
+      (choice, i) => {
+        grid.mark(round.answer, 'is-correct');
+        if (i !== round.answer) grid.mark(i, 'is-wrong');
+        ctx.answer({ choice });
+      },
+      { columns: 2 },
+    );
+    ctx.root.append(grid.el);
+    ctx.status('Hangisi farklı?');
+  }
+  ctx.presented();
+}
+
+return { CATEGORIES, CLOSE_PAIRS, CATEGORY_IDS, categoryOf, definition, levelConfig, createState, nextRound, evaluate, render };
+})();
+
+// ---- src/games/mentalRotation.js ----
+const __m21 = (() => {
+// Mekânsal akıl yürütme: döndürme mi, ayna mı?
+// Seçeneklerden yalnızca biri parçanın DÖNDÜRÜLMÜŞ hâlidir; diğerleri ayna görüntüsünün
+// döndürülmüş hâlleridir. Parça "kiral" seçilir (ayna görüntüsü hiçbir dönüşüne eşit değildir),
+// bu yüzden doğru cevap tektir.
+
+const { OUTCOME } = __m4;
+const { createRepeatGuard } = __m2;
+const { h, choiceGrid } = __m9;
+const { pieceSvg } = __m10;
+
+const definition = {
+  id: 'mentalRotation',
+  name: 'Döndür ya da Aynala',
+  category: 'spatial',
+  icon: '⟳',
+  description: 'Hangisi parçanın sadece döndürülmüş hâli? Gerisi ayna görüntüsü.',
+  howTo: [
+    'Üstte bir parça görünür.',
+    'Seçeneklerden yalnızca biri aynı parçanın döndürülmüş hâlidir.',
+    'Diğerleri ayna görüntüsüdür; döndürsen de üstteki parçayla çakışmaz.',
+  ],
+  targetRtMs: 3500,
+};
+
+function levelConfig(level) {
+  const l = Math.min(10, Math.max(1, level));
+  return { cells: l <= 2 ? 4 : l <= 5 ? 5 : l <= 7 ? 6 : 7, options: l <= 3 ? 3 : 4, allowZero: l <= 2 };
+}
+
+function normalize(cells) {
+  const minR = Math.min(...cells.map(([r]) => r));
+  const minC = Math.min(...cells.map(([, c]) => c));
+  return cells.map(([r, c]) => [r - minR, c - minC]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+}
+
+const keyOf = (cells) => normalize(cells).map(([r, c]) => `${r}.${c}`).join('|');
+const rotate = (cells) => normalize(cells.map(([r, c]) => [c, -r]));
+const mirror = (cells) => normalize(cells.map(([r, c]) => [r, -c]));
+
+function rotations(cells) {
+  const out = [normalize(cells)];
+  for (let i = 0; i < 3; i++) out.push(rotate(out[out.length - 1]));
+  return out;
+}
+
+const isChiral = (cells) => {
+  const m = keyOf(mirror(cells));
+  return !rotations(cells).some((r) => keyOf(r) === m);
+};
+
+function growPiece(rng, count) {
+  const cells = [[0, 0]];
+  const has = (r, c) => cells.some(([a, b]) => a === r && b === c);
+  while (cells.length < count) {
+    const [r, c] = rng.pick(cells);
+    const [dr, dc] = rng.pick([[1, 0], [-1, 0], [0, 1], [0, -1]]);
+    if (!has(r + dr, c + dc)) cells.push([r + dr, c + dc]);
+  }
+  return normalize(cells);
+}
+
+const boxSize = (cells) => Math.max(...cells.map(([r, c]) => Math.max(r, c))) + 1;
+
+function makeQuestion(rng, level) {
+  const cfg = levelConfig(level);
+  for (let i = 0; i < 200; i++) {
+    const piece = growPiece(rng, cfg.cells);
+    if (!isChiral(piece)) continue;
+    const rots = rotations(piece);
+    const mirrors = rotations(mirror(piece));
+    const mirrorKeys = new Set(mirrors.map(keyOf));
+    if (mirrorKeys.size < cfg.options - 1) continue;
+    const turn = cfg.allowZero ? rng.int(0, 3) : rng.int(1, 3);
+    const correct = rots[turn];
+    const distinct = [...new Map(mirrors.map((m) => [keyOf(m), m])).values()];
+    const distractors = rng.sample(distinct, cfg.options - 1);
+    const options = rng.shuffle([correct, ...distractors]);
+    return {
+      piece,
+      options,
+      answer: options.indexOf(correct),
+      turn: turn * 90,
+      size: Math.max(boxSize(piece), ...options.map(boxSize)),
+      key: keyOf(piece),
+    };
+  }
+  throw new Error('Parça üretilemedi');
+}
+
+const createState = () => ({ guard: createRepeatGuard({ memory: 20 }) });
+
+function nextRound(state, { rng, level }) {
+  return state.guard.take(() => makeQuestion(rng, level), (r) => r.key);
+}
+
+function evaluate(_state, round, input) {
+  if (input.timeout) return { outcome: OUTCOME.TIMEOUT };
+  return input.choice === round.answer
+    ? { outcome: OUTCOME.CORRECT }
+    : {
+        outcome: OUTCOME.WRONG,
+        explanation: `Seçtiğin parça ayna görüntüsüydü. Doğrusu ${round.turn}° döndürülmüş hâliydi.`,
+      };
+}
+
+function render(ctx) {
+  const { round } = ctx;
+  ctx.root.append(
+    h('div', { class: 'mr-ref' }, h('span', { class: 'label' }, 'Parça'), pieceSvg(round.piece, round.size, { size: 110, title: 'Referans parça' })),
+  );
+  const grid = choiceGrid(
+    ctx,
+    round.options.map((cells, i) => ({ content: pieceSvg(cells, round.size, { size: 80 }), label: `parça ${i + 1}`, value: i })),
+    (choice, i) => {
+      grid.mark(round.answer, 'is-correct');
+      if (i !== round.answer) grid.mark(i, 'is-wrong');
+      ctx.answer({ choice });
+    },
+    { columns: round.options.length === 4 ? 2 : 3 },
+  );
+  ctx.root.append(grid.el);
+  ctx.status('Hangisi sadece döndürülmüş?');
+  ctx.presented();
+}
+
+return { definition, levelConfig, normalize, keyOf, rotate, mirror, rotations, isChiral, growPiece, boxSize, makeQuestion, createState, nextRound, evaluate, render };
+})();
+
+// ---- src/games/index.js ----
+const __m8 = (() => {
+// Oyun kaydı. Yeni oyun eklemek için: src/games/ altına ortak arayüzü uygulayan
+// bir modül yaz ve aşağıdaki listeye ekle. Başka hiçbir dosyanın değişmesi gerekmez.
+//
+// Ortak arayüz:
+//   definition                         { id, name, category, icon, description, howTo[], targetRtMs, options? }
+//   createState({ rng, options })      oturum boyunca saklanan oyun durumu
+//   nextRound(state, { rng, level })   yeni tur verisi (saf veri, DOM yok); round.key tekrar kontrolü içindir
+//   evaluate(state, round, input)      { outcome, explanation?, extraBonus?, targetRtMs? }
+//   render(ctx)                        turu ctx.root içine çizer, ctx.answer(input) ile cevap verir
+
+const memoryGrid = __m13;
+const quickMatch = __m14;
+const mentalMath = __m15;
+const dualFocus = __m16;
+const patternShift = __m17;
+const logicCircuit = __m18;
+const sequenceDetective = __m19;
+const wordSort = __m20;
+const mentalRotation = __m21;
+
+const GAMES = [
+  memoryGrid,
+  quickMatch,
+  mentalMath,
+  dualFocus,
+  patternShift,
+  logicCircuit,
+  sequenceDetective,
+  wordSort,
+  mentalRotation,
+];
+
+const CATEGORIES = {
+  memory: { name: 'Hafıza' },
+  match: { name: 'Hızlı eşleştirme' },
+  numeric: { name: 'Sayısal' },
+  pattern: { name: 'Görsel örüntü' },
+  attention: { name: 'Dikkat ve tepki' },
+  verbal: { name: 'Sözel' },
+  spatial: { name: 'Mekânsal' },
+  logic: { name: 'Mantık' },
+};
+
+const CATEGORY_IDS = Object.keys(CATEGORIES);
+
+const gameById = (id) => GAMES.find((g) => g.definition.id === id) || null;
+const gamesInCategory = (cat) => GAMES.filter((g) => g.definition.category === cat);
+
+return { GAMES, CATEGORIES, CATEGORY_IDS, gameById, gamesInCategory };
+})();
+
+// ---- src/ui/audio.js ----
+const __m11 = (() => {
+// AudioManager: Web Audio ile sentezlenen kısa sesler. Ses dosyası yoktur.
+// AudioContext ilk kullanıcı etkileşiminden sonra, ilk çalmada oluşturulur.
+
+const TONES = {
+  correct: [[660, 0, 0.08], [880, 0.07, 0.12]],
+  wrong: [[196, 0, 0.18, 'square']],
+  tick: [[1200, 0, 0.03]],
+  level: [[523, 0, 0.08], [659, 0.08, 0.08], [784, 0.16, 0.14]],
+  start: [[440, 0, 0.06], [660, 0.1, 0.1]],
+  end: [[784, 0, 0.1], [659, 0.12, 0.1], [523, 0.24, 0.2]],
+  count: [[520, 0, 0.06]],
+};
+
+function createAudio(isEnabled = () => true) {
+  let ctx = null;
+  const ensure = () => {
+    if (ctx) return ctx;
+    const AC = globalThis.AudioContext || globalThis.webkitAudioContext;
+    if (!AC) return null;
+    try {
+      ctx = new AC();
+    } catch {
+      ctx = null;
+    }
+    return ctx;
+  };
+  return {
+    play(name) {
+      if (!isEnabled()) return;
+      const tones = TONES[name];
+      const ac = tones && ensure();
+      if (!ac) return;
+      if (ac.state === 'suspended') ac.resume().catch(() => {});
+      const t0 = ac.currentTime + 0.01;
+      for (const [freq, at, dur, type = 'sine'] of tones) {
+        const osc = ac.createOscillator();
+        const gain = ac.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, t0 + at);
+        gain.gain.exponentialRampToValueAtTime(type === 'square' ? 0.05 : 0.12, t0 + at + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + at + dur);
+        osc.connect(gain).connect(ac.destination);
+        osc.start(t0 + at);
+        osc.stop(t0 + at + dur + 0.02);
+      }
+    },
+  };
+}
+
+return { createAudio };
+})();
+
+// ---- src/ui/app.js ----
+const __m1 = (() => {
+// Uygulama kabuğu: ekranlar (menü, tanıtım, oyun, sonuç, istatistik, ayarlar) ve oyun döngüsü.
+
+const { createRng } = __m2;
+const { createSession, PHASE } = __m3;
+const { OUTCOME } = __m4;
+const { createTimer } = __m5;
+const { sessionSummary, categoryStrengths, trend } = __m6;
+const { planChallenge, summarizeChallenge } = __m7;
+const { GAMES, CATEGORIES, CATEGORY_IDS, gameById, gamesInCategory } = __m8;
+const { h, clear } = __m9;
+const { s } = __m10;
+const { createAudio } = __m11;
+
+const RELAXED_ROUNDS = 12;
+
+const fmtMs = (ms) => (ms == null ? '—' : `${(ms / 1000).toFixed(2).replace('.', ',')} sn`);
+const fmtPct = (v) => (v == null ? '—' : `%${String(v).replace('.', ',')}`);
+const fmtInt = (v) => (v == null ? '—' : Math.round(v).toLocaleString('tr-TR'));
+
+function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis) }) {
+  const audio = createAudio(() => repo.settings.sound);
+  const screen = root.querySelector('#screen');
+  const live = root.querySelector('#live');
+  let teardown = null; // aktif ekranın temizlik fonksiyonu
+
+  const announce = (text) => {
+    live.textContent = '';
+    setTimeout(() => (live.textContent = text), 30);
+  };
+
+  const reducedMotion = () => {
+    const pref = repo.settings.reducedMotion;
+    if (pref === 'on') return true;
+    if (pref === 'off') return false;
+    return !!media?.('(prefers-reduced-motion: reduce)').matches;
+  };
+
+  function applySettings() {
+    const html = document.documentElement;
+    const theme = repo.settings.theme;
+    if (theme === 'auto') delete html.dataset.theme;
+    else html.dataset.theme = theme;
+    html.classList.toggle('reduce-motion', reducedMotion());
+    html.classList.toggle('motion-ok', repo.settings.reducedMotion === 'off');
+  }
+
+  function show(build, { focus = true } = {}) {
+    if (teardown) teardown();
+    teardown = null;
+    clear(screen);
+    const result = build(screen);
+    if (typeof result === 'function') teardown = result;
+    if (focus) {
+      const heading = screen.querySelector('h1, h2');
+      (heading || screen).setAttribute('tabindex', '-1');
+      (heading || screen).focus({ preventScroll: false });
+    }
+    window.scrollTo?.(0, 0);
+  }
+
+  // ---------------- Menü ----------------
+  function menu() {
+    show((el) => {
+      const sum = sessionSummary(repo.data.sessions);
+      el.append(
+        h(
+          'section',
+          { class: 'hero' },
+          h('h1', { class: 'hero-title' }, 'Kısa bir mola, ', h('span', { class: 'hl' }, 'keskin'), ' bir zihin.'),
+          h('p', { class: 'hero-sub' }, `Bugün ${sum.today} oturum · Son 7 gün ${sum.week} oturum`),
+          h(
+            'div',
+            { class: 'hero-actions' },
+            h('button', { type: 'button', class: 'btn btn-primary', id: 'quick-start', onclick: quickStart }, 'Hızlı başlat'),
+            h(
+              'button',
+              { type: 'button', class: 'btn btn-secondary', id: 'challenge-start', onclick: challengeIntro },
+              'Uyarlanabilir Mücadele',
+            ),
+          ),
+        ),
+      );
+      const list = h('section', { class: 'game-list', 'aria-labelledby': 'games-h' }, h('h2', { id: 'games-h', class: 'section-title' }, 'Oyunlar'));
+      for (const cat of CATEGORY_IDS) {
+        const games = gamesInCategory(cat);
+        if (!games.length) continue;
+        list.append(
+          h(
+            'div',
+            { class: 'cat' },
+            h('h3', { class: 'cat-title' }, CATEGORIES[cat].name),
+            games.map((g) => gameRow(g)),
+          ),
+        );
+      }
+      el.append(list);
+      if (!repo.persistent) {
+        el.append(h('p', { class: 'note' }, 'Not: Tarayıcı yerel kaydı engelliyor. Rekorlar bu sekme kapanınca silinir.'));
+      }
+    }, { focus: false });
+  }
+
+  function gameRow(game) {
+    const d = game.definition;
+    const rec = repo.data.games[d.id];
+    const best = rec?.best;
+    return h(
+      'button',
+      { type: 'button', class: 'game-row', onclick: () => intro(d.id), 'aria-label': `${d.name}. ${d.description}${best ? ` En iyi skor ${best.score}.` : ''}` },
+      h('span', { class: 'game-icon', 'aria-hidden': 'true' }, d.icon),
+      h('span', { class: 'game-text' }, h('strong', {}, d.name), h('span', {}, d.description)),
+      h('span', { class: 'game-best' }, best ? h('span', {}, h('small', {}, 'Rekor'), fmtInt(best.score)) : h('small', {}, 'Yeni')),
+    );
+  }
+
+  function quickStart() {
+    const today = new Date().setHours(0, 0, 0, 0);
+    const playedToday = new Set(repo.data.sessions.filter((x) => x.at >= today).map((x) => x.gameId));
+    const fresh = GAMES.filter((g) => !playedToday.has(g.definition.id));
+    const pool = fresh.length ? fresh : GAMES;
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    intro(pick.definition.id);
+  }
+
+  // ---------------- Tanıtım ----------------
+  function startLevelFor(id) {
+    const sl = repo.settings.startLevel;
+    if (sl !== 'auto') return sl;
+    const rec = repo.data.games[id];
+    // Son seviyenin bir altından başla: kısa bir ısınma, sonra uyarlama devreye girer.
+    return rec ? Math.max(1, rec.lastLevel - 1) : 1;
+  }
+
+  function intro(id, { challenge = null } = {}) {
+    const game = gameById(id);
+    const d = game.definition;
+    const rec = repo.data.games[id];
+    const firstTime = !rec?.tutorialSeen;
+    const options = { ...repo.getOptions(id) };
+    show((el) => {
+      const optionEls = (d.options || []).map((opt) => {
+        const current = options[opt.id] || opt.default;
+        return h(
+          'fieldset',
+          { class: 'seg' },
+          h('legend', {}, opt.label),
+          opt.choices.map((c) =>
+            h(
+              'label',
+              { class: 'seg-item' },
+              h('input', {
+                type: 'radio',
+                name: `opt-${opt.id}`,
+                id: `opt-${opt.id}-${c.value}`,
+                value: c.value,
+                checked: c.value === current,
+                onchange: () => {
+                  options[opt.id] = c.value;
+                  repo.setOption(id, opt.id, c.value);
+                },
+              }),
+              h('span', {}, c.label),
+            ),
+          ),
+        );
+      });
+      const level = challenge ? challenge.step.startLevel : startLevelFor(id);
+      el.append(
+        h(
+          'section',
+          { class: 'intro' },
+          challenge
+            ? h('p', { class: 'eyebrow' }, `Mücadele ${challenge.index + 1}/${challenge.plan.length} · ${challenge.step.categoryName}`)
+            : h('p', { class: 'eyebrow' }, CATEGORIES[d.category].name),
+          h('h1', { class: 'intro-title' }, h('span', { class: 'game-icon big', 'aria-hidden': 'true' }, d.icon), d.name),
+          challenge ? h('p', { class: 'reason' }, `Neden bu oyun: ${challenge.step.reason}`) : null,
+          h('ol', { class: 'howto' }, d.howTo.map((line) => h('li', {}, line))),
+          optionEls,
+          h(
+            'dl',
+            { class: 'facts' },
+            h('div', {}, h('dt', {}, 'Süre'), h('dd', {}, challenge ? `${challenge.step.durationMs / 1000} sn` : repo.settings.relaxed ? `${RELAXED_ROUNDS} tur, süresiz` : `${repo.settings.durationSec} sn`)),
+            h('div', {}, h('dt', {}, 'Başlangıç seviyesi'), h('dd', {}, String(level))),
+            h('div', {}, h('dt', {}, 'Rekor'), h('dd', {}, rec?.best ? fmtInt(rec.best.score) : '—')),
+          ),
+          firstTime ? h('p', { class: 'note' }, 'İlk oynayışın: önce puanlanmayan bir alıştırma turu var.') : null,
+          h(
+            'div',
+            { class: 'row-actions' },
+            h('button', {
+              type: 'button',
+              class: 'btn btn-primary',
+              id: 'start-game',
+              onclick: () => play(id, { options, challenge, practiceRounds: firstTime ? 1 : 0, level }),
+            }, 'Başla'),
+            h('button', { type: 'button', class: 'btn btn-ghost', onclick: challenge ? () => abandonChallenge(challenge) : menu }, challenge ? 'Mücadeleyi bırak' : 'Geri'),
+          ),
+        ),
+      );
+      const start = el.querySelector('#start-game');
+      setTimeout(() => start.focus(), 0);
+    });
+  }
+
+  // ---------------- Oyun ----------------
+  function play(id, { options = {}, challenge = null, practiceRounds = 0, level = 1 }) {
+    const game = gameById(id);
+    const d = game.definition;
+    const settings = repo.settings;
+    const relaxed = settings.relaxed && !challenge;
+    const seed = settings.seed ? `${settings.seed}:${id}` : `${Date.now()}:${Math.random()}`;
+    const playClock = createTimer({ durationMs: Infinity, now: () => performance.now() });
+    playClock.start();
+    const now = () => playClock.elapsed();
+    const rec = repo.data.games[id];
+    const session = createSession({
+      game,
+      rng: createRng(seed),
+      startLevel: level,
+      adaptive: settings.adaptive,
+      durationMs: challenge ? challenge.step.durationMs : relaxed ? Infinity : settings.durationSec * 1000,
+      rounds: RELAXED_ROUNDS,
+      practiceRounds,
+      options,
+      best: rec?.best || null,
+      now,
+    });
+
+    show((el) => {
+      let raf = 0;
+      let disposed = false;
+      let scheduled = [];
+      let keyHandlers = [];
+      let roundLimit = null;
+      let answered = false;
+      let finished = false;
+
+      const hudScore = h('span', { class: 'hud-val', id: 'hud-score' }, '0');
+      const hudLevel = h('span', { class: 'hud-val' }, String(level));
+      const hudStreak = h('span', { class: 'hud-val' }, '0');
+      const timeText = h('span', { class: 'time-text', 'aria-hidden': 'true' }, '');
+      const timeFill = h('span', { class: 'time-fill' });
+      const roundFill = h('span', { class: 'round-fill' });
+      const status = h('p', { class: 'status', 'aria-live': 'polite' }, '');
+      const stage = h('div', { class: 'stage', id: 'stage' });
+      const feedback = h('div', { class: 'feedback', role: 'status', 'aria-live': 'assertive' });
+      const banner = h('p', { class: 'banner', hidden: true });
+      const pauseBtn = h('button', { type: 'button', class: 'btn btn-ghost btn-sm', id: 'pause', onclick: () => togglePause() }, 'Duraklat');
+      const pauseLayer = h(
+        'div',
+        { class: 'pause-layer', hidden: true, role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'pause-h' },
+        h('h2', { id: 'pause-h' }, 'Duraklatıldı'),
+        h('div', { class: 'row-actions' },
+          h('button', { type: 'button', class: 'btn btn-primary', id: 'resume', onclick: () => togglePause() }, 'Devam et'),
+          h('button', { type: 'button', class: 'btn btn-ghost', id: 'quit', onclick: () => finish(true) }, 'Oyunu bitir'),
+        ),
+      );
+
+      el.append(
+        h(
+          'section',
+          { class: 'play', 'aria-label': d.name },
+          h(
+            'div',
+            { class: 'hud' },
+            pauseBtn,
+            h('span', { class: 'hud-item' }, h('small', {}, 'Seviye'), hudLevel),
+            h('span', { class: 'hud-item' }, h('small', {}, 'Seri'), hudStreak),
+            h('span', { class: 'hud-item hud-score' }, h('small', {}, 'Skor'), hudScore),
+          ),
+          h(
+            'div',
+            {
+              class: `timebar${session.timed ? '' : ' is-rounds'}`,
+              role: 'progressbar',
+              'aria-label': session.timed ? 'Kalan süre' : 'Tur ilerlemesi',
+              'aria-valuemin': 0,
+              'aria-valuemax': 100,
+            },
+            timeFill,
+            timeText,
+          ),
+          h('div', { class: 'roundbar', 'aria-hidden': 'true' }, roundFill),
+          banner,
+          h('h1', { class: 'visually-hidden' }, d.name),
+          status,
+          stage,
+          feedback,
+          pauseLayer,
+        ),
+      );
+
+      const later = (fn, ms) => scheduled.push({ at: now() + ms, fn });
+
+      const onKey = (e) => {
+        if (e.key === 'Escape') {
+          togglePause();
+          e.preventDefault();
+          return;
+        }
+        if (paused) return;
+        for (const handler of keyHandlers) {
+          if (handler(e)) {
+            e.preventDefault();
+            return;
+          }
+        }
+      };
+      document.addEventListener('keydown', onKey);
+
+      let paused = false;
+      function togglePause() {
+        if (finished) return;
+        paused = !paused;
+        if (!paused) {
+          session.resume();
+          playClock.resume();
+          pauseLayer.hidden = true;
+          stage.inert = false;
+          pauseBtn.focus();
+        } else {
+          session.pause();
+          playClock.pause();
+          pauseLayer.hidden = false;
+          stage.inert = true;
+          pauseLayer.querySelector('#resume').focus();
+        }
+      }
+
+      function updateHud() {
+        hudScore.textContent = fmtInt(session.score);
+        hudLevel.textContent = String(session.level);
+        hudStreak.textContent = String(session.streak);
+      }
+
+      function tick() {
+        if (disposed) return;
+        raf = requestAnimationFrame(tick);
+        const t = now();
+        // zamanlanmış işler (duraklatmaya duyarlı saat)
+        if (scheduled.length) {
+          const due = scheduled.filter((j) => j.at <= t);
+          scheduled = scheduled.filter((j) => j.at > t);
+          due.forEach((j) => j.fn());
+        }
+        if (session.timed && !session.practice) {
+          const frac = session.timer.fraction();
+          timeFill.style.transform = `scaleX(${frac})`;
+          const secs = Math.ceil(session.timer.remaining() / 1000);
+          timeText.textContent = `${secs} sn`;
+          timeFill.parentElement.setAttribute('aria-valuenow', String(Math.round(frac * 100)));
+          timeFill.parentElement.classList.toggle('is-low', secs <= 10);
+          if (session.timer.expired() && (session.phase === PHASE.AWAITING || session.phase === PHASE.PRESENTING)) {
+            finish(false);
+            return;
+          }
+        } else if (!session.timed) {
+          const frac = Math.min(1, session.roundNumber / RELAXED_ROUNDS);
+          timeFill.style.transform = `scaleX(${frac})`;
+          timeText.textContent = `${session.roundNumber}/${RELAXED_ROUNDS}`;
+        } else {
+          timeText.textContent = 'Alıştırma';
+        }
+        if (roundLimit) {
+          roundFill.style.transform = `scaleX(${roundLimit.timer.fraction()})`;
+          if (roundLimit.timer.expired()) {
+            const map = roundLimit.map;
+            roundLimit = null;
+            answer(map ? map() : { timeout: true });
+          }
+        }
+      }
+
+      function newRound() {
+        const round = session.nextRound();
+        if (!round) finish(false);
+        else renderRound(round);
+      }
+
+      function renderRound(round) {
+        scheduled = [];
+        keyHandlers = [];
+        roundLimit = null;
+        roundFill.style.transform = 'scaleX(0)';
+        answered = false;
+        feedback.className = 'feedback';
+        clear(feedback);
+        clear(stage);
+        banner.hidden = !session.practice;
+        banner.textContent = session.practice ? 'ALIŞTIRMA TURU · puan sayılmaz, süre işlemez' : '';
+        updateHud();
+        game.render({
+          root: stage,
+          round,
+          level: session.level,
+          practice: session.practice,
+          relaxed,
+          reducedMotion: reducedMotion(),
+          answer,
+          presented: () => session.phase === PHASE.PRESENTING && session.presented(),
+          later,
+          onKey: (fn) => keyHandlers.push(fn),
+          status: (text) => (status.textContent = text),
+          sound: (name) => audio.play(name),
+          limit: (ms, map) => {
+            roundLimit = { timer: createTimer({ durationMs: ms, now }), map };
+            roundLimit.timer.start();
+          },
+        });
+      }
+
+      function answer(input) {
+        if (answered || finished || paused) return;
+        answered = true;
+        roundLimit = null;
+        const res = session.submit(input);
+        updateHud();
+        const ok = res.outcome === OUTCOME.CORRECT;
+        const ignore = res.outcome === OUTCOME.IGNORE;
+        const label = {
+          [OUTCOME.CORRECT]: 'Doğru',
+          [OUTCOME.WRONG]: 'Yanlış',
+          [OUTCOME.FALSE_ALARM]: 'Yanlış alarm',
+          [OUTCOME.MISS]: 'Kaçırdın',
+          [OUTCOME.TIMEOUT]: 'Süre doldu',
+          [OUTCOME.SKIP]: 'Boş geçildi',
+        }[res.outcome];
+        if (!ignore) {
+          feedback.className = `feedback ${ok ? 'is-ok' : 'is-bad'}`;
+          clear(feedback);
+          feedback.append(
+            h('span', { class: 'fb-icon', 'aria-hidden': 'true' }, ok ? '✓' : '✕'),
+            h('strong', {}, label),
+            res.practice ? h('span', { class: 'fb-pts' }, 'alıştırma') : h('span', { class: 'fb-pts' }, `${res.points >= 0 ? '+' : ''}${res.points}`),
+            res.quickSwitch ? h('span', { class: 'fb-note' }, 'Kural değişimini hemen fark ettin!') : null,
+            !ok && res.explanation ? h('span', { class: 'fb-note' }, res.explanation) : null,
+          );
+          audio.play(ok ? 'correct' : 'wrong');
+        }
+        if (res.levelChange.changed) {
+          const up = res.levelChange.changed > 0;
+          const toast = h('span', { class: `fb-level ${up ? 'up' : 'down'}` }, `Seviye ${res.levelChange.level} ${up ? '↑' : '↓'} · ${res.levelChange.reason}`);
+          feedback.append(toast);
+          if (up) audio.play('level');
+          announce(toast.textContent);
+        }
+        const practiceDone = res.practice && !session.practice;
+        if (practiceDone) feedback.append(h('span', { class: 'fb-note' }, 'Alıştırma bitti. Şimdi gerçek oyun başlıyor!'));
+        const long = !ok && res.explanation;
+        const delay = ignore ? 220 : practiceDone ? 1800 : long ? (res.steps ? 2800 : 1700) : ok ? 520 : 900;
+        if (relaxed && long) {
+          const cont = h('button', { type: 'button', class: 'btn btn-secondary btn-sm', id: 'continue', onclick: () => newRound() }, 'Devam');
+          feedback.append(cont);
+          keyHandlers = [(e) => (e.key === 'Enter' ? (cont.click(), true) : false)];
+          cont.focus();
+        } else {
+          later(() => {
+            if (!finished) newRound();
+          }, delay);
+        }
+      }
+
+      function finish(quit) {
+        if (finished) return;
+        finished = true;
+        session.end();
+        const result = session.result();
+        if (quit && result.answered === 0) {
+          cleanup();
+          if (challenge) abandonChallenge(challenge);
+          else intro(id);
+          return;
+        }
+        repo.markTutorialSeen(id);
+        const previousBest = repo.recordResult(result, { category: d.category });
+        audio.play('end');
+        cleanup();
+        if (challenge) challengeNext(challenge, result);
+        else resultScreen(result, previousBest);
+      }
+
+      function cleanup() {
+        disposed = true;
+        cancelAnimationFrame(raf);
+        document.removeEventListener('keydown', onKey);
+      }
+
+      // 3-2-1 geri sayım, sonra ilk tur
+      const count = h('div', { class: 'countdown', 'aria-live': 'assertive' });
+      stage.append(count);
+      const steps = reducedMotion() ? ['Hazır'] : ['3', '2', '1'];
+      steps.forEach((txt, i) =>
+        later(() => {
+          count.textContent = txt;
+          audio.play('count');
+        }, i * 650),
+      );
+      later(() => {
+        audio.play('start');
+        renderRound(session.start());
+      }, steps.length * 650);
+      raf = requestAnimationFrame(tick);
+
+      return () => {
+        if (!finished) {
+          finished = true;
+          session.end();
+        }
+        cleanup();
+      };
+    });
+  }
+
+  // ---------------- Sonuç ----------------
+  function resultRows(r) {
+    return [
+      ['Doğruluk', fmtPct(r.accuracy), r.records.accuracy],
+      ['Doğru / Yanlış', `${r.counts.correct} / ${r.answered - r.counts.correct}`],
+      ['Ort. tepki süresi', fmtMs(r.avgRtMs), r.records.avgRtMs],
+      ['Süre', fmtMs(r.durationMs)],
+      ['En uzun seri', String(r.bestStreak)],
+      ['Ulaşılan seviye', `${r.maxLevel}`],
+    ];
+  }
+
+  function resultScreen(result, previousBest) {
+    const d = gameById(result.gameId).definition;
+    show((el) => {
+      const isRecord = result.records.score;
+      const errors = [
+        ['Yanlış', result.counts.wrong],
+        ['Yanlış alarm', result.counts.falseAlarm],
+        ['Kaçırılan', result.counts.miss],
+        ['Süre aşımı', result.counts.timeout],
+        ['Boş', result.counts.skip],
+      ].filter(([, n]) => n > 0);
+      el.append(
+        h(
+          'section',
+          { class: 'result' },
+          h('p', { class: 'eyebrow' }, d.name),
+          h('h1', { class: 'result-score' }, h('small', {}, 'Skor'), fmtInt(result.score)),
+          isRecord
+            ? h('p', { class: 'badge badge-record' }, previousBest ? `Yeni rekor! Öncekinden ${fmtInt(result.score - previousBest.score)} fazla.` : 'İlk rekorun!')
+            : result.toBest > 0
+              ? h('p', { class: 'badge' }, `Rekoruna ${fmtInt(result.toBest)} puan kaldı (${fmtInt(previousBest?.score)}).`)
+              : null,
+          h(
+            'dl',
+            { class: 'stat-grid' },
+            resultRows(result).map(([k, v, rec]) => h('div', {}, h('dt', {}, k), h('dd', {}, v, rec ? h('span', { class: 'pill' }, 'rekor') : null))),
+          ),
+          errors.length ? h('p', { class: 'muted' }, `Hata dağılımı: ${errors.map(([k, n]) => `${k} ${n}`).join(' · ')}`) : null,
+          h(
+            'div',
+            { class: 'row-actions' },
+            h('button', { type: 'button', class: 'btn btn-primary', id: 'again', onclick: () => intro(result.gameId) }, 'Tekrar oyna'),
+            h('button', { type: 'button', class: 'btn btn-ghost', onclick: menu }, 'Menü'),
+          ),
+        ),
+      );
+      setTimeout(() => el.querySelector('#again')?.focus(), 0);
+    });
+  }
+
+  // ---------------- Uyarlanabilir Mücadele ----------------
+  function challengeIntro() {
+    const fixed = repo.settings.startLevel === 'auto' ? null : repo.settings.startLevel;
+    const plan = planChallenge({
+      games: GAMES,
+      categories: CATEGORIES,
+      data: repo.data,
+      rng: createRng(repo.settings.seed ? `${repo.settings.seed}:challenge` : Date.now()),
+      adaptive: repo.settings.adaptive,
+      fixedLevel: fixed,
+    });
+    show((el) => {
+      el.append(
+        h(
+          'section',
+          { class: 'intro' },
+          h('p', { class: 'eyebrow' }, `${plan.length} oyun · her biri ${plan[0].durationMs / 1000} sn`),
+          h('h1', { class: 'intro-title' }, 'Uyarlanabilir Mücadele'),
+          h(
+            'p',
+            {},
+            repo.settings.adaptive
+              ? 'Oyunlar geçmiş sonuçlarına göre seçildi: bir ısınma, gelişime açık alanların ve henüz denemediklerin. Zorluk; doğruluğuna, hızına ve son turlarına göre oyun içinde ayarlanır.'
+              : 'Otomatik uyarlama ayarlardan kapalı. Oyunlar rastgele seçildi ve seviye sabit kalır.',
+          ),
+          h(
+            'ol',
+            { class: 'plan' },
+            plan.map((step) =>
+              h('li', {}, h('strong', {}, gameById(step.gameId).definition.name), h('span', { class: 'muted' }, ` · ${step.categoryName} · seviye ${step.startLevel}`), h('span', { class: 'reason' }, step.reason)),
+            ),
+          ),
+          h(
+            'div',
+            { class: 'row-actions' },
+            h('button', { type: 'button', class: 'btn btn-primary', id: 'start-challenge', onclick: () => challengeStep({ plan, index: 0, results: [] }) }, 'Mücadeleyi başlat'),
+            h('button', { type: 'button', class: 'btn btn-ghost', onclick: menu }, 'Geri'),
+          ),
+        ),
+      );
+      setTimeout(() => el.querySelector('#start-challenge')?.focus(), 0);
+    });
+  }
+
+  function challengeStep(state) {
+    const step = state.plan[state.index];
+    intro(step.gameId, { challenge: { ...state, step } });
+  }
+
+  function challengeNext(challenge, result) {
+    const results = [...challenge.results, result];
+    const index = challenge.index + 1;
+    if (index < challenge.plan.length) challengeStep({ plan: challenge.plan, index, results });
+    else challengeSummary(challenge.plan, results);
+  }
+
+  function abandonChallenge(challenge) {
+    if (challenge.results.length) challengeSummary(challenge.plan.slice(0, challenge.results.length), challenge.results);
+    else menu();
+  }
+
+  function challengeSummary(plan, results) {
+    const sum = summarizeChallenge(results);
+    show((el) => {
+      el.append(
+        h(
+          'section',
+          { class: 'result' },
+          h('p', { class: 'eyebrow' }, 'Uyarlanabilir Mücadele'),
+          h('h1', { class: 'result-score' }, h('small', {}, 'Toplam skor'), fmtInt(sum.score)),
+          h('p', { class: 'muted' }, `Toplam doğruluk ${fmtPct(sum.accuracy)} · ${sum.correct}/${sum.answered} doğru`),
+          h(
+            'div',
+            { class: 'table-wrap' },
+            h(
+              'table',
+              { class: 'data' },
+              h('thead', {}, h('tr', {}, ['Oyun', 'Skor', 'Doğruluk', 'Seviye', 'Neden seçildi'].map((t) => h('th', { scope: 'col' }, t)))),
+              h(
+                'tbody',
+                {},
+                results.map((r, i) =>
+                  h(
+                    'tr',
+                    {},
+                    h('th', { scope: 'row' }, gameById(r.gameId).definition.name),
+                    h('td', { class: 'num' }, fmtInt(r.score)),
+                    h('td', { class: 'num' }, fmtPct(r.accuracy)),
+                    h('td', { class: 'num' }, r.level === r.maxLevel ? String(r.level) : `${r.level} (en yüksek ${r.maxLevel})`),
+                    h('td', {}, plan[i]?.reason || ''),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          h(
+            'div',
+            { class: 'row-actions' },
+            h('button', { type: 'button', class: 'btn btn-primary', id: 'again', onclick: challengeIntro }, 'Yeni mücadele'),
+            h('button', { type: 'button', class: 'btn btn-ghost', onclick: menu }, 'Menü'),
+          ),
+        ),
+      );
+    });
+  }
+
+  // ---------------- İstatistik ----------------
+  function sparkline(values) {
+    if (values.length < 2) return h('span', { class: 'muted' }, '—');
+    const w = 96;
+    const hgt = 28;
+    const max = Math.max(...values, 1);
+    const pts = values.map((v, i) => [(i / (values.length - 1)) * (w - 6) + 3, hgt - 3 - (v / max) * (hgt - 6)]);
+    const line = pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+    const last = pts[pts.length - 1];
+    return s(
+      'svg',
+      { viewBox: `0 0 ${w} ${hgt}`, width: w, height: hgt, class: 'spark', role: 'img', 'aria-label': `Son ${values.length} skor: ${values.join(', ')}` },
+      s('polyline', { points: line, class: 'spark-line', fill: 'none' }),
+      s('circle', { cx: last[0], cy: last[1], r: 2.8, class: 'spark-dot' }),
+    );
+  }
+
+  function weekChart(days) {
+    const w = 320;
+    const hgt = 120;
+    const max = Math.max(...days.map((d) => d.count), 1);
+    const bw = (w - 20) / days.length;
+    const names = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+    return s(
+      'svg',
+      { viewBox: `0 0 ${w} ${hgt}`, class: 'week-chart', role: 'img', 'aria-label': `Son 7 gün oturum sayıları: ${days.map((d) => d.count).join(', ')}` },
+      s('line', { x1: 10, x2: w - 10, y1: hgt - 22, y2: hgt - 22, class: 'axis' }),
+      days.map((d, i) => {
+        const bh = (d.count / max) * (hgt - 46);
+        const x = 10 + i * bw + bw * 0.2;
+        return s(
+          'g',
+          {},
+          s('rect', { x, y: hgt - 22 - bh, width: bw * 0.6, height: Math.max(bh, d.count ? 2 : 0), rx: 3, class: i === days.length - 1 ? 'bar bar-today' : 'bar' }),
+          d.count ? s('text', { x: x + bw * 0.3, y: hgt - 26 - bh, class: 'bar-val', 'text-anchor': 'middle' }, document.createTextNode(String(d.count))) : null,
+          s('text', { x: x + bw * 0.3, y: hgt - 6, class: 'bar-label', 'text-anchor': 'middle' }, document.createTextNode(names[new Date(d.dayStart).getDay()])),
+        );
+      }),
+    );
+  }
+
+  function statsScreen() {
+    show((el) => {
+      const sum = sessionSummary(repo.data.sessions);
+      const strengths = categoryStrengths(repo.data.sessions, CATEGORY_IDS);
+      el.append(
+        h('h1', { class: 'page-title' }, 'İstatistikler'),
+        h(
+          'dl',
+          { class: 'stat-grid three' },
+          h('div', {}, h('dt', {}, 'Bugün'), h('dd', {}, `${sum.today} oturum`)),
+          h('div', {}, h('dt', {}, 'Son 7 gün'), h('dd', {}, `${sum.week} oturum`)),
+          h('div', {}, h('dt', {}, 'Toplam'), h('dd', {}, `${sum.total} oturum`)),
+        ),
+        h('section', { class: 'panel' }, h('h2', { class: 'section-title' }, 'Son 7 gün'), weekChart(sum.days)),
+        h(
+          'section',
+          { class: 'panel' },
+          h('h2', { class: 'section-title' }, 'Alanlar'),
+          h('p', { class: 'muted' }, 'Cevap sayısıyla ağırlıklı doğruluk. En güçlü alan en üstte.'),
+          h(
+            'ul',
+            { class: 'bars' },
+            strengths.map((st) =>
+              h(
+                'li',
+                {},
+                h('span', { class: 'bar-name' }, CATEGORIES[st.category].name),
+                h('span', { class: 'bar-track', 'aria-hidden': 'true' }, h('span', { class: 'bar-fill', style: { width: `${st.accuracy ?? 0}%` } })),
+                h('span', { class: 'bar-num' }, st.accuracy == null ? 'oynanmadı' : fmtPct(st.accuracy)),
+              ),
+            ),
+          ),
+        ),
+        h(
+          'section',
+          { class: 'panel' },
+          h('h2', { class: 'section-title' }, 'Oyunlar'),
+          h(
+            'div',
+            { class: 'table-wrap' },
+            h(
+              'table',
+              { class: 'data' },
+              h('thead', {}, h('tr', {}, ['Oyun', 'Oynama', 'En iyi skor', 'En iyi doğruluk', 'En iyi tepki', 'Eğilim', 'Son skorlar'].map((t) => h('th', { scope: 'col' }, t)))),
+              h(
+                'tbody',
+                {},
+                GAMES.map((g) => {
+                  const rec = repo.data.games[g.definition.id];
+                  const tr = rec ? trend(rec.history) : null;
+                  return h(
+                    'tr',
+                    {},
+                    h('th', { scope: 'row' }, g.definition.name),
+                    h('td', { class: 'num' }, String(rec?.plays ?? 0)),
+                    h('td', { class: 'num' }, fmtInt(rec?.best?.score)),
+                    h('td', { class: 'num' }, fmtPct(rec?.best?.accuracy)),
+                    h('td', { class: 'num' }, fmtMs(rec?.best?.avgRtMs)),
+                    h('td', { class: 'num' }, tr == null ? '—' : `${tr > 0 ? '▲ +' : tr < 0 ? '▼ ' : ''}${tr}`),
+                    h('td', {}, sparkline((rec?.history || []).slice(-10).map((x) => x.score))),
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  // ---------------- Ayarlar ----------------
+  function settingsScreen() {
+    show((el) => {
+      const st = repo.settings;
+      const update = (patch) => {
+        repo.updateSettings(patch);
+        applySettings();
+      };
+      const toggle = (id, label, key, hint) =>
+        h(
+          'div',
+          { class: 'field' },
+          h('label', { class: 'switch', for: id },
+            h('input', { type: 'checkbox', id, checked: st[key], onchange: (e) => update({ [key]: e.target.checked }) }),
+            h('span', {}, label),
+          ),
+          hint ? h('p', { class: 'hint' }, hint) : null,
+        );
+      const select = (id, label, key, choices, parse = (v) => v) =>
+        h(
+          'div',
+          { class: 'field' },
+          h('label', { for: id }, label),
+          h(
+            'select',
+            { id, onchange: (e) => update({ [key]: parse(e.target.value) }) },
+            choices.map(([value, text]) => h('option', { value: String(value), selected: String(st[key]) === String(value) }, text)),
+          ),
+        );
+      const confirmBtn = (id, label, confirmText, action) => {
+        const btn = h('button', { type: 'button', class: 'btn btn-ghost btn-danger', id }, label);
+        btn.addEventListener('click', () => {
+          if (btn.dataset.armed) {
+            action();
+            return;
+          }
+          btn.dataset.armed = '1';
+          btn.textContent = confirmText;
+          setTimeout(() => {
+            if (btn.isConnected) {
+              delete btn.dataset.armed;
+              btn.textContent = label;
+            }
+          }, 4000);
+        });
+        return btn;
+      };
+      const msg = h('p', { class: 'hint', 'aria-live': 'polite', id: 'data-msg' });
+      const exportBox = h('textarea', { id: 'export-box', class: 'export-box', rows: 6, readonly: true, hidden: true, 'aria-label': 'Dışa aktarılan veri (JSON)' });
+      const fileInput = h('input', { type: 'file', id: 'import-file', accept: 'application/json,.json', class: 'visually-hidden' });
+      fileInput.addEventListener('change', async () => {
+        const file = fileInput.files?.[0];
+        if (!file) return;
+        try {
+          repo.importJson(await file.text());
+          applySettings();
+          msg.textContent = 'Veriler içe aktarıldı.';
+        } catch (err) {
+          msg.textContent = `İçe aktarılamadı: ${err.message}. Bu uygulamadan dışa aktarılmış bir JSON dosyası seç.`;
+        }
+      });
+
+      el.append(
+        h('h1', { class: 'page-title' }, 'Ayarlar'),
+        h(
+          'section',
+          { class: 'panel form' },
+          h('h2', { class: 'section-title' }, 'Oyun'),
+          select('set-duration', 'Oturum süresi', 'durationSec', [[45, '45 saniye'], [60, '60 saniye'], [90, '90 saniye']], Number),
+          toggle('set-relaxed', 'Süre baskısı kapalı', 'relaxed', `Oturumlar ${RELAXED_ROUNDS} tur sürer, geri sayım olmaz. Hafıza Izgarası’nda ezberleme süresini sen bitirirsin. Çift Odak’ta uyaranlar daha uzun kalır.`),
+          toggle('set-adaptive', 'Otomatik zorluk', 'adaptive', 'Açıkken seviye; doğruluğuna, tepki süren ve son cevaplarına göre küçük adımlarla değişir. Kapalıyken başlangıç seviyesinde kalır.'),
+          select('set-level', 'Başlangıç seviyesi', 'startLevel', [['auto', 'Otomatik (son seviyenin bir altı)'], ...Array.from({ length: 10 }, (_, i) => [i + 1, `Seviye ${i + 1}`])], (v) => (v === 'auto' ? 'auto' : Number(v))),
+        ),
+        h(
+          'section',
+          { class: 'panel form' },
+          h('h2', { class: 'section-title' }, 'Görünüm ve ses'),
+          toggle('set-sound', 'Sesler', 'sound'),
+          select('set-motion', 'Hareketler', 'reducedMotion', [['auto', 'Sistem ayarına uy'], ['on', 'Azalt'], ['off', 'Normal']]),
+          select('set-theme', 'Tema', 'theme', [['auto', 'Sistem'], ['light', 'Açık'], ['dark', 'Koyu']]),
+        ),
+        h(
+          'section',
+          { class: 'panel form' },
+          h('h2', { class: 'section-title' }, 'Veriler'),
+          h('p', { class: 'hint' }, repo.persistent ? 'Tüm veriler yalnızca bu tarayıcıda saklanır; hiçbir yere gönderilmez.' : 'Bu tarayıcı yerel kaydı engelliyor; veriler sekme kapanınca silinir.'),
+          repo.warnings.map((w) => h('p', { class: 'hint warn' }, w)),
+          h(
+            'div',
+            { class: 'row-actions wrap' },
+            h('button', {
+              type: 'button',
+              class: 'btn btn-secondary',
+              id: 'export',
+              onclick: () => {
+                const json = repo.exportJson();
+                exportBox.value = json;
+                exportBox.hidden = false;
+                exportBox.select();
+                try {
+                  const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+                  const a = h('a', { href: url, download: 'zihin-molasi-veri.json' });
+                  document.body.append(a);
+                  a.click();
+                  a.remove();
+                  setTimeout(() => URL.revokeObjectURL(url), 1000);
+                } catch {
+                  /* indirme engellenmiş olabilir; metin kutusu yedek yoldur */
+                }
+                navigator.clipboard?.writeText(json).then(
+                  () => (msg.textContent = 'Veri indirildi ve panoya kopyalandı. İndirme başlamadıysa aşağıdaki metni kopyala.'),
+                  () => (msg.textContent = 'İndirme başlamadıysa aşağıdaki metni seçip kopyala.'),
+                );
+              },
+            }, 'Dışa aktar'),
+            h('button', { type: 'button', class: 'btn btn-secondary', id: 'import', onclick: () => fileInput.click() }, 'İçe aktar'),
+            confirmBtn('reset-stats', 'İstatistikleri sıfırla', 'Emin misin? Tekrar bas', () => {
+              repo.resetStats();
+              msg.textContent = 'İstatistikler ve rekorlar sıfırlandı. Ayarlar korundu.';
+            }),
+            confirmBtn('delete-all', 'Tüm verileri sil', 'Her şey silinecek. Tekrar bas', () => {
+              repo.deleteAll();
+              applySettings();
+              settingsScreen();
+            }),
+          ),
+          fileInput,
+          msg,
+          exportBox,
+        ),
+        h(
+          'section',
+          { class: 'panel form' },
+          h('h2', { class: 'section-title' }, 'Test'),
+          h('div', { class: 'field' },
+            h('label', { for: 'set-seed' }, 'Sabit tohum'),
+            h('input', { type: 'text', id: 'set-seed', value: st.seed, maxlength: 40, placeholder: 'boş = her oyun farklı', onchange: (e) => update({ seed: e.target.value.trim() }) }),
+            h('p', { class: 'hint' }, 'Bir değer girersen aynı oyun her seferinde aynı soruları üretir.'),
+          ),
+        ),
+      );
+    });
+  }
+
+  return { menu, intro, statsScreen, settingsScreen, applySettings };
+}
+
+return { createApp };
+})();
+
+// ---- src/main.js ----
+const __m23 = (() => {
+// Uygulama girişi: kayıt deposunu açar, kabuğu kurar, menüyü gösterir.
+
+const { createProgressRepository, createBrowserStore } = __m0;
+const { createApp } = __m1;
+
+function boot() {
+  const root = document.getElementById('app');
+  const repo = createProgressRepository(createBrowserStore());
+  const app = createApp({ root, repo });
+  app.applySettings();
+  root.querySelector('#nav-home').addEventListener('click', app.menu);
+  root.querySelector('#nav-stats').addEventListener('click', app.statsScreen);
+  root.querySelector('#nav-settings').addEventListener('click', app.settingsScreen);
+  globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').addEventListener?.('change', app.applySettings);
+  app.menu();
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+
+return {  };
+})();
+})();
+</script>
+  </body>
+</html>
