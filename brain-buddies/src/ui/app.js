@@ -1037,7 +1037,7 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
     });
   }
 
-  const brainScreens = createBrainScreens({ repo, show, play, audio, reducedMotion, openTraining: menu });
+  const brainScreens = createBrainScreens({ repo, show, play, audio, reducedMotion, openTraining: menu, openGame: (id) => intro(id) });
 
   return { menu: brainScreens.home, training: menu, trophies: brainScreens.trophies, intro, statsScreen, settingsScreen, applySettings };
 }

@@ -1716,6 +1716,72 @@ table.data .num {
   max-width: 100%;
 }
 
+.extra-games {
+  display: grid;
+  gap: 8px;
+}
+
+.extra-games .muted {
+  margin: 0;
+}
+
+.extra-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.extra-tile {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 10px 12px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--primary);
+  border-radius: var(--radius);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.extra-tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.extra-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: var(--primary-ink);
+  font: 700 1rem / 1 var(--font-display);
+}
+
+.extra-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.extra-text small,
+.extra-best {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.extra-best {
+  font-family: var(--font-num);
+  white-space: nowrap;
+}
+
 .bt-training {
   display: flex;
   flex-wrap: wrap;
@@ -7349,12 +7415,12 @@ const { mascotSvg, speech, moodForGrams, moodForTotal } = __m34;
 const { labBackground, PREVIEWS } = __m35;
 const { createRng } = __m3;
 const { TEST_CATEGORIES, STEP_MS, BONUS_EVERY, BONUS_MS, scoringFor, pickGame, summarizeTest, TROPHIES, weightComment, stepComment, categoryById } = __m2;
-const { gameById } = __m9;
+const { gameById, EXTRA_GAMES, CATEGORIES } = __m9;
 
 const g = (v) => `${Math.round(v || 0).toLocaleString('tr-TR')} g`;
 const nameOf = (id) => gameById(id).definition.name;
 
-function createBrainScreens({ repo, show, play, audio, reducedMotion, openTraining }) {
+function createBrainScreens({ repo, show, play, audio, reducedMotion, openTraining, openGame }) {
   const brain = () => repo.data.brain;
 
   // ---------------- Ana sayfa ----------------
@@ -7399,8 +7465,15 @@ function createBrainScreens({ repo, show, play, audio, reducedMotion, openTraini
         ),
         h(
           'section',
+          { class: 'extra-games', 'aria-labelledby': 'extra-h' },
+          h('h2', { class: 'section-title', id: 'extra-h' }, 'Ek oyunlar'),
+          h('p', { class: 'muted' }, 'Testin dışındaki 9 beyin oyunu. Birine dokun, hemen oyna.'),
+          h('div', { class: 'extra-grid' }, EXTRA_GAMES.map((game) => extraTile(game.definition))),
+        ),
+        h(
+          'section',
           { class: 'bt-training' },
-          h('div', {}, h('h2', { class: 'section-title' }, 'Serbest antrenman'), h('p', { class: 'muted' }, 'Testteki 8 oyunu ve ek beyin oyunlarını tek tek, süre ve zorluk ayarlarıyla oyna.')),
+          h('div', {}, h('h2', { class: 'section-title' }, 'Serbest antrenman'), h('p', { class: 'muted' }, '17 oyunun hepsini süre, zorluk ve rahat mod ayarlarıyla oyna; Uyarlanabilir Mücadele de burada.')),
           h('button', { type: 'button', class: 'btn btn-secondary', id: 'open-training', onclick: openTraining }, 'Antrenmana git'),
         ),
       );
@@ -7423,6 +7496,17 @@ function createBrainScreens({ repo, show, play, audio, reducedMotion, openTraini
       h('ul', { class: 'bt-games' }, cat.games.map((id) => h('li', {}, nameOf(id)))),
       h('label', { class: 'bt-choice' }, h('span', { class: 'label' }, 'Oyun'), sel),
       h('p', { class: 'bt-cat-best' }, h('span', { class: 'label' }, 'En iyi'), h('strong', {}, b.catBest[cat.id] ? g(b.catBest[cat.id]) : '—')),
+    );
+  }
+
+  function extraTile(d) {
+    const best = repo.data.games[d.id]?.best;
+    return h(
+      'button',
+      { type: 'button', class: 'extra-tile', 'data-game': d.id, onclick: () => openGame(d.id), 'aria-label': `${d.name}. ${d.description}${best ? ` Rekor ${best.score}.` : ''}` },
+      h('span', { class: 'extra-icon', 'aria-hidden': 'true' }, d.icon),
+      h('span', { class: 'extra-text' }, h('strong', {}, d.name), h('small', {}, CATEGORIES[d.category]?.name || '')),
+      h('span', { class: 'extra-best' }, best ? `Rekor ${Math.round(best.score).toLocaleString('tr-TR')}` : 'Yeni'),
     );
   }
 
@@ -8713,7 +8797,7 @@ function createApp({ root, repo, media = globalThis.matchMedia?.bind(globalThis)
     });
   }
 
-  const brainScreens = createBrainScreens({ repo, show, play, audio, reducedMotion, openTraining: menu });
+  const brainScreens = createBrainScreens({ repo, show, play, audio, reducedMotion, openTraining: menu, openGame: (id) => intro(id) });
 
   return { menu: brainScreens.home, training: menu, trophies: brainScreens.trophies, intro, statsScreen, settingsScreen, applySettings };
 }

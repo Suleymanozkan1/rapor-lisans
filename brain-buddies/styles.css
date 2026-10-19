@@ -1708,6 +1708,72 @@ table.data .num {
   max-width: 100%;
 }
 
+.extra-games {
+  display: grid;
+  gap: 8px;
+}
+
+.extra-games .muted {
+  margin: 0;
+}
+
+.extra-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.extra-tile {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 10px 12px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--primary);
+  border-radius: var(--radius);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.extra-tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.extra-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: var(--primary-ink);
+  font: 700 1rem / 1 var(--font-display);
+}
+
+.extra-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.extra-text small,
+.extra-best {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.extra-best {
+  font-family: var(--font-num);
+  white-space: nowrap;
+}
+
 .bt-training {
   display: flex;
   flex-wrap: wrap;

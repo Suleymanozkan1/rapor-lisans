@@ -6,12 +6,12 @@ import { mascotSvg, speech, moodForGrams, moodForTotal } from './mascot.js';
 import { labBackground, PREVIEWS } from './scenes.js';
 import { createRng } from '../core/rng.js';
 import { TEST_CATEGORIES, STEP_MS, BONUS_EVERY, BONUS_MS, scoringFor, pickGame, summarizeTest, TROPHIES, weightComment, stepComment, categoryById } from '../core/brainTest.js';
-import { gameById } from '../games/index.js';
+import { gameById, EXTRA_GAMES, CATEGORIES } from '../games/index.js';
 
 const g = (v) => `${Math.round(v || 0).toLocaleString('tr-TR')} g`;
 const nameOf = (id) => gameById(id).definition.name;
 
-export function createBrainScreens({ repo, show, play, audio, reducedMotion, openTraining }) {
+export function createBrainScreens({ repo, show, play, audio, reducedMotion, openTraining, openGame }) {
   const brain = () => repo.data.brain;
 
   // ---------------- Ana sayfa ----------------
@@ -56,8 +56,15 @@ export function createBrainScreens({ repo, show, play, audio, reducedMotion, ope
         ),
         h(
           'section',
+          { class: 'extra-games', 'aria-labelledby': 'extra-h' },
+          h('h2', { class: 'section-title', id: 'extra-h' }, 'Ek oyunlar'),
+          h('p', { class: 'muted' }, 'Testin dışındaki 9 beyin oyunu. Birine dokun, hemen oyna.'),
+          h('div', { class: 'extra-grid' }, EXTRA_GAMES.map((game) => extraTile(game.definition))),
+        ),
+        h(
+          'section',
           { class: 'bt-training' },
-          h('div', {}, h('h2', { class: 'section-title' }, 'Serbest antrenman'), h('p', { class: 'muted' }, 'Testteki 8 oyunu ve ek beyin oyunlarını tek tek, süre ve zorluk ayarlarıyla oyna.')),
+          h('div', {}, h('h2', { class: 'section-title' }, 'Serbest antrenman'), h('p', { class: 'muted' }, '17 oyunun hepsini süre, zorluk ve rahat mod ayarlarıyla oyna; Uyarlanabilir Mücadele de burada.')),
           h('button', { type: 'button', class: 'btn btn-secondary', id: 'open-training', onclick: openTraining }, 'Antrenmana git'),
         ),
       );
@@ -80,6 +87,17 @@ export function createBrainScreens({ repo, show, play, audio, reducedMotion, ope
       h('ul', { class: 'bt-games' }, cat.games.map((id) => h('li', {}, nameOf(id)))),
       h('label', { class: 'bt-choice' }, h('span', { class: 'label' }, 'Oyun'), sel),
       h('p', { class: 'bt-cat-best' }, h('span', { class: 'label' }, 'En iyi'), h('strong', {}, b.catBest[cat.id] ? g(b.catBest[cat.id]) : '—')),
+    );
+  }
+
+  function extraTile(d) {
+    const best = repo.data.games[d.id]?.best;
+    return h(
+      'button',
+      { type: 'button', class: 'extra-tile', 'data-game': d.id, onclick: () => openGame(d.id), 'aria-label': `${d.name}. ${d.description}${best ? ` Rekor ${best.score}.` : ''}` },
+      h('span', { class: 'extra-icon', 'aria-hidden': 'true' }, d.icon),
+      h('span', { class: 'extra-text' }, h('strong', {}, d.name), h('small', {}, CATEGORIES[d.category]?.name || '')),
+      h('span', { class: 'extra-best' }, best ? `Rekor ${Math.round(best.score).toLocaleString('tr-TR')}` : 'Yeni'),
     );
   }
 

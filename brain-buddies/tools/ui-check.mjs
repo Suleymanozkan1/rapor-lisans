@@ -92,6 +92,11 @@ try {
     const selects = await page.$$eval('.bt-choice select', (els) => els.map((e) => e.options.length));
     log(homeGames === 8 && selects.length === 4 && selects.every((n) => n === 3), `ana sayfa: 8 test oyunu ve her kategoride seçim baştan açık (${homeGames}, ${selects})`);
     await page.selectOption('#choice-logic', 'alphaSort');
+    const extras = await page.$$eval('.extra-tile', (els) => els.map((e) => e.dataset.game));
+    log(extras.length === 9, `ana sayfa: 9 ek oyun kartı (${extras.length})`);
+    await page.click('.extra-tile[data-game="mentalMath"]');
+    log((await page.locator('#start-game').count()) === 1, 'ana sayfadaki ek oyun kartı oyunun tanıtımını açıyor');
+    await page.click('#nav-home');
     await shot(page, 'home-phone');
     await page.click('#start-test');
     log((await page.textContent('#welcome-h')).includes('Hoş geldin'), 'testten önce karşılama ekranı');

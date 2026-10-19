@@ -8,7 +8,8 @@ Hiçbir orijinal kod, görsel, ses veya metin kullanılmadı; karakter ve çizim
 - **Beyin Testi:** 4 × 60 sn, gram puanı, toplam beyin ağırlığı, rekor yalnızca toplamı geçince kaydedilir
 - Orijinal menünün yerleşimi: laboratuvar sahnesi, 2×2 kategori kartı, büyük "Testi başlat", adınla karşılama
 - 8 test oyunu (her kategoride 2, hepsi baştan açık; her testte kategoriden biri rastgele gelir ya da ana sayfadan seçilir), art arda 10 doğruya ek süre, 8 kupa
-- **Serbest antrenman:** test oyunları + 9 ek beyin oyunu, Uyarlanabilir Mücadele
+- **Ek oyunlar ana sayfada:** 9 ek beyin oyunu tek dokunuşla başlar
+- **Serbest antrenman:** 17 oyunun hepsi, süre/zorluk ayarları, Uyarlanabilir Mücadele
 - Otomatik zorluk, alıştırma turu, süre baskısını kapatma (antrenmanda)
 - Kişisel rekorlar, günlük/haftalık istatistikler, güçlü alanlar
 - Açık/koyu tema, klavyeyle tam oynanış, hareket azaltma, sesler aç/kapat

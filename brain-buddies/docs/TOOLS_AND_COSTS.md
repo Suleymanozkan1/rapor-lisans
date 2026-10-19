@@ -42,7 +42,7 @@ Notlar:
 | Otomatik testler | `npm test` | 92/92 geçti (Beyin Testi ve geliştirme sunucusu testleri dahil) |
 | Build | `npm run build` | `dist/zihin-molasi.html` üretildi (~270 KB, 37 modül) |
 | Lint | `eslint .` | 0 hata, 0 uyarı (1 `prefer-const` hatası bulundu ve düzeltildi) |
-| Uçtan uca arayüz | `npm run ui` | 72/72 kontrol geçti: laboratuvar ana ekranı ve karşılama, 8 test oyununun baştan açık ve seçilebilir olması, tam Beyin Testi (4 oyun + final tartısı), rekorun kalıcılığı, antrenmandaki 17 oyunun tam oturumu, taşma (dikey/yatay/masaüstü), klavye (1–4 ve Düşürme!'de rakamlar), Esc ile duraklatma, dışa/içe aktarma onayı, koyu tema, erişilebilir adlar, konsol hatası yok |
+| Uçtan uca arayüz | `npm run ui` | 74/74 kontrol geçti: laboratuvar ana ekranı ve karşılama, 8 test oyununun baştan açık ve seçilebilir olması, ana sayfadaki 9 ek oyun kartı, tam Beyin Testi (4 oyun + final tartısı), rekorun kalıcılığı, antrenmandaki 17 oyunun tam oturumu, taşma (dikey/yatay/masaüstü), klavye (1–4 ve Düşürme!'de rakamlar), Esc ile duraklatma, dışa/içe aktarma onayı, koyu tema, erişilebilir adlar, konsol hatası yok |
 | Kontrast (WCAG AA) | `tests/a11y.test.mjs` | açık + koyu tema geçti (2 renk düzeltildi) |
 | Güvenlik denetimi | Cloudflare security-audit-skill, quick profil, 6 alt ajan | 0 doğrulanmış açık, 0 doğrulama bekleyen iz, 7 sertleştirme notu (6'sı uygulandı); iki doğrulayıcı PASS. Hedef kod sandbox'ta çalıştırılmadı (bkz. `SECURITY_AUDIT.md`) |
 | REA statik analizi | `rea analyze-javascript-application` | 34 dosya, 0 ayrıştırma hatası; ağ uç noktası yok (bkz. `REA_ANALYSIS.md`) |
