@@ -11,8 +11,8 @@ import { h, clear, append } from './dom.js';
 import { s } from './svg.js';
 import { createAudio } from './audio.js';
 import { MAX_IMPORT_BYTES } from '../core/storage.js';
+import { TEST_CATEGORIES } from '../core/brainTest.js';
 import { createBrainScreens } from './brainScreens.js';
-import { TEST_CATEGORIES, unlockedGames } from '../core/brainTest.js';
 
 const RELAXED_ROUNDS = 12;
 
@@ -108,26 +108,10 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
     }, { focus: false });
   }
 
-  function lockedTestGame(id) {
-    const cat = TEST_CATEGORIES.find((c) => c.games.includes(id));
-    if (!cat || unlockedGames(cat.id, repo.data.brain.tests).includes(id)) return null;
-    return cat.unlockAfter[cat.games.indexOf(id)] - repo.data.brain.tests;
-  }
-
   function gameRow(game) {
     const d = game.definition;
     const rec = repo.data.games[d.id];
     const best = rec?.best;
-    const lockedFor = lockedTestGame(d.id);
-    if (lockedFor) {
-      return h(
-        'div',
-        { class: 'game-row is-locked', 'aria-disabled': 'true' },
-        h('span', { class: 'game-icon', 'aria-hidden': 'true' }, '🔒'),
-        h('span', { class: 'game-text' }, h('strong', {}, d.name), h('span', {}, `Beyin Testi'ni ${lockedFor} kez daha bitirince açılır.`)),
-        h('span', { class: 'game-best' }, h('small', {}, 'Kilitli')),
-      );
-    }
     return h(
       'button',
       { type: 'button', class: 'game-row', onclick: () => intro(d.id), 'aria-label': `${d.name}. ${d.description}${best ? ` En iyi skor ${best.score}.` : ''}` },
@@ -141,7 +125,7 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
     const today = new Date().setHours(0, 0, 0, 0);
     const playedToday = new Set(repo.data.sessions.filter((x) => x.at >= today).map((x) => x.gameId));
     const fresh = GAMES.filter((g) => !playedToday.has(g.definition.id));
-    const pool = (fresh.length ? fresh : GAMES).filter((g) => !lockedTestGame(g.definition.id));
+    const pool = fresh.length ? fresh : GAMES;
     const pick = pool[Math.floor(Math.random() * pool.length)];
     intro(pick.definition.id);
   }

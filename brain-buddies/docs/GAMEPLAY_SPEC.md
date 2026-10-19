@@ -26,7 +26,7 @@ Ana sayfa (laboratuvar: başlık, 2×2 kategori kartı, Testi başlat, Profesör
 | Zorluk | Her oyun seviye 1'den başlar ve doğrulara göre hızla yükselir (otomatik zorluk ayarından bağımsız) | TAHMİN |
 | Rekor | Yalnızca toplam rekor geçilince kaydedilir; kategori en iyileri ayrıca tutulur | KAYNAKTA |
 | Karşılaştırma | Ara sonuçta: rekor testindeki aynı kategori ve kategori en iyisi (arkadaş yerine) | Uyarlama |
-| Oyun seçimi | Her kategoride 2 oyun. Başta 1'i açık. 2. oyun: Hafıza 2, Mantık 3, Hesap 4, Görsel 5 testten sonra açılır. Açıksa ana sayfadan seçilir, yoksa rastgele | OYUNCU ANLATIMI; eşikler TAHMİN |
+| Oyun seçimi | Her kategoride 2 oyun, 8'i de baştan açık. Ana sayfadan seçilir; "Rastgele" (varsayılan) ise her testte ikisinden biri gelir | OYUNCU ANLATIMI'ndan sapma: orijinalde 2. oyunlar zamanla açılıyordu; kullanıcı isteğiyle kilit kaldırıldı |
 | Yarıda bırakma | Test kaydedilmez | TAHMİN |
 
 Oyunların gram değerleri (iyi bir oyuncu 60 sn'de ≈ 1000 g alacak şekilde):

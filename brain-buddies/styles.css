@@ -1674,13 +1674,14 @@ table.data .num {
   font: 700 1.2rem / 1 var(--font-display);
 }
 
-.bt-game,
-.bt-cat-best,
-.bt-lock {
+.bt-games,
+.bt-cat-best {
   margin: 0;
 }
 
-.bt-game {
+.bt-games {
+  padding: 0;
+  list-style: none;
   font-weight: 700;
 }
 
@@ -1689,11 +1690,6 @@ table.data .num {
   justify-content: space-between;
   align-items: baseline;
   font-family: var(--font-num);
-}
-
-.bt-lock {
-  color: var(--muted);
-  font-size: var(--step--1);
 }
 
 .bt-choice {
@@ -1883,15 +1879,6 @@ ul.plain {
   font-weight: 600;
 }
 
-.game-row.is-locked {
-  cursor: default;
-  opacity: 0.65;
-}
-
-.game-row.is-locked:hover {
-  transform: none;
-  border-color: var(--line);
-}
 
 .test-step-label {
   margin: 0;
@@ -2546,6 +2533,15 @@ ul.plain {
   font: 800 var(--step-0) / 1 var(--font-display);
   color: var(--cat);
   filter: brightness(1.35);
+}
+
+.lab-tile-games {
+  margin: 0;
+  color: var(--lab-tile-ink);
+  font-size: var(--step--1);
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .lab-tile-icon {

@@ -33,15 +33,15 @@ Ekran görüntüleri yalnızca inceleme için kullanıldı; depoya eklenmedi (te
 | 4 | Sunucu: beyaz saçlı, gözlüklü, laboratuvar önlüklü, dokunaçlı yeşil uzaylı bilim insanı ("Doctor Octopus"); sıcak turuncu gün batımlı laboratuvar | GÖZLEMLENDİ / KAYNAKTA DOĞRULANDI | ekranlar, doublegames, Adweek |
 | 5 | Bir tur ≈ 5 dakika; her turda 4 kategori, her kategori için bir mini oyun | KAYNAKTA DOĞRULANDI | spielen.de |
 | 6 | Her kategori ayrı puan alır; puanlar gram ("g"); toplam = beyin ağırlığı | OYUNCU ANLATIMI | comunio (ör. 4072 g = Hafıza 1057 + Mantık 926 + Hesap 1151 + Görsel 938) |
-| 7 | Tipik toplam 2000–4000 g; iyi oyuncular 4500–5300 g; kategori başına ~700–2000 g | OYUNCU ANLATIMI | comunio |
+| 7 | Tipik toplam 2000–4000 g; iyi oyuncular 4500–5300 g; kategori başına ~700–2000 g | OYUNCU ANLATIMI | comunio (uygulamada kilit kullanıcı isteğiyle kaldırıldı; 8 oyun baştan açık) |
 | 8 | Yeni sonuç yalnızca kişisel toplam rekor geçilirse kaydedilir | KAYNAKTA DOĞRULANDI | spielen.de |
 | 9 | Oyunlar arasında kategori sonuçları arkadaşlarla karşılaştırılır; beyin ağırlığı Facebook duvarında paylaşılabilir | KAYNAKTA DOĞRULANDI | spielen.de, doublegames |
-| 10 | Hatalar puanı çok düşürür; hatasız oynamak, hızlı ama hatalı oynamaktan iyidir | OYUNCU ANLATIMI | comunio |
-| 11 | Art arda 10 ya da 20 doğru ek süre kazandırır | OYUNCU ANLATIMI | comunio |
-| 12 | Hesap ve bazı mantık oyunlarında sayılar tuş takımıyla yazılır; fareyle yaklaşık yarı puan | OYUNCU ANLATIMI | comunio |
-| 13 | Her kategoride 2 oyun; yeni oyunlar zamanla açılır; açılmayınca oyun rastgele seçilir; açılınca seçilebilir | OYUNCU ANLATIMI | comunio |
+| 10 | Hatalar puanı çok düşürür; hatasız oynamak, hızlı ama hatalı oynamaktan iyidir | OYUNCU ANLATIMI | comunio (uygulamada kilit kullanıcı isteğiyle kaldırıldı; 8 oyun baştan açık) |
+| 11 | Art arda 10 ya da 20 doğru ek süre kazandırır | OYUNCU ANLATIMI | comunio (uygulamada kilit kullanıcı isteğiyle kaldırıldı; 8 oyun baştan açık) |
+| 12 | Hesap ve bazı mantık oyunlarında sayılar tuş takımıyla yazılır; fareyle yaklaşık yarı puan | OYUNCU ANLATIMI | comunio (uygulamada kilit kullanıcı isteğiyle kaldırıldı; 8 oyun baştan açık) |
+| 13 | Her kategoride 2 oyun; yeni oyunlar zamanla açılır; açılmayınca oyun rastgele seçilir; açılınca seçilebilir | OYUNCU ANLATIMI | comunio (uygulamada kilit kullanıcı isteğiyle kaldırıldı; 8 oyun baştan açık) |
 | 14 | Açılma koşulu belirsiz: ~12 oyun, arkadaş sayısı (ör. "12 arkadaş daha"), kupalar | OYUNCU ANLATIMI (çelişkili) | comunio |
-| 15 | Kupalar: "2500 fehlerlos" (hatasız 2500), "30 mal gespielt" (30 kez), "Netzwerkpokal" | OYUNCU ANLATIMI | comunio |
+| 15 | Kupalar: "2500 fehlerlos" (hatasız 2500), "30 mal gespielt" (30 kez), "Netzwerkpokal" | OYUNCU ANLATIMI | comunio (uygulamada kilit kullanıcı isteğiyle kaldırıldı; 8 oyun baştan açık) |
 
 ### 2.2 Mini oyunlar
 

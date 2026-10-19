@@ -4,7 +4,7 @@
 //
 // Kontroller: konsol hatası yok · yatay taşma yok (telefon dikey/yatay, masaüstü) ·
 // tam bir Beyin Testi (4 oyun) ve final tartısı · rekorun kaydı · antrenmanda açık her oyunun
-// sonuna kadar oynanması, kilitli oyunlar · klavye ve duraklatma · dışa/içe aktarma · erişilebilir adlar.
+// sonuna kadar oynanması · klavye ve duraklatma · dışa/içe aktarma · erişilebilir adlar.
 // Kullanım: npm run ui   (SHOTS=klasör ile ekran görüntüsü kaydeder)
 
 import { createRequire } from 'node:module';
@@ -88,6 +88,10 @@ try {
     const { context, page, errors } = await newPage({ width: 360, height: 760 });
     log((await overflow(page)) <= 0, 'telefon: Beyin Testi ana sayfasında yatay taşma yok');
     log(await page.locator('.lab #start-test').count() === 1 && (await page.locator('.lab-tile').count()) === 4, 'ana sayfa: laboratuvar sahnesi, 4 kategori kartı ve Testi başlat');
+    const homeGames = await page.$$eval('.bt-games li', (els) => els.length);
+    const selects = await page.$$eval('.bt-choice select', (els) => els.map((e) => e.options.length));
+    log(homeGames === 8 && selects.length === 4 && selects.every((n) => n === 3), `ana sayfa: 8 test oyunu ve her kategoride seçim baştan açık (${homeGames}, ${selects})`);
+    await page.selectOption('#choice-logic', 'alphaSort');
     await shot(page, 'home-phone');
     await page.click('#start-test');
     log((await page.textContent('#welcome-h')).includes('Hoş geldin'), 'testten önce karşılama ekranı');
@@ -114,14 +118,14 @@ try {
     await shot(page, 'final-phone');
     await page.reload();
     log((await page.textContent('.lab-record')).includes('Beynin'), 'yeniden açınca rekor beyin ağırlığı korunuyor');
-    // Antrenman: kilitli ve açık oyunlar
+    // Antrenman: kilit yok, 17 oyunun hepsi açık
     await page.click('#nav-settings');
     await page.check('#set-relaxed');
     await page.click('#nav-training');
     const locked = await page.locator('.game-row.is-locked').count();
-    log(locked === 4, `1 testten sonra 4 Beyin Testi oyunu hâlâ kilitli (${locked})`);
+    log(locked === 0, `kilitli oyun yok (${locked})`);
     const names = await page.$$eval('button.game-row strong', (els) => els.map((e) => e.textContent));
-    log(names.length === 13, `antrenmanda 13 açık oyun (${names.length})`);
+    log(names.length === 17, `antrenmanda 17 açık oyun (${names.length})`);
     for (const name of names) {
       await page.click('#nav-training');
       await page.locator('button.game-row', { hasText: name }).click();

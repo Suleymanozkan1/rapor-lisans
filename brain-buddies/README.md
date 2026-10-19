@@ -7,7 +7,7 @@ Hiçbir orijinal kod, görsel, ses veya metin kullanılmadı; karakter ve çizim
 
 - **Beyin Testi:** 4 × 60 sn, gram puanı, toplam beyin ağırlığı, rekor yalnızca toplamı geçince kaydedilir
 - Orijinal menünün yerleşimi: laboratuvar sahnesi, 2×2 kategori kartı, büyük "Testi başlat", adınla karşılama
-- 8 test oyunu (her kategoride 2; ikincisi testleri bitirdikçe açılır), art arda 10 doğruya ek süre, 8 kupa
+- 8 test oyunu (her kategoride 2, hepsi baştan açık; her testte kategoriden biri rastgele gelir ya da ana sayfadan seçilir), art arda 10 doğruya ek süre, 8 kupa
 - **Serbest antrenman:** test oyunları + 9 ek beyin oyunu, Uyarlanabilir Mücadele
 - Otomatik zorluk, alıştırma turu, süre baskısını kapatma (antrenmanda)
 - Kişisel rekorlar, günlük/haftalık istatistikler, güçlü alanlar
@@ -38,7 +38,7 @@ npm run ui        # Playwright + Chromium ile uçtan uca arayüz kontrolü (Apac
 
 ## Beyin Testi oyunları
 
-| Kategori | Oyun 1 (başta açık) | Oyun 2 (sonra açılır) |
+| Kategori | Oyun 1 | Oyun 2 |
 |---|---|---|
 | Hafıza | Deseni Vur: nesnelerin yerini ezberle, karelere tıkla | Kayıp Sembol: eksik nesneyi bul |
 | Mantık | Dişli Çark: üç dişliden farklı olanı bul | ABC Sırala: harflere alfabe sırasıyla tıkla |

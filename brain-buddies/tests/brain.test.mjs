@@ -8,9 +8,7 @@ import {
   TEST_CATEGORIES,
   CATEGORY_IDS,
   scoringFor,
-  unlockedGames,
   pickGame,
-  newlyUnlocked,
   summarizeTest,
   recordTest,
   defaultBrain,
@@ -55,16 +53,14 @@ test('beyin testi: 4 kategori, her birinde 2 oyun; hepsi kayıtlı ve gram değe
   assert.equal(TEST_GAMES.length, 8);
 });
 
-test('beyin testi: başlangıçta her kategoride 1 oyun açık; diğerleri test sayısıyla açılır', () => {
-  for (const cat of TEST_CATEGORIES) assert.deepEqual(unlockedGames(cat.id, 0), [cat.games[0]]);
-  assert.deepEqual(unlockedGames('memory', 2), TEST_CATEGORIES[0].games);
-  assert.deepEqual(newlyUnlocked(1, 2), [{ category: 'memory', gameId: 'missingSymbol' }]);
-  assert.deepEqual(newlyUnlocked(5, 6), []);
+test('beyin testi: 8 oyunun hepsi baştan açık; seçim yoksa kategoriden biri rastgele gelir', () => {
   const rng = createRng(1);
-  assert.equal(pickGame('logic', 0, 'alphaSort', rng), 'gearWheel', 'kilitli seçim yok sayılır');
-  assert.equal(pickGame('logic', 3, 'alphaSort', rng), 'alphaSort');
-  const picks = new Set(Array.from({ length: 40 }, () => pickGame('visual', 9, 'random', rng)));
-  assert.deepEqual([...picks].sort(), ['bubbles', 'freezeAlien'], 'rastgele seçim iki oyunu da getirir');
+  assert.equal(pickGame('logic', 'alphaSort', rng), 'alphaSort', 'ilk testte de ikinci oyun seçilebilir');
+  assert.equal(pickGame('logic', 'patternShoot', rng) === 'patternShoot', false, 'başka kategorinin oyunu seçilemez');
+  for (const cat of TEST_CATEGORIES) {
+    const picks = new Set(Array.from({ length: 40 }, () => pickGame(cat.id, 'random', rng)));
+    assert.deepEqual([...picks].sort(), [...cat.games].sort(), `${cat.id}: rastgele seçim iki oyunu da getirir`);
+  }
 });
 
 test('gram puanlaması: doğru = gram değeri, hata 1,5 katı düşürür, seri bonusu yok', () => {
@@ -149,7 +145,6 @@ test('rekor yalnızca toplam rekor geçilince güncellenir; kategori rekorları 
   assert.equal(brain.catBest.memory, 1500);
   assert.equal(brain.history.length, 2);
   assert.equal(brain.tests, 2);
-  assert.deepEqual(r2.unlocked, [{ category: 'memory', gameId: 'missingSymbol' }]);
 });
 
 test('kupalar: koşul sağlanınca bir kez verilir', () => {

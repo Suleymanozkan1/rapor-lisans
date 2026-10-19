@@ -9,10 +9,10 @@ export const BONUS_MS = 5000;
 export const HISTORY_LIMIT = 50;
 
 export const TEST_CATEGORIES = Object.freeze([
-  { id: 'memory', name: 'Hafıza', icon: '🧠', games: ['patternShoot', 'missingSymbol'], unlockAfter: [0, 2] },
-  { id: 'logic', name: 'Mantık', icon: '⚙', games: ['gearWheel', 'alphaSort'], unlockAfter: [0, 3] },
-  { id: 'numeric', name: 'Hesap', icon: '123', games: ['dontDrop', 'numberHunt'], unlockAfter: [0, 4] },
-  { id: 'visual', name: 'Görsel', icon: '👁', games: ['freezeAlien', 'bubbles'], unlockAfter: [0, 5] },
+  { id: 'memory', name: 'Hafıza', icon: '🧠', games: ['patternShoot', 'missingSymbol'] },
+  { id: 'logic', name: 'Mantık', icon: '⚙', games: ['gearWheel', 'alphaSort'] },
+  { id: 'numeric', name: 'Hesap', icon: '123', games: ['dontDrop', 'numberHunt'] },
+  { id: 'visual', name: 'Görsel', icon: '👁', games: ['freezeAlien', 'bubbles'] },
 ]);
 
 export const CATEGORY_IDS = TEST_CATEGORIES.map((c) => c.id);
@@ -50,26 +50,11 @@ export function defaultBrain() {
   };
 }
 
-export function unlockedGames(categoryId, testsDone) {
-  const cat = categoryById(categoryId);
-  return cat.games.filter((_, i) => testsDone >= cat.unlockAfter[i]);
-}
-
-// Seçim yapılmamışsa veya seçilen oyun kilitliyse açık oyunlardan rastgele biri (orijinaldeki gibi).
-export function pickGame(categoryId, testsDone, choice, rng) {
-  const open = unlockedGames(categoryId, testsDone);
-  if (choice && choice !== 'random' && open.includes(choice)) return choice;
-  return rng.pick(open);
-}
-
-export function newlyUnlocked(before, after) {
-  const out = [];
-  for (const cat of TEST_CATEGORIES) {
-    cat.games.forEach((g, i) => {
-      if (before < cat.unlockAfter[i] && after >= cat.unlockAfter[i]) out.push({ category: cat.id, gameId: g });
-    });
-  }
-  return out;
+// Her kategorinin iki oyunu da baştan açık. Seçim yapılmamışsa ikisinden biri rastgele gelir (orijinaldeki gibi).
+export function pickGame(categoryId, choice, rng) {
+  const games = categoryById(categoryId).games;
+  if (choice && choice !== 'random' && games.includes(choice)) return choice;
+  return rng.pick(games);
 }
 
 // steps: [{ category, gameId, result }] — result session.result()'tan gelir; score = gram
@@ -100,8 +85,7 @@ export const TROPHIES = Object.freeze([
 
 // Testi beyin kaydına işler (yalnızca tamamlanan testler). Kaydı yerinde değiştirir.
 export function recordTest(brain, test, at = Date.now()) {
-  if (!test.complete) return { isRecord: false, previousBest: brain.best, newTrophies: [], unlocked: [] };
-  const before = brain.tests;
+  if (!test.complete) return { isRecord: false, previousBest: brain.best, newTrophies: [] };
   brain.tests += 1;
   const previousBest = brain.best ? { ...brain.best, cats: { ...brain.best.cats } } : null;
   const isRecord = !brain.best || test.total > brain.best.total;
@@ -116,7 +100,7 @@ export function recordTest(brain, test, at = Date.now()) {
       newTrophies.push(t);
     }
   }
-  return { isRecord, previousBest, newTrophies, unlocked: newlyUnlocked(before, brain.tests) };
+  return { isRecord, previousBest, newTrophies };
 }
 
 // Profesör Gram'ın yorumları (özgün metin)

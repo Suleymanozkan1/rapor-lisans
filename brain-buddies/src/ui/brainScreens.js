@@ -5,7 +5,7 @@ import { s } from './svg.js';
 import { mascotSvg, speech, moodForGrams, moodForTotal } from './mascot.js';
 import { labBackground, PREVIEWS } from './scenes.js';
 import { createRng } from '../core/rng.js';
-import { TEST_CATEGORIES, STEP_MS, BONUS_EVERY, BONUS_MS, scoringFor, unlockedGames, pickGame, summarizeTest, TROPHIES, weightComment, stepComment, categoryById } from '../core/brainTest.js';
+import { TEST_CATEGORIES, STEP_MS, BONUS_EVERY, BONUS_MS, scoringFor, pickGame, summarizeTest, TROPHIES, weightComment, stepComment, categoryById } from '../core/brainTest.js';
 import { gameById } from '../games/index.js';
 
 const g = (v) => `${Math.round(v || 0).toLocaleString('tr-TR')} g`;
@@ -34,6 +34,7 @@ export function createBrainScreens({ repo, show, play, audio, reducedMotion, ope
                 { class: `lab-tile cat-${cat.id}` },
                 h('p', { class: 'lab-tile-name' }, h('span', { class: 'lab-tile-icon', 'aria-hidden': 'true' }, cat.icon), cat.name),
                 PREVIEWS[cat.id](),
+                h('p', { class: 'lab-tile-games' }, cat.games.map(nameOf).join(' · ')),
               ),
             ),
           ),
@@ -56,7 +57,7 @@ export function createBrainScreens({ repo, show, play, audio, reducedMotion, ope
         h(
           'section',
           { class: 'bt-training' },
-          h('div', {}, h('h2', { class: 'section-title' }, 'Serbest antrenman'), h('p', { class: 'muted' }, 'Açtığın oyunları ve ek beyin oyunlarını tek tek, süre ve zorluk ayarlarıyla oyna.')),
+          h('div', {}, h('h2', { class: 'section-title' }, 'Serbest antrenman'), h('p', { class: 'muted' }, 'Testteki 8 oyunu ve ek beyin oyunlarını tek tek, süre ve zorluk ayarlarıyla oyna.')),
           h('button', { type: 'button', class: 'btn btn-secondary', id: 'open-training', onclick: openTraining }, 'Antrenmana git'),
         ),
       );
@@ -66,30 +67,19 @@ export function createBrainScreens({ repo, show, play, audio, reducedMotion, ope
 
   function categoryCard(cat) {
     const b = brain();
-    const open = unlockedGames(cat.id, b.tests);
-    const locked = cat.games.filter((id) => !open.includes(id));
-    let gameLine;
-    if (open.length > 1) {
-      const sel = h(
-        'select',
-        { id: `choice-${cat.id}`, 'aria-label': `${cat.name} oyunu`, onchange: (e) => repo.setBrainChoice(cat.id, e.target.value) },
-        h('option', { value: 'random', selected: b.choice[cat.id] === 'random' }, 'Rastgele'),
-        open.map((id) => h('option', { value: id, selected: b.choice[cat.id] === id }, nameOf(id))),
-      );
-      gameLine = h('label', { class: 'bt-choice' }, h('span', { class: 'label' }, 'Oyun'), sel);
-    } else {
-      gameLine = h('p', { class: 'bt-game' }, nameOf(open[0]));
-    }
+    const sel = h(
+      'select',
+      { id: `choice-${cat.id}`, 'aria-label': `${cat.name} oyunu`, onchange: (e) => repo.setBrainChoice(cat.id, e.target.value) },
+      h('option', { value: 'random', selected: b.choice[cat.id] === 'random' }, 'Rastgele'),
+      cat.games.map((id) => h('option', { value: id, selected: b.choice[cat.id] === id }, nameOf(id))),
+    );
     return h(
       'article',
       { class: `bt-cat cat-${cat.id}` },
       h('div', { class: 'bt-cat-head' }, h('span', { class: 'bt-cat-icon', 'aria-hidden': 'true' }, cat.icon), h('h3', {}, cat.name)),
-      gameLine,
+      h('ul', { class: 'bt-games' }, cat.games.map((id) => h('li', {}, nameOf(id)))),
+      h('label', { class: 'bt-choice' }, h('span', { class: 'label' }, 'Oyun'), sel),
       h('p', { class: 'bt-cat-best' }, h('span', { class: 'label' }, 'En iyi'), h('strong', {}, b.catBest[cat.id] ? g(b.catBest[cat.id]) : '—')),
-      locked.map((id) => {
-        const after = cat.unlockAfter[cat.games.indexOf(id)];
-        return h('p', { class: 'bt-lock' }, `🔒 ${nameOf(id)}: ${after - b.tests} test sonra açılır`);
-      }),
     );
   }
 
@@ -98,7 +88,7 @@ export function createBrainScreens({ repo, show, play, audio, reducedMotion, ope
     const b = brain();
     const seed = repo.settings.seed ? `${repo.settings.seed}:test:${b.tests}` : Date.now();
     const rng = createRng(seed);
-    const plan = TEST_CATEGORIES.map((cat) => ({ category: cat.id, gameId: pickGame(cat.id, b.tests, b.choice[cat.id], rng) }));
+    const plan = TEST_CATEGORIES.map((cat) => ({ category: cat.id, gameId: pickGame(cat.id, b.choice[cat.id], rng) }));
     audio.play('start');
     welcome({ plan, steps: [] });
   }
@@ -283,9 +273,6 @@ export function createBrainScreens({ repo, show, play, audio, reducedMotion, ope
           ),
           outcome.newTrophies.length
             ? h('div', { class: 'panel' }, h('h2', { class: 'section-title' }, '🏆 Yeni kupa'), h('ul', { class: 'plain' }, outcome.newTrophies.map((t) => h('li', {}, h('strong', {}, t.name), ` · ${t.desc}`))))
-            : null,
-          outcome.unlocked.length
-            ? h('div', { class: 'panel' }, h('h2', { class: 'section-title' }, '🔓 Yeni oyun açıldı'), h('ul', { class: 'plain' }, outcome.unlocked.map((u) => h('li', {}, h('strong', {}, nameOf(u.gameId)), ` · ${categoryById(u.category).name}. Ana sayfada seçebilirsin.`))))
             : null,
           h('p', { class: 'muted' }, `Toplam ${b.tests} test. ${summary.errors ? `Bu testte ${summary.errors} hata.` : 'Bu testte hiç hata yapmadın!'}`),
           h(
