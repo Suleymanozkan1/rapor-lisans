@@ -58,3 +58,8 @@ Denetim bunları açık değil, sertleştirme olarak raporladı. Denetimden **so
 - Beyin Testi (8 yeni oyun, `brainTest.js`, kayıt şeması 2) denetimden **sonra** eklendi ve yeniden denetlenmedi.
   Yeni dış girdi yüzeyi yok: kayıttaki `brain` alanı da `sanitizeBrain()` ile tür/aralık denetiminden geçer
   (`tests/brain.test.mjs`). Yeni kod da `innerHTML` kullanmaz (ESLint kuralı).
+- Android kabuğu (`android/`) denetimden sonra eklendi ve yeniden denetlenmedi. Tasarım kararları: internet
+  izni yok; WebView yalnızca `file:///android_asset/` sayfalarını açar, başka adrese gezinme engellenir;
+  `setAllowFileAccess(false)`, `setAllowContentAccess(false)`. Sayfaya açılan tek köprü
+  `ZihinAndroid.saveFile(ad, metin)`dir ve yalnızca kullanıcının seçtiği konuma yazan sistem "Farklı kaydet"
+  penceresini açar; dosya sistemine doğrudan erişim vermez.

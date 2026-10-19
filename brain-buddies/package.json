@@ -15,7 +15,8 @@
     "check": "node tools/check-syntax.mjs",
     "lint": "eslint .",
     "ui": "node tools/build.mjs && node tools/ui-check.mjs",
-    "verify": "npm run check && npm test && npm run build"
+    "verify": "npm run check && npm test && npm run build",
+    "apk": "node tools/build.mjs && cd android && ./gradlew --no-daemon assembleRelease"
   },
   "dependencies": {},
   "devDependencies": {}

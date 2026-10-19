@@ -35,7 +35,26 @@ npm run verify    # check + test + build
 # İsteğe bağlı (global kurulu araçlar gerekir, proje bağımlılığı değildir):
 npm run lint      # ESLint (MIT)
 npm run ui        # Playwright + Chromium ile uçtan uca arayüz kontrolü (Apache-2.0)
+npm run apk       # Android APK (JDK 17+ ve Android SDK gerekir, bkz. aşağısı)
 ```
+
+## Android (APK)
+
+`android/` klasörü oyunu çevrimdışı açan küçük bir Android uygulamasıdır: `dist/zihin-molasi.html`
+derlemede `assets/index.html` olarak kopyalanır ve tam ekran WebView'da açılır. Kütüphane bağımlılığı yok
+(AndroidX dahil), internet izni istemez, Android 8.0+ (API 26) üzerinde çalışır.
+
+- Geri tuşu: oyun sürerken duraklatır, alt ekranlarda ana sayfaya döner, ana sayfada uygulamadan çıkar.
+- Ayarlar → Dışa aktar "Farklı kaydet" penceresini açar; İçe aktar dosya seçiciyi açar.
+- Kayıtlar uygulamanın kendi alanında tutulur; uygulama silinince kayıtlar da silinir (önce dışa aktar).
+
+Derleme (hepsi ücretsiz): JDK 17+, Android SDK `platforms;android-35` ve `build-tools;35.0.0`
+(`sdkmanager` ile). `android/local.properties` içine `sdk.dir=<SDK yolu>` yaz, sonra `npm run apk`.
+Çıktı: `android/app/build/outputs/apk/release/app-release.apk`.
+
+İmzalama: `android/keystore.properties` (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`) varsa
+sürüm anahtarıyla, yoksa hata ayıklama anahtarıyla imzalanır. Anahtar ve şifre depoya eklenmez
+(`.gitignore`). Güncellemeyi kayıtları silmeden kurmak için hep aynı anahtar kullanılmalıdır.
 
 ## Beyin Testi oyunları
 

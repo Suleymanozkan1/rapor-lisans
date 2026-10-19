@@ -992,6 +992,8 @@ export function createApp({ root, repo, media = globalThis.matchMedia?.bind(glob
                 exportBox.hidden = false;
                 exportBox.select();
                 try {
+                  // Android uygulamasında blob indirmesi çalışmaz; kabuk "Farklı kaydet" penceresini açar
+                  if (window.ZihinAndroid?.saveFile) return void window.ZihinAndroid.saveFile('zihin-molasi-veri.json', json);
                   const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
                   const a = h('a', { href: url, download: 'zihin-molasi-veri.json' });
                   document.body.append(a);

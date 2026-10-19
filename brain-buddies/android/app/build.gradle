@@ -1,0 +1,55 @@
+// Zihin Molası Android kabuğu: dist/zihin-molasi.html'i WebView'da çevrimdışı açar.
+// Hiçbir kütüphane bağımlılığı yok (AndroidX dahil); yalnızca Android platform API'leri.
+
+plugins {
+    id 'com.android.application'
+}
+
+def signing = new Properties()
+def signingFile = rootProject.file('keystore.properties')
+if (signingFile.exists()) signingFile.withInputStream { signing.load(it) }
+
+android {
+    namespace 'app.zihinmolasi'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'app.zihinmolasi'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName '1.0.0'
+    }
+
+    signingConfigs {
+        release {
+            if (signingFile.exists()) {
+                storeFile rootProject.file(signing['storeFile'])
+                storePassword signing['storePassword']
+                keyAlias signing['keyAlias']
+                keyPassword signing['keyPassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // keystore.properties yoksa hata ayıklama anahtarıyla imzalanır (yine de kurulabilir)
+            signingConfig signingFile.exists() ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Oyunun tek dosyalık sürümü her derlemede assets/index.html olarak kopyalanır (önce: npm run build)
+def copyGame = tasks.register('copyGame', Copy) {
+    from(rootProject.file('../dist/zihin-molasi.html'))
+    into(layout.projectDirectory.dir('src/main/assets'))
+    rename { 'index.html' }
+}
+tasks.named('preBuild') { dependsOn copyGame }
