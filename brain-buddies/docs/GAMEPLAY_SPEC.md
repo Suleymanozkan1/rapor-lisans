@@ -47,6 +47,11 @@ Hatasız 2500 · Dengeli beyin (her kategoride 1000 g) · Seri (art arda 20 doğ
 
 Profesör Gram'ın final yorumu toplam ağırlığa göre değişir (<1000, 1000, 2000, 3000, 4000, 5000 g).
 
+Profesör Gram'ın ifadeleri (`src/ui/mascot.js`): ana sayfada mutlu ve el sallar; karşılamada ve oyun
+girişinde düşünceli; ara sonuçta kategori rekoru → gururlu, ≥1000 g → şaşkın, ≥600 g → mutlu, altı → teselli
+eden; finalde rekor (≥1500 g) → gururlu, ≥4000 g gururlu, ≥2500 g şaşkın, ≥1500 g mutlu, altı teselli eden.
+Her zaman göz kırpar ve hafifçe süzülür; konuşurken ağzı oynar. Hareket azaltma ayarında hepsi durur.
+
 ## 1. Ortak oturum akışı (`src/core/session.js`, `src/ui/app.js`)
 
 ```

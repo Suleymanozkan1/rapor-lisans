@@ -2750,3 +2750,90 @@ ul.plain {
     radial-gradient(circle at 85% 18%, #d9d4e6 0 6%, transparent 6.5%),
     linear-gradient(180deg, #3d1b5a, #6b2f8a 60%, #b04fa8);
 }
+
+/* Profesör Gram: canlılık animasyonları */
+.pg-glint { fill: #ffffff; }
+.pg-brow { fill: none; stroke: var(--brain-line); stroke-width: 3; stroke-linecap: round; }
+.pg-cheek { fill: #ff7aa2; opacity: 0.55; }
+.pg-thought { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
+.pg-drop { fill: #7cc7ff; stroke: #2a6fa8; stroke-width: 1; }
+.pg-fizz { fill: rgba(255, 255, 255, 0.85); }
+
+.mascot .pg-float {
+  animation: pg-float 3.2s ease-in-out infinite;
+}
+
+.mascot .pg-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pg-blink 4.6s infinite;
+}
+
+.mascot.is-talking .pg-mouth-g {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pg-talk 0.28s ease-in-out infinite alternate;
+}
+
+.mascot.is-waving .pg-wave {
+  transform-box: view-box;
+  transform-origin: 88px 112px;
+  animation: pg-wave 2.4s ease-in-out infinite;
+}
+
+.mascot .pg-fizz {
+  animation: pg-fizz 1.8s ease-in infinite;
+}
+
+.mascot .pg-fizz-2 {
+  animation-delay: 0.9s;
+}
+
+.mascot.mood-wow .pg-float,
+.mascot.mood-proud .pg-float {
+  animation: pg-hop 1.4s ease-in-out 2, pg-float 3.2s ease-in-out 2.8s infinite;
+}
+
+@keyframes pg-float {
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes pg-hop {
+  30% { transform: translateY(-9px); }
+  60% { transform: translateY(0); }
+}
+
+@keyframes pg-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+@keyframes pg-talk {
+  from { transform: scaleY(1); }
+  to { transform: scaleY(0.35); }
+}
+
+@keyframes pg-wave {
+  0%, 55%, 100% { transform: rotate(0deg); }
+  65% { transform: rotate(-14deg); }
+  75% { transform: rotate(8deg); }
+  85% { transform: rotate(-10deg); }
+}
+
+@keyframes pg-fizz {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-10px); opacity: 0; }
+}
+
+/* Hareket azaltma: karakter sabit durur (göz kırpma dahil) */
+.reduce-motion .mascot *,
+.reduce-motion .mascot {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.motion-ok) .mascot,
+  html:not(.motion-ok) .mascot * {
+    animation: none !important;
+  }
+}

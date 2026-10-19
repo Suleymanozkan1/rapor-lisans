@@ -2,7 +2,7 @@
 
 import { h } from './dom.js';
 import { s } from './svg.js';
-import { mascotSvg, speech } from './mascot.js';
+import { mascotSvg, speech, moodForGrams, moodForTotal } from './mascot.js';
 import { labBackground, PREVIEWS } from './scenes.js';
 import { createRng } from '../core/rng.js';
 import { TEST_CATEGORIES, STEP_MS, BONUS_EVERY, BONUS_MS, scoringFor, unlockedGames, pickGame, summarizeTest, TROPHIES, weightComment, stepComment, categoryById } from '../core/brainTest.js';
@@ -44,7 +44,7 @@ export function createBrainScreens({ repo, show, play, audio, reducedMotion, ope
             h('p', { class: 'lab-record' }, b.best ? ['Beynin: ', h('strong', { id: 'record-weight' }, g(b.best.total))] : 'Henüz tartılmadın'),
             h('button', { type: 'button', class: 'lab-small', id: 'open-trophies', onclick: trophies }, `🏆 Kupalar ${earned}/${TROPHIES.length}`),
           ),
-          h('div', { class: 'lab-host' }, mascotSvg({ size: 150, mood: 'happy' })),
+          h('div', { class: 'lab-host' }, mascotSvg({ size: 150, mood: 'happy', wave: true })),
         ),
         h('p', { class: 'lab-note' }, '4 oyun × 60 saniye: Hafıza, Mantık, Hesap, Görsel. Hata yapmadan hızlı ol; art arda 10 doğru ek süre kazandırır.'),
         h(
@@ -213,7 +213,7 @@ export function createBrainScreens({ repo, show, play, audio, reducedMotion, ope
           'section',
           { class: 'bt-step' },
           progress(state, last ? -1 : i + 1),
-          speech(stepComment(grams, b.catBest[cat.id]), { mood: grams >= 1000 ? 'wow' : 'happy', size: 96 }),
+          speech(stepComment(grams, b.catBest[cat.id]), { mood: b.catBest[cat.id] && grams > b.catBest[cat.id] ? 'proud' : moodForGrams(grams), size: 96 }),
           h('p', { class: 'eyebrow' }, `${cat.name} · ${nameOf(p.gameId)}`),
           h('h1', { class: 'bt-grams' }, h('span', { id: 'step-grams' }, g(grams))),
           h(
@@ -262,7 +262,7 @@ export function createBrainScreens({ repo, show, play, audio, reducedMotion, ope
         h(
           'section',
           { class: 'bt-final' },
-          speech(weightComment(summary.total), { mood: 'wow', size: 110 }),
+          speech(weightComment(summary.total), { mood: outcome.isRecord && summary.total >= 1500 ? 'proud' : moodForTotal(summary.total), size: 110 }),
           h('div', { class: 'bt-weigh' }, scaleSvg(), h('h1', { class: 'bt-total' }, h('small', {}, 'Beyin ağırlığın'), big)),
           outcome.isRecord
             ? h('p', { class: 'badge badge-record' }, prev ? `Yeni rekor! Öncekinden ${g(summary.total - prev.total)} ağır.` : 'İlk tartın rekor olarak kaydedildi!')
