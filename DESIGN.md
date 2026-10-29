@@ -66,14 +66,17 @@ yayın/makale okunabilirliği. Başlıkta tek kelimeyi farklı renk/yazı tipiyl
 
 ## Düzen
 
-- **Ana sayfa slider'ı:** hero bir slider'dır: ilk slayt site tanıtımı (logo, ad, amaç cümleleri),
-  ardından son 3 yazı ("Gündem": kategori, başlık, özet, tarih, okuma süresi, kapak) ve 3 mağaza
-  ürünü (fiyat, biçim, "Satın al"/"İncele", ürün kapağı) sırayla, karışık. 6,5 saniyede bir
-  kendiliğinden geçer; altta duraklat, önceki/sonraki düğmeleri, noktalar ve ilerleme çubuğu
-  vardır. Fare üstündeyken veya klavye odağı içindeyken durur; `prefers-reduced-motion`
-  isteyen ziyaretçide hiç kendiliğinden geçmez. Görünmeyen slaytlar `inert`'tir (klavye ve ekran
-  okuyucu yalnızca görüneni bulur). Tüm slaytlar aynı ızgara hücresinde durur, yükseklik
-  zıplamaz. Slaytların düzeni aşağıdaki hero düzeninin aynısıdır.
+- **Ana sayfa slider'ı (Instagram hikâyesi gibi):** ilk slayt site tanıtımı, ardından son 3 yazı
+  ("Gündem") ve 3 mağaza ürünü karışık sırayla. Her slayt kendi sarı-siyah afişidir; yenisi
+  eskisinin üzerinden **panelin eğik kenarı boyunca silerek** gelir (geri giderken tersten),
+  eskisi hafifçe geri kayar, fotoğrafta yavaş yakınlaşma olur, metin kademeli yükselir. Üstte
+  slayt başına bir **hikâye çubuğu**: geçmişler dolu, şimdiki dolarak zamanlayıcı olur (6,5 sn),
+  çubuğa dokunmak o slayta gider. Altta duraklat, önceki, sonraki ve **"Sıradaki"** kartı (bir
+  sonraki slaytın türü ve başlığı). Telefonda kaydırma (swipe), klavyede ok tuşları. Fare
+  üstündeyken veya odak içindeyken durur; `prefers-reduced-motion` isteyende ne silme ne
+  kendiliğinden geçiş vardır. Görünmeyen slaytlar `inert`'tir. Telefonda yazı ve ürün slaytları
+  haber kartı gibidir (üstte 16:9 görsel, altta başlık 3 satır ve özet 2 satırla kırpılır),
+  tanıtım slaytı temsili fotoğrafı göstermez; böylece slaytlar aynı yükseklikte kalır.
 - **Ana sayfa:** hero solda eğik kenarlı sarı panel (logo, site adı, sitenin amacını anlatan
   dört kısa cümle ve ikonları, "Hazırlayan: Uğur Durak", "Yazıları oku" ve "Mağaza"
   düğmeleri), sağda siyah alan üzerinde temsili fotoğraf, arkasında sarı blok, üstüne binen
@@ -103,7 +106,7 @@ yayın/makale okunabilirliği. Başlıkta tek kelimeyi farklı renk/yazı tipiyl
 
 ## Hareket
 
-Hepsi CSS (slider'ın zamanlayıcısı da ilerleme çubuğunun CSS animasyonudur), hareket kütüphanesi yok; `prefers-reduced-motion: reduce` altında tamamen kapanır.
+Hepsi CSS (slider'ın zamanlayıcısı da hikâye çubuğunun CSS animasyonudur), hareket kütüphanesi yok; `prefers-reduced-motion: reduce` altında tamamen kapanır.
 
 | Hareket | Ne anlatır |
 |---|---|
@@ -113,7 +116,7 @@ Hepsi CSS (slider'ın zamanlayıcısı da ilerleme çubuğunun CSS animasyonudur
 | Ürün kartında hover'da sarı panelin eğiminin hafifçe açılması | Kartın tıklanabilir olduğu |
 | Kart, düğme ve kutularda hover'da yükselme, görselde hafif büyüme | Tıklanabilirlik geri bildirimi |
 | Yazı sayfasında sarı okuma ilerleme çubuğu (`animation-timeline: scroll()`) | Okurun metindeki yeri |
-| Slider: slaytlar arasında solma, yeni slaytta metnin kademeli yükselmesi ve görselin açılması, ilerleme çubuğu | Sıradaki habere/ürüne geçiş ve ne zaman geçileceği |
+| Slider: eğik kenar boyunca silme, eski slaytın geri kayması, fotoğrafta yavaş yakınlaşma, hikâye çubuğunun dolması | Sıradaki habere/ürüne geçiş ve ne zaman geçileceği |
 
 ## İkonlar
 

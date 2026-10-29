@@ -47,15 +47,18 @@ test('home slider: intro first, then posts and products; controls, pause and aut
   await page.getByRole('button', { name: 'Sonraki' }).click()
   await expect(slides.nth(1)).toHaveClass(/is-active/)
   await expect(slides.nth(1)).toContainText('Gündem')
-  await page.getByRole('button', { name: '3. öğe', exact: false }).click()
+  await page.getByRole('button', { name: /^3\. Mağaza:/ }).click()
   await expect(slides.nth(2)).toHaveClass(/is-active/)
   await page.getByRole('button', { name: 'Önceki' }).click()
   await expect(slides.nth(1)).toHaveClass(/is-active/)
 
   await page.getByRole('button', { name: 'Otomatik geçişi durdur' }).click()
   await expect(page.getByRole('button', { name: 'Otomatik geçişi başlat' })).toBeVisible()
-  await expect(page.locator('.hero-slider__progress')).toHaveCount(0)
+  await expect(page.locator('.story__fill--run')).toHaveCount(0)
   await page.getByRole('button', { name: 'Otomatik geçişi başlat' }).click()
+  await expect(page.locator('.story__fill--run')).toHaveCount(1)
+  // The "next" preview names what comes after the current slide.
+  await expect(page.locator('.hero-slider__next')).toContainText('Sıradaki')
 
   // Auto-advance once the pointer and focus leave the slider.
   await page.locator('h2', { hasText: 'Son yazılar' }).focus().catch(() => {})
@@ -68,7 +71,7 @@ test('home slider does not rotate when reduced motion is preferred', async ({ br
   const ctx = await browser.newContext({ reducedMotion: 'reduce' })
   const page = await ctx.newPage()
   await page.goto('/')
-  await expect(page.locator('.hero-slider__progress')).toHaveCount(0)
+  await expect(page.locator('.story__fill--run')).toHaveCount(0)
   await page.waitForTimeout(1500)
   await expect(page.locator('.hero-slide').nth(0)).toHaveClass(/is-active/)
   await ctx.close()

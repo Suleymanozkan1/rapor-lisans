@@ -28,7 +28,7 @@ export default function HomePage() {
   const counts = Object.fromEntries(categories.map((c) => [c.slug, posts.filter((p) => p.category === c.slug).length]))
 
   const introSlide = (
-    <div className="wrap hero__inner">
+    <div className="wrap hero__inner hero__inner--intro">
       <div className="hero__copy">
         {s.logo ? (
           // Decorative: the h1 carries the name.
@@ -78,13 +78,14 @@ export default function HomePage() {
       <div>
         <figure className="hero__visual">
           {portrait ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img className="reveal-media" src={portrait.src} alt={portrait.alt} width={portraitMeta?.width} height={portraitMeta?.height} fetchPriority="high" />
+            <span className="hero__frame reveal-media">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={portrait.src} alt={portrait.alt} width={portraitMeta?.width} height={portraitMeta?.height} fetchPriority="high" />
+            </span>
           ) : (
-            <>
+            <span className="hero__frame reveal-media">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                className="reveal-media"
                 src={SITE_PHOTOS.hero.src}
                 srcSet={SITE_PHOTOS.hero.srcSet}
                 sizes="(min-width: 60rem) 40vw, 100vw"
@@ -93,7 +94,7 @@ export default function HomePage() {
                 height={SITE_PHOTOS.hero.height}
                 fetchPriority="high"
               />
-            </>
+            </span>
           )}
         </figure>
         {portrait ? null : <p className="hero__credit">Temsili görsel. Fotoğraf: {SITE_PHOTOS.hero.credit}</p>}
@@ -102,9 +103,9 @@ export default function HomePage() {
   )
 
   // Intro first, then the latest posts and store products, interleaved.
-  const postSlides = posts.slice(0, 3).map((p) => ({ key: `yazi-${p.slug}`, label: p.title, content: <PostSlide post={p} category={categoryName(categories, p.category)} /> }))
-  const productSlides = products.slice(0, 3).map((p) => ({ key: `urun-${p.slug}`, label: p.title, content: <ProductSlide product={p} /> }))
-  const slides = [{ key: 'tanitim', label: s.siteName, content: introSlide }]
+  const postSlides = posts.slice(0, 3).map((p) => ({ key: `yazi-${p.slug}`, kind: 'Gündem', label: p.title, content: <PostSlide post={p} category={categoryName(categories, p.category)} /> }))
+  const productSlides = products.slice(0, 3).map((p) => ({ key: `urun-${p.slug}`, kind: 'Mağaza', label: p.title, content: <ProductSlide product={p} /> }))
+  const slides = [{ key: 'tanitim', kind: 'Tanıtım', label: s.siteName, content: introSlide }]
   for (let i = 0; i < Math.max(postSlides.length, productSlides.length); i++) {
     if (postSlides[i]) slides.push(postSlides[i])
     if (productSlides[i]) slides.push(productSlides[i])
@@ -202,7 +203,7 @@ export default function HomePage() {
 function PostSlide({ post: p, category }: { post: Post; category?: string }) {
   const cover = p.cover ? mediaFor(p.cover.src) : undefined
   return (
-    <div className="wrap hero__inner">
+    <div className="wrap hero__inner hero__inner--story">
       <div className="hero__copy">
         <p className="hero__eyebrow rise">
           <Newspaper size={22} weight="fill" aria-hidden="true" />
@@ -235,8 +236,10 @@ function PostSlide({ post: p, category }: { post: Post; category?: string }) {
       <div>
         <figure className="hero__visual">
           {p.cover ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img className="reveal-media" src={p.cover.src} alt={p.cover.alt} width={cover?.width} height={cover?.height} loading="lazy" decoding="async" />
+            <span className="hero__frame reveal-media">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={p.cover.src} alt={p.cover.alt} width={cover?.width} height={cover?.height} loading="lazy" decoding="async" />
+            </span>
           ) : (
             <div className="hero__art reveal-media" aria-hidden="true">
               <CategoryIcon slug={p.category} size={160} />
@@ -251,7 +254,7 @@ function PostSlide({ post: p, category }: { post: Post; category?: string }) {
 function ProductSlide({ product: p }: { product: Product }) {
   const price = formatPrice(p.price)
   return (
-    <div className="wrap hero__inner">
+    <div className="wrap hero__inner hero__inner--story">
       <div className="hero__copy">
         <p className="hero__eyebrow rise">
           <ShoppingBagOpen size={22} weight="fill" aria-hidden="true" />
@@ -270,16 +273,24 @@ function ProductSlide({ product: p }: { product: Product }) {
         ) : null}
         <div className="hero__actions rise rise-4">
           {isForSale(p) ? (
-            <Link className="button button--black" href={`/magaza/${p.slug}/satin-al`}>
-              Satın al
-            </Link>
-          ) : null}
-          <Link className={`button ${isForSale(p) ? 'button--outline-black' : 'button--black'}`} href={`/magaza/${p.slug}`}>
-            İncele
-          </Link>
-          <Link className="button button--outline-black" href="/magaza">
-            Mağaza
-          </Link>
+            <>
+              <Link className="button button--black" href={`/magaza/${p.slug}/satin-al`}>
+                Satın al
+              </Link>
+              <Link className="button button--outline-black" href={`/magaza/${p.slug}`}>
+                İncele
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link className="button button--black" href={`/magaza/${p.slug}`}>
+                İncele
+              </Link>
+              <Link className="button button--outline-black" href="/magaza">
+                Mağaza
+              </Link>
+            </>
+          )}
         </div>
       </div>
       <div>
