@@ -87,8 +87,10 @@ sadeliği hedefiyle çelişir.
 
 ## K10. Denetim kaydı
 
-Her panel işlemi `panel(<kullanıcı>): <işlem> <hedef>` mesajlı bir commit'tir (kim, ne zaman, ne).
-Ayrıca sunucu loguna `admin_audit` JSON satırı yazılır. Parola, token, çerez loglanmaz.
+Her panel işlemi `panel: <işlem> <hedef>` mesajlı bir commit'tir (ne zaman, ne; commit yazarı
+GitHub token'ının sahibi). Yönetici kullanıcı adı, depo public olabileceği için commit mesajına
+yazılmaz; sunucu loguna yazılan `admin_audit` JSON satırı kullanıcıyı da içerir. Parola, token,
+çerez loglanmaz.
 Vercel Hobby runtime logları 1 saat tutulur; kalıcı kayıt Git geçmişidir.
 
 ## K11. Bilinen sınırlar

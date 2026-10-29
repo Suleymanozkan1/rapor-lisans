@@ -57,7 +57,7 @@ export function SettingsForm({ csrf, settings: s, sha, media }: Props) {
         </div>
         <ImagePick id="logoSrc" label="Logo" media={media} value={s.logo?.src} />
         <Text id="logoAlt" label="Logo alt metni" value={s.logo?.alt ?? ''} max={300} />
-        <ImagePick id="defaultOgImage" label="Varsayılan paylaşım görseli" media={media} value={s.seo.defaultOgImage} />
+        <ImagePick id="defaultOgImageSrc" label="Varsayılan paylaşım görseli" media={media} value={s.seo.defaultOgImage} />
       </fieldset>
 
       <fieldset id="yazar" className="admin-fieldset">

@@ -61,6 +61,19 @@ describe('JPEG cleaning', () => {
   })
 })
 
+describe('allowlist', () => {
+  it('drops JFXX thumbnails, unknown APP markers and private/C2PA chunks', () => {
+    const seg = (m: number, text: string) => {
+      const t = Buffer.from(text, 'latin1')
+      return Buffer.concat([Buffer.from([0xff, m, (t.length + 2) >> 8, (t.length + 2) & 0xff]), t])
+    }
+    const j = cleanJpeg(Buffer.concat([JPG.subarray(0, 2), seg(0xe0, 'JFXX\0thumbGIZLI'), seg(0xeb, 'JUMBc2paGIZLI'), JPG.subarray(2)]))
+    expect(j.data.toString('latin1')).not.toContain('GIZLI')
+    const p = cleanPng(Buffer.concat([PNG.subarray(0, 33), pngChunk('caBX', Buffer.from('GIZLI')), pngChunk('prVt', Buffer.from('GIZLI')), PNG.subarray(33)]))
+    expect(p.data.toString('latin1')).not.toContain('GIZLI')
+  })
+})
+
 describe('PNG cleaning', () => {
   it('drops text/EXIF chunks and trailing bytes', () => {
     const iend = PNG.length - 12

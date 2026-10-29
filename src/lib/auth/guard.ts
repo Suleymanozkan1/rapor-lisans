@@ -82,13 +82,15 @@ export async function endSession(): Promise<void> {
 }
 
 /**
- * Client address for rate limiting. On Vercel the platform overwrites
- * x-forwarded-for, so its first entry is the client. Elsewhere the header is
- * only trusted when TRUST_PROXY=1 says a proxy in front rewrites it;
- * otherwise all clients share one bucket (stricter, never spoofable).
+ * Client address for rate limiting, or null when none can be trusted.
+ * On Vercel the platform overwrites x-forwarded-for with the client address.
+ * Behind another proxy (TRUST_PROXY=1) the last entry is the one that proxy
+ * appended; earlier entries are client-controlled.
  */
-export async function clientIp(): Promise<string> {
-  if (!process.env.VERCEL && process.env.TRUST_PROXY !== '1') return 'untrusted-network'
+export async function clientIp(): Promise<string | null> {
   const h = await headers()
-  return (h.get('x-forwarded-for')?.split(',')[0] ?? h.get('x-real-ip') ?? 'unknown').trim().slice(0, 64)
+  const xff = h.get('x-forwarded-for')
+  if (process.env.VERCEL) return (xff?.split(',')[0] ?? h.get('x-real-ip'))?.trim().slice(0, 64) || null
+  if (process.env.TRUST_PROXY === '1') return xff?.split(',').pop()?.trim().slice(0, 64) || null
+  return null
 }

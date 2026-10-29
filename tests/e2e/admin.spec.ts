@@ -127,7 +127,7 @@ test('post lifecycle: draft, preview, publish, edit, delete with confirmation', 
   expect(existsSync(file)).toBe(false)
 
   await page.goto('/admin/kayitlar')
-  await expect(page.locator('table')).toContainText('panel(yonetici): yazıyı sildi yuksekte-calismada-dusme-onleme')
+  await expect(page.locator('table')).toContainText('panel: yazıyı sildi yuksekte-calismada-dusme-onleme')
 })
 
 test('stale edits are rejected instead of overwriting (optimistic locking)', async ({ browser }) => {
@@ -279,11 +279,17 @@ test('settings: validates URLs and e-mail, saves valid data', async ({ page }) =
   await expect(page.locator('main').getByRole('alert')).toContainText('social.linkedin')
   await page.getByLabel('LinkedIn').fill('https://www.linkedin.com/in/ornek')
   await page.getByLabel('Kısa biyografi (ana sayfa)').fill('E2E kısa biyografi')
+  await page.getByLabel('Varsayılan paylaşım görseli').selectOption({ index: 1 })
   await page.getByRole('button', { name: 'Ayarları kaydet' }).click()
   await expect(page.locator('main').getByRole('status').filter({ hasText: 'Ayarlar kaydedildi' })).toBeVisible()
   const s = JSON.parse(readFileSync(path.join(work, 'content/settings.json'), 'utf8'))
   expect(s.social.linkedin).toBe('https://www.linkedin.com/in/ornek')
   expect(s.author.shortBio).toBe('E2E kısa biyografi')
+  expect(s.seo.defaultOgImage).toMatch(/^\/uploads\//)
+  // Saving again without touching the field keeps it (regression: it used to be cleared).
+  await page.getByRole('button', { name: 'Ayarları kaydet' }).click()
+  await expect(page.locator('main').getByRole('status').filter({ hasText: 'Ayarlar kaydedildi' })).toBeVisible()
+  expect(JSON.parse(readFileSync(path.join(work, 'content/settings.json'), 'utf8')).seo.defaultOgImage).toBe(s.seo.defaultOgImage)
 })
 
 test('tags: rename across posts', async ({ page }) => {

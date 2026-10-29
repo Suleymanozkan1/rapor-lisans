@@ -14,7 +14,7 @@ export default async function LogPage() {
     <>
       <h1>İşlem kayıtları</h1>
       <p className="admin-muted">
-        Paneldeki her değişiklik bir Git commit’i olarak saklanır: kim, ne zaman, hangi içerik. Parola, token veya çerez
+        Paneldeki her değişiklik bir Git commit’i olarak saklanır: ne zaman, hangi içerik; yazar, GitHub token’ının sahibidir (kullanıcı adı güvenlik için commit mesajına yazılmaz). Parola, token veya çerez
         kaydedilmez. Tam geçmiş için deponun commit geçmişine bakın.
       </p>
       {r.data.length === 0 ? (

@@ -59,6 +59,27 @@ describe('login action', () => {
     expect(results.filter((r) => r.error?.startsWith('Çok fazla'))).toHaveLength(15)
   })
 
+  it('without a trusted client address, junk attempts do not lock the owner out', async () => {
+    vi.stubEnv('TRUST_PROXY', '')
+    vi.stubEnv('VERCEL', '')
+    const { login } = await import('@/app/admin/login-actions')
+    for (let i = 0; i < 30; i++) await login({}, fd(`kullanici-${i % 3}`, 'tahmin'))
+    await expect(login({}, fd('yonetici-x', 'dogru-parola-123'))).rejects.toMatchObject({ url: '/admin' })
+  })
+
+  it('a known-wrong and the real username are throttled identically', async () => {
+    const { login } = await import('@/app/admin/login-actions')
+    const run = async (u: string) => {
+      const out: string[] = []
+      for (let i = 0; i < 21; i++) {
+        state.ip = `192.0.2.${i}-${u}`
+        out.push((await login({}, fd(u, 'yanlis'))).error ?? '')
+      }
+      return out.map((e) => (e.startsWith('Çok fazla') ? 'blocked' : 'failed'))
+    }
+    expect(await run('admin')).toEqual(await run('yonetici-x'))
+  })
+
   it('changing the password invalidates existing sessions', async () => {
     const { login } = await import('@/app/admin/login-actions')
     const { getAdminSession } = await import('@/lib/auth/guard')

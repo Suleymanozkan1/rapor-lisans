@@ -217,7 +217,7 @@ describe('admin content service (local store)', () => {
 
     await svc.deletePost('yeni-adres', (await svc.getAdminPost('yeni-adres'))!.sha, 'ugur')
     expect(await svc.getAdminPost('yeni-adres')).toBeNull()
-    expect(readFileSync(path.join(dir, 'content', '.admin-activity.jsonl'), 'utf8')).toContain('panel(ugur): yazıyı sildi yeni-adres')
+    expect(readFileSync(path.join(dir, 'content', '.admin-activity.jsonl'), 'utf8')).toContain('panel: yazıyı sildi yeni-adres')
   })
 
   it('rejects invalid slugs at the service boundary', async () => {

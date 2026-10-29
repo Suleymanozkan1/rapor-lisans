@@ -26,8 +26,9 @@ function audit(user: string, action: string, target: string) {
   console.info(JSON.stringify({ type: 'admin_audit', at: new Date().toISOString(), user, action, target }))
 }
 
-function message(user: string, action: string, target: string) {
-  return `panel(${user}): ${action} ${target}`.slice(0, 200)
+/** Commit message. The admin username is deliberately left out: commits may be public. */
+function message(_user: string, action: string, target: string) {
+  return `panel: ${action} ${target}`.slice(0, 200)
 }
 
 async function readJson<T>(store: ContentStore, p: LogicalPath, parse: (v: unknown) => T, fallback: T): Promise<Versioned<T>> {

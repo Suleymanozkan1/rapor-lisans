@@ -187,7 +187,7 @@ Tüm içerik Git'tedir; deponun kendisi yedektir.
 - Her panel işlemi sunucuda oturum + oturuma bağlı CSRF token'ı + Origin kontrolü yapar;
   `proxy.ts` yalnızca ilk kapıdır.
 - Giriş hız sınırı: IP başına 15 dakikada 5 deneme (parola kontrolünden önce atomik sayılır),
-  doğru kullanıcı adıyla hesap başına 20 deneme. Kullanıcı adını tahmin edilemez seçin. Sınır
+  girilen kullanıcı adı başına 20 deneme. Kullanıcı adını tahmin edilemez seçin. Sınır
   varsayılan olarak her sunucu örneğinin belleğindedir (sunucusuz ortamda kısmi koruma);
   paylaşılan sayaç için isteğe bağlı Upstash değişkenleri. `x-forwarded-for` yalnızca Vercel'de
   veya `TRUST_PROXY=1` ile kullanılır.

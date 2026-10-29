@@ -162,10 +162,34 @@ güvenlik başlıkları, bağımlılıklar, sırlar).
    Şüphede `SESSION_VERSION` artırın veya parolayı değiştirin.
 4. **Hız sınırı örnek başına:** Upstash yapılandırılmadıkça sayaçlar sunucusuz örnekler arasında
    paylaşılmaz. Uzun, rastgele bir parola kullanın.
-5. **Kullanıcı adını bilen saldırgan** hesap kilidini tetikleyebilir (bilinçli denge).
+5. **Kullanıcı adını bilen saldırgan** hesap kilidini tetikleyebilir (bilinçli denge: kaba
+   kuvvete karşı sınır). Kullanıcı adı artık commit mesajlarında yer almıyor; yine de tahmin
+   edilemez bir ad seçin. Kilitlenirseniz 15 dakika bekleyin veya yeniden deploy edin (bellek
+   sayaçları sıfırlanır).
 6. **Doğrulanmamış dağıtım gerçekleri:** Vercel'in `x-forwarded-for` başlığını üzerine yazması,
    statik dosyalara başlıkların uygulanması ve gerçek otomatik deploy davranışı bu ortamda
    gözlemlenemedi.
+
+## Yeniden denetim (düzeltmelerden sonra)
+
+Düzeltme commit'leri (`5487d76..b4c3134`) ayrı bir bağımsız ajan tarafından yeniden denetlendi.
+Ajan düzeltmeleri kodun kopyasında çalıştırdı: 50 paralel denemeden tam 5'i değerlendirildi;
+3 MB'lık saldırı dosyaları 5–39 ms'de işlendi; 600.000 vakalık bozma/kesme testi
+`ImageFormatError` dışında hiçbir istisna üretmedi.
+
+| Sonuç | Durum |
+|---|---|
+| Bulgu 1–4'ün dördü de kapandı | Doğrulandı |
+| **Yeni (düşük):** Vercel dışında, `TRUST_PROXY` olmadan tüm istemciler tek bir IP kovasını paylaşıyordu; 5 anonim istek sahibi kilitleyebiliyordu (Bulgu 2'nin daha kolay bir biçimi) | Düzeltildi: güvenilir adres yoksa IP kovası kullanılmıyor, kullanıcı adı kovası tahmini sınırlıyor. Regresyon testi `tests/unit/login.test.ts` |
+| **Yeni (düşük):** Hesap kovası yalnızca doğru kullanıcı adında harcandığı için yanıt farkı kullanıcı adının doğru olup olmadığını sızdırıyordu; ayrıca kullanıcı adı her commit mesajında (`panel(<kullanıcı>)`) yazıyordu | Düzeltildi: her deneme yazdığı kullanıcı adının kovasını harcıyor (yanlış adlar hash'lenmiş, atılabilir anahtarla); doğru ve yanlış ad aynı biçimde sınırlanıyor (testli). Commit mesajlarından kullanıcı adı çıkarıldı (`panel: …`) |
+| **İşlevsel hata:** Ayarlar her kaydedildiğinde varsayılan paylaşım görseli siliniyordu (form alanı adı uyuşmazlığı, ilk düzeltme turunda girdi) | Düzeltildi, e2e testi iki ardışık kayıtta değerin korunduğunu doğruluyor |
+| Görsel temizleyici yasak listesi kullanıyordu: C2PA, JFXX küçük resmi, bilinmeyen/özel parçalar kalabiliyordu | İzin listesine çevrildi (JPEG: kare/tablo/tarama + JFIF/ICC/Adobe; PNG: kritik + görüntüyü etkileyen parçalar; WebP: VP8/VP8L/VP8X/ALPH/ANIM/ANMF/ICCP). Testli |
+| `TRUST_PROXY=1` iken en soldaki (istemcinin yazabildiği) `x-forwarded-for` girdisi alınıyordu | Artık son vekilin eklediği en sağdaki girdi alınıyor |
+| Upstash'te `EXPIRE … NX` desteklenmezse sayaç süresiz kalabilirdi | `SET … EX … NX` + `INCR` sırası |
+| WebP'nin son tek boyutlu parçasında dolgu baytı düşüyordu | Eklendi |
+
+Bu ikinci tur düzeltmeler ayrıca yeniden denetlenmedi; her biri kendi testiyle ve tüm test
+paketinin yeniden çalıştırılmasıyla doğrulandı.
 
 ## Sapmalar (yöntem uyarlaması)
 
@@ -181,5 +205,5 @@ güvenlik başlıkları, bağımlılıklar, sırlar).
   olmadığından uygulama çalıştırılmadı. Ölçümler, kurulu kütüphanelerin sahte veriyle tek
   başına çağrılmasıyla yapıldı. Uygulama davranışı ayrıca projenin kendi test paketiyle
   doğrulandı.
-- Düzeltmelerden sonra güvenlik denetimi baştan tekrarlanmadı; her düzeltme kendi regresyon
-  testiyle ve tüm test paketinin yeniden çalıştırılmasıyla doğrulandı.
+- Düzeltmelerden sonra tüm kod tabanı baştan denetlenmedi; yalnızca düzeltme farkı bağımsız bir
+  ajana yeniden denetletildi (yukarıda).

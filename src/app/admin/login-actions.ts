@@ -5,7 +5,7 @@ import { authConfig } from '@/lib/env'
 import { verifyPassword } from '@/lib/auth/password'
 import { consume, LOGIN_LIMITS, resetLimit } from '@/lib/auth/rate-limit'
 import { clientIp, endSession, getAdminSession, startSession } from '@/lib/auth/guard'
-import { timingSafeEqual } from 'node:crypto'
+import { createHash, timingSafeEqual } from 'node:crypto'
 import { verifyCsrfToken } from '@/lib/auth/session'
 
 export type LoginState = { error?: string }
@@ -25,24 +25,28 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
   const username = String(formData.get('username') ?? '').slice(0, 100)
   const password = String(formData.get('password') ?? '').slice(0, 1024)
   const ip = await clientIp()
-  const ipKey = `login:ip:${ip}`
-  const accountKey = `login:acct:${cfg.username}`
+  const ipKey = ip ? `login:ip:${ip}` : null
+  const usernameOk = sameString(username, cfg.username)
+  // Every attempt spends the budget of the username it names, right or wrong, so responses and
+  // timing do not reveal whether a username exists. Only the real account's bucket is protected
+  // from eviction; wrong-username buckets are keyed by hash and evictable.
+  const accountKey = usernameOk
+    ? `login:acct:${cfg.username}`
+    : `login:user:${createHash('sha256').update(username).digest('base64url').slice(0, 22)}`
   const blocked = (retry: number) => {
     console.warn(JSON.stringify({ type: 'admin_login_blocked', at: new Date().toISOString(), ip }))
     return { error: `Çok fazla başarısız deneme. ${Math.ceil(retry / 60)} dakika sonra tekrar deneyin.` }
   }
 
   // Slots are reserved before the slow hash runs, so parallel requests cannot exceed the limit.
-  const ipLimit = await consume(ipKey, LOGIN_LIMITS.perIp.max, LOGIN_LIMITS.perIp.windowSeconds)
-  if (!ipLimit.allowed) return blocked(ipLimit.retryAfterSeconds)
-
-  // The account budget is only spent when the submitted username is right, so someone who does
-  // not know the (non-public) username cannot lock the owner out by failing on purpose.
-  const usernameOk = sameString(username, cfg.username)
-  if (usernameOk) {
-    const acct = await consume(accountKey, LOGIN_LIMITS.perAccount.max, LOGIN_LIMITS.perAccount.windowSeconds)
-    if (!acct.allowed) return blocked(acct.retryAfterSeconds)
+  // Without a trustworthy client address there is no per-IP bucket: a shared one would let five
+  // anonymous requests lock everyone out. The per-username bucket still caps guessing.
+  if (ipKey) {
+    const ipLimit = await consume(ipKey, LOGIN_LIMITS.perIp.max, LOGIN_LIMITS.perIp.windowSeconds)
+    if (!ipLimit.allowed) return blocked(ipLimit.retryAfterSeconds)
   }
+  const acct = await consume(accountKey, LOGIN_LIMITS.perAccount.max, LOGIN_LIMITS.perAccount.windowSeconds)
+  if (!acct.allowed) return blocked(acct.retryAfterSeconds)
 
   // Always run the hash so response time does not reveal whether the username matched.
   const passwordOk = await verifyPassword(password, cfg.passwordHash)
@@ -51,7 +55,7 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
     return { error: GENERIC }
   }
 
-  await Promise.all([resetLimit(ipKey), resetLimit(accountKey)])
+  await Promise.all([ipKey ? resetLimit(ipKey) : null, resetLimit(accountKey)])
   await startSession(cfg.username)
   console.info(JSON.stringify({ type: 'admin_login', at: new Date().toISOString(), user: cfg.username, ip }))
   redirect('/admin')

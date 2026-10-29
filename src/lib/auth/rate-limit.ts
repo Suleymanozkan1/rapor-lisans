@@ -39,25 +39,26 @@ async function upstash(command: (string | number)[][]): Promise<unknown[] | null
   }
 }
 
-/** Evicts expired buckets first, then the oldest per-IP buckets; never account buckets. */
+/** Evicts expired buckets first, then the oldest per-IP / wrong-username buckets; never the real account's. */
 function makeRoom(now: number) {
   if (memory.size < MAX_KEYS) return
   for (const [k, b] of memory) if (b.resetAt <= now) memory.delete(k)
   for (const k of memory.keys()) {
     if (memory.size < MAX_KEYS) break
-    if (k.startsWith('login:ip:')) memory.delete(k)
+    if (!k.startsWith('login:acct:')) memory.delete(k)
   }
 }
 
 /** Atomically counts one attempt and reports whether it is within `max` for the window. */
 export async function consume(key: string, max: number, windowSeconds: number, now = Date.now()): Promise<LimitResult> {
+  // SET NX EX creates the key with its expiry first; INCR keeps the TTL. Works without EXPIRE NX.
   const remote = await upstash([
+    ['SET', `rl:${key}`, 0, 'EX', windowSeconds, 'NX'],
     ['INCR', `rl:${key}`],
-    ['EXPIRE', `rl:${key}`, windowSeconds, 'NX'],
     ['TTL', `rl:${key}`],
   ])
   if (remote) {
-    const count = Number(remote[0] ?? 0)
+    const count = Number(remote[1] ?? 0)
     const ttl = Number(remote[2] ?? windowSeconds)
     return { allowed: count <= max, retryAfterSeconds: count <= max ? 0 : Math.max(ttl, 1) }
   }

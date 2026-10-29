@@ -1,9 +1,10 @@
 /*
  * Linear-time readers for JPEG, PNG and WebP that return the image size
  * and a cleaned copy of the file:
- *  - metadata blocks are removed (EXIF incl. GPS, XMP, IPTC, comments,
- *    PNG text chunks), except the JPEG EXIF orientation, which is kept as
- *    a minimal EXIF block so phone photos are not shown sideways;
+ *  - only an allowlist of image-data and colour blocks is kept, so every
+ *    metadata block (EXIF incl. GPS, XMP, IPTC, C2PA, comments, thumbnails,
+ *    unknown or private chunks) is removed; the JPEG EXIF orientation is
+ *    re-added as a minimal EXIF block so phone photos are not shown sideways;
  *  - anything after the format's end marker is dropped, so a valid image
  *    header cannot carry an appended HTML/JS payload.
  * Every loop advances by a positive offset and is capped, so a crafted
@@ -24,6 +25,16 @@ const fail = (msg: string): never => {
 /* ---------------- JPEG ---------------- */
 
 const SOF = new Set([0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf])
+/** Frame, Huffman/arithmetic tables, quantisation, restart interval, scan. */
+const JPEG_KEEP = new Set([...SOF, 0xc4, 0xcc, 0xdb, 0xdd, 0xda])
+
+/** APPn blocks that affect how pixels look: JFIF header (not JFXX thumbnails), ICC profile, Adobe colour transform. */
+function keepJpegApp(marker: number, payload: Buffer): boolean {
+  if (marker === 0xe0) return payload.toString('latin1', 0, 5) === 'JFIF\0'
+  if (marker === 0xe2) return payload.toString('latin1', 0, 12) === 'ICC_PROFILE\0'
+  if (marker === 0xee) return payload.toString('latin1', 0, 5) === 'Adobe'
+  return false
+}
 
 /** Reads the EXIF orientation (1-8) from an APP1 "Exif\0\0" payload, or undefined. */
 function exifOrientation(seg: Buffer): number | undefined {
@@ -99,9 +110,8 @@ export function cleanJpeg(buf: Buffer): CleanImage {
       width = payload.readUInt16BE(3)
     }
 
-    const isMetadata = (marker >= 0xe1 && marker <= 0xef && marker !== 0xe2 && marker !== 0xee) || marker === 0xfe
     if (marker === 0xe1 && orientation === undefined) orientation = exifOrientation(payload)
-    if (!isMetadata) out.push(segment)
+    if (JPEG_KEEP.has(marker) || keepJpegApp(marker, payload)) out.push(segment)
 
     if (marker === 0xda) {
       sawScan = true
@@ -132,7 +142,9 @@ export function cleanJpeg(buf: Buffer): CleanImage {
 /* ---------------- PNG ---------------- */
 
 const PNG_SIG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
-const PNG_DROP = new Set(['tEXt', 'zTXt', 'iTXt', 'eXIf', 'tIME'])
+/** Critical chunks plus ancillary chunks that affect rendering or animation. */
+const PNG_KEEP = new Set(['IHDR', 'PLTE', 'IDAT', 'IEND', 'tRNS', 'gAMA', 'cHRM', 'sRGB', 'iCCP', 'sBIT', 'pHYs', 'bKGD', 'cICP', 'acTL', 'fcTL', 'fdAT'])
+const WEBP_KEEP = new Set(['VP8 ', 'VP8L', 'VP8X', 'ALPH', 'ANIM', 'ANMF', 'ICCP'])
 
 export function cleanPng(buf: Buffer): CleanImage {
   if (buf.length < 33 || !buf.subarray(0, 8).equals(PNG_SIG)) fail('PNG başlığı yok')
@@ -153,7 +165,7 @@ export function cleanPng(buf: Buffer): CleanImage {
       width = buf.readUInt32BE(pos + 8)
       height = buf.readUInt32BE(pos + 12)
     }
-    if (!PNG_DROP.has(type)) out.push(buf.subarray(pos, end))
+    if (PNG_KEEP.has(type)) out.push(buf.subarray(pos, end))
     pos = end
     if (type === 'IEND') {
       ended = true
@@ -198,8 +210,9 @@ export function cleanWebp(buf: Buffer): CleanImage {
       width = (bits & 0x3fff) + 1
       height = ((bits >> 14) & 0x3fff) + 1
     }
-    if (fourcc !== 'EXIF' && fourcc !== 'XMP ') {
-      const chunk = Buffer.from(buf.subarray(pos, Math.min(end, riffEnd)))
+    if (WEBP_KEEP.has(fourcc)) {
+      // Copy, and add the RIFF pad byte if the file left it out at the very end.
+      const chunk = Buffer.concat([buf.subarray(pos, Math.min(end, riffEnd)), Buffer.alloc(Math.max(0, end - riffEnd))])
       if (fourcc === 'VP8X') vp8x.push(chunk)
       chunks.push(chunk)
     }
