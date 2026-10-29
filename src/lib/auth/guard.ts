@@ -46,8 +46,14 @@ export async function requireAdminAction(formData: FormData): Promise<AdminSessi
   const h = await headers()
   const origin = h.get('origin')
   const host = h.get('x-forwarded-host') ?? h.get('host')
-  if (origin && host && new URL(origin).host !== host) {
-    throw new AuthError('İstek kaynağı doğrulanamadı.')
+  if (origin && host) {
+    let originHost: string | null = null
+    try {
+      originHost = new URL(origin).host
+    } catch {
+      // "null" or a malformed Origin: treat as a mismatch.
+    }
+    if (originHost !== host) throw new AuthError('İstek kaynağı doğrulanamadı.')
   }
   return s
 }
@@ -75,8 +81,14 @@ export async function endSession(): Promise<void> {
   })
 }
 
+/**
+ * Client address for rate limiting. On Vercel the platform overwrites
+ * x-forwarded-for, so its first entry is the client. Elsewhere the header is
+ * only trusted when TRUST_PROXY=1 says a proxy in front rewrites it;
+ * otherwise all clients share one bucket (stricter, never spoofable).
+ */
 export async function clientIp(): Promise<string> {
+  if (!process.env.VERCEL && process.env.TRUST_PROXY !== '1') return 'untrusted-network'
   const h = await headers()
-  // On Vercel x-forwarded-for is set by the platform; the first entry is the client.
   return (h.get('x-forwarded-for')?.split(',')[0] ?? h.get('x-real-ip') ?? 'unknown').trim().slice(0, 64)
 }

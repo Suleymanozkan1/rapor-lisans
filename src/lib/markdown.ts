@@ -20,7 +20,24 @@ export type TocItem = { id: string; text: string; depth: 2 | 3 }
  */
 const schema = {
   ...defaultSchema,
+  // remark-rehype already prefixes footnote ids with "user-content-"; Markdown cannot set any other id
+  // (raw HTML is dropped), so the sanitizer must not prefix them a second time.
+  clobberPrefix: '',
   protocols: { ...defaultSchema.protocols, href: ['http', 'https', 'mailto', 'tel'], src: ['http', 'https'] },
+}
+
+/** Ids used by the page template, plus anything that could shadow a window global (e.g. __next_f). */
+const RESERVED_IDS = new Set(['icerik', 'toc-title', 'refs-title', 'tags-title', 'share-title', 'related-title', 'panel-icerik'])
+
+function rehypeSafeHeadingIds() {
+  return (tree: HastRoot) => {
+    visit(tree, 'element', (node: Element) => {
+      const id = node.properties?.id
+      if (/^h[1-6]$/.test(node.tagName) && typeof id === 'string' && (RESERVED_IDS.has(id) || !/^[\p{L}\p{N}]/u.test(id))) {
+        node.properties.id = `bolum-${id.replace(/^[^\p{L}\p{N}]+/u, '') || 'baslik'}`
+      }
+    })
+  }
 }
 
 /** Make outbound links safe and mark them, and keep images lazy. */
@@ -59,6 +76,7 @@ export async function renderMarkdown(source: string): Promise<RenderedMarkdown> 
     .use(remarkRehype)
     .use(rehypeSanitize, schema)
     .use(rehypeSlug)
+    .use(rehypeSafeHeadingIds)
     .use(rehypeHardenLinks)
 
   const mdast = processor.parse(source) as MdRoot
@@ -101,7 +119,8 @@ function plainText(tree: MdRoot): string {
   const parts: string[] = []
   visit(tree, (node) => {
     if (node.type === 'paragraph' || node.type === 'heading' || node.type === 'tableCell') {
-      parts.push(toString(node))
+      // includeHtml:false keeps HTML comments and inline tags (dropped from the page) out of the search index.
+      parts.push(toString(node, { includeHtml: false }))
       return 'skip'
     }
   })

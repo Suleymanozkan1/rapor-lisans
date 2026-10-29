@@ -4,7 +4,10 @@ import { siteUrl } from '@/lib/env'
 export const dynamic = 'force-static'
 
 const esc = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
+  s
+    // Characters that are illegal in XML 1.0 would invalidate the whole feed.
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
 
 export function GET() {
   const s = getSettings()
@@ -14,8 +17,8 @@ export function GET() {
     .map(
       (p) => `    <item>
       <title>${esc(p.title)}</title>
-      <link>${base}/blog/${p.slug}</link>
-      <guid isPermaLink="true">${base}/blog/${p.slug}</guid>
+      <link>${esc(`${base}/blog/${p.slug}`)}</link>
+      <guid isPermaLink="true">${esc(`${base}/blog/${p.slug}`)}</guid>
       <pubDate>${new Date(p.publishedAt!).toUTCString()}</pubDate>
       ${p.excerpt ? `<description>${esc(p.excerpt)}</description>` : ''}
     </item>`,
@@ -25,10 +28,10 @@ export function GET() {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>${esc(s.siteName)}</title>
-    <link>${base}/</link>
+    <link>${esc(base)}/</link>
     <description>${esc(s.description || s.tagline || s.siteName)}</description>
     <language>tr-TR</language>
-    <atom:link href="${base}/rss.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="${esc(base)}/rss.xml" rel="self" type="application/rss+xml" />
 ${items}
   </channel>
 </rss>

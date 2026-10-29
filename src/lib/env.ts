@@ -1,5 +1,6 @@
 import 'server-only'
 import path from 'node:path'
+import { createHash } from 'node:crypto'
 
 /** Directory with Markdown/JSON content, relative to the project root. */
 export function contentDir(): string {
@@ -83,6 +84,7 @@ export function authConfig(): AuthConfig | null {
     username: ADMIN_USERNAME,
     passwordHash: ADMIN_PASSWORD_HASH,
     sessionSecret: SESSION_SECRET,
-    sessionVersion: process.env.SESSION_VERSION || '1',
+    // Changing the password (its hash) or SESSION_VERSION invalidates every issued session.
+    sessionVersion: `${process.env.SESSION_VERSION || '1'}.${createHash('sha256').update(ADMIN_PASSWORD_HASH).digest('base64url').slice(0, 10)}`,
   }
 }

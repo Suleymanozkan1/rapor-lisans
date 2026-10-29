@@ -16,7 +16,7 @@ const MESSAGES: Record<string, { kind: 'ok' | 'warn' | 'danger'; text: string }>
 
 /** Shows a fixed message for a known ?durum= value; unknown values are ignored (no reflected text). */
 export function StatusBanner({ code }: { code?: string | string[] }) {
-  const m = typeof code === 'string' ? MESSAGES[code] : undefined
+  const m = typeof code === 'string' && Object.hasOwn(MESSAGES, code) ? MESSAGES[code] : undefined
   if (!m) return null
   return (
     <div className={`notice notice--${m.kind}`} role={m.kind === 'danger' ? 'alert' : 'status'}>

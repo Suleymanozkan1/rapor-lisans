@@ -5,6 +5,7 @@ import { cache } from 'react'
 import { contentDir } from './env'
 import { parsePostFile } from './frontmatter'
 import { isPublic, sortByDate } from './posts'
+import { isValidSlug } from './slug'
 import { categoriesSchema, settingsSchema, type Category, type Post, type Settings } from './types'
 import { DEFAULT_SETTINGS } from './defaults'
 import { mediaIndexSchema, type MediaItem } from './media'
@@ -26,7 +27,12 @@ export const getAllPosts = cache((): Post[] => {
   if (!existsSync(dir)) return []
   const posts = readdirSync(dir)
     .filter((f) => f.endsWith('.md'))
-    .map((f) => parsePostFile(f.slice(0, -3), readFileSync(path.join(dir, f), 'utf8')))
+    .map((f) => {
+      const slug = f.slice(0, -3)
+      // Files committed outside the panel must still have a safe, non-reserved name.
+      if (!isValidSlug(slug)) throw new Error(`content/posts/${f}: geçersiz dosya adı (yalnızca a-z, 0-9 ve tire)`)
+      return parsePostFile(slug, readFileSync(path.join(dir, f), 'utf8'))
+    })
   return sortByDate(posts)
 })
 

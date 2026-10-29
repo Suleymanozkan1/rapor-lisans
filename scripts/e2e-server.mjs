@@ -26,6 +26,8 @@ const env = {
   CONTENT_DIR: '.e2e/content',
   UPLOADS_DIR: '.e2e/uploads',
   CONTENT_STORE: 'local',
+  // Tests send X-Forwarded-For per test so login rate limits do not leak between tests.
+  TRUST_PROXY: '1',
   NEXT_PUBLIC_SITE_URL: 'http://localhost:3100',
   ADMIN_USERNAME: 'yonetici',
   ADMIN_PASSWORD_HASH: hash,

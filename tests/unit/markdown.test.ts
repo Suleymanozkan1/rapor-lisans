@@ -45,6 +45,23 @@ describe('renderMarkdown', () => {
     expect(html).not.toContain('name="location"')
   })
 
+  it('keeps heading ids from shadowing window globals or template ids', async () => {
+    const { html, toc } = await renderMarkdown('## __next_f\n\n## icerik\n\n## Normal başlık')
+    expect(html).not.toMatch(/id="(__next_f|icerik)"/)
+    expect(toc.map((t) => t.id)).toEqual(['bolum-next_f', 'bolum-icerik', 'normal-başlık'])
+  })
+
+  it('footnote links point at existing ids', async () => {
+    const { html } = await renderMarkdown('Metin[^1]\n\n[^1]: Not')
+    const hrefs = [...html.matchAll(/href="#([^"]+)"/g)].map((m) => m[1])
+    expect(hrefs.length).toBeGreaterThan(0)
+    for (const h of hrefs) expect(html).toContain(`id="${h}"`)
+  })
+
+  it('leaves HTML comments and tags (not their text) out of plain text', () => {
+    expect(markdownToPlainText('Görünür <!-- gizli not --> metin <span hidden>saklı</span>')).toBe('Görünür metin saklı')
+  })
+
   it('counts words and reading time', async () => {
     const { words } = await renderMarkdown('bir iki üç dört')
     expect(words).toBe(4)

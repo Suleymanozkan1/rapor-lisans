@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach } from 'vitest'
 import { hashPassword, verifyPassword } from '@/lib/auth/password'
 import { createSessionToken, verifySessionToken, csrfTokenFor, verifyCsrfToken, SESSION_TTL_SECONDS } from '@/lib/auth/session'
-import { checkLimit, recordFailure, resetLimit, __resetMemoryLimiter } from '@/lib/auth/rate-limit'
+import { consume, resetLimit, __resetMemoryLimiter, __memorySize } from '@/lib/auth/rate-limit'
 
 const FAST = { N: 2 ** 14, r: 8, p: 1, keyLen: 32 }
 const SECRET = 'x'.repeat(40)
@@ -59,20 +59,27 @@ describe('session tokens', () => {
 
 describe('login rate limit (memory backend)', () => {
   beforeEach(() => __resetMemoryLimiter())
-  it('blocks after max failures and resets after the window', async () => {
+  it('allows max attempts per window, then blocks until the window ends', async () => {
     const now = 1_000_000
-    for (let i = 0; i < 5; i++) {
-      expect((await checkLimit('k', 5, now)).allowed).toBe(true)
-      await recordFailure('k', 60, now)
-    }
-    const blocked = await checkLimit('k', 5, now)
+    for (let i = 0; i < 5; i++) expect((await consume('k', 5, 60, now)).allowed).toBe(true)
+    const blocked = await consume('k', 5, 60, now)
     expect(blocked.allowed).toBe(false)
     expect(blocked.retryAfterSeconds).toBe(60)
-    expect((await checkLimit('k', 5, now + 61_000)).allowed).toBe(true)
+    expect((await consume('k', 5, 60, now + 61_000)).allowed).toBe(true)
+  })
+  it('is atomic under concurrent bursts', async () => {
+    const results = await Promise.all(Array.from({ length: 50 }, () => consume('burst', 5, 60)))
+    expect(results.filter((r) => r.allowed)).toHaveLength(5)
   })
   it('resets on success', async () => {
-    for (let i = 0; i < 5; i++) await recordFailure('k2', 60)
+    for (let i = 0; i < 6; i++) await consume('k2', 5, 60)
     await resetLimit('k2')
-    expect((await checkLimit('k2', 5)).allowed).toBe(true)
+    expect((await consume('k2', 5, 60)).allowed).toBe(true)
+  })
+  it('never evicts the account bucket when flooded with IP keys', async () => {
+    for (let i = 0; i < 21; i++) await consume('login:acct:admin', 20, 900)
+    for (let i = 0; i < 10_050; i++) await consume(`login:ip:10.0.${i >> 8}.${i & 255}`, 5, 900)
+    expect(__memorySize()).toBeLessThanOrEqual(10_000)
+    expect((await consume('login:acct:admin', 20, 900)).allowed).toBe(false)
   })
 })

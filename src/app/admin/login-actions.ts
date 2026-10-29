@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 import { authConfig } from '@/lib/env'
 import { verifyPassword } from '@/lib/auth/password'
-import { checkLimit, LOGIN_LIMITS, recordFailure, resetLimit } from '@/lib/auth/rate-limit'
+import { consume, LOGIN_LIMITS, resetLimit } from '@/lib/auth/rate-limit'
 import { clientIp, endSession, getAdminSession, startSession } from '@/lib/auth/guard'
 import { timingSafeEqual } from 'node:crypto'
 import { verifyCsrfToken } from '@/lib/auth/session'
@@ -27,30 +27,31 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
   const ip = await clientIp()
   const ipKey = `login:ip:${ip}`
   const accountKey = `login:acct:${cfg.username}`
-
-  const [ipLimit, acctLimit] = await Promise.all([
-    checkLimit(ipKey, LOGIN_LIMITS.perIp.max),
-    checkLimit(accountKey, LOGIN_LIMITS.perAccount.max),
-  ])
-  if (!ipLimit.allowed || !acctLimit.allowed) {
-    const wait = Math.ceil(Math.max(ipLimit.retryAfterSeconds, acctLimit.retryAfterSeconds) / 60)
+  const blocked = (retry: number) => {
     console.warn(JSON.stringify({ type: 'admin_login_blocked', at: new Date().toISOString(), ip }))
-    return { error: `Çok fazla başarısız deneme. ${wait} dakika sonra tekrar deneyin.` }
+    return { error: `Çok fazla başarısız deneme. ${Math.ceil(retry / 60)} dakika sonra tekrar deneyin.` }
+  }
+
+  // Slots are reserved before the slow hash runs, so parallel requests cannot exceed the limit.
+  const ipLimit = await consume(ipKey, LOGIN_LIMITS.perIp.max, LOGIN_LIMITS.perIp.windowSeconds)
+  if (!ipLimit.allowed) return blocked(ipLimit.retryAfterSeconds)
+
+  // The account budget is only spent when the submitted username is right, so someone who does
+  // not know the (non-public) username cannot lock the owner out by failing on purpose.
+  const usernameOk = sameString(username, cfg.username)
+  if (usernameOk) {
+    const acct = await consume(accountKey, LOGIN_LIMITS.perAccount.max, LOGIN_LIMITS.perAccount.windowSeconds)
+    if (!acct.allowed) return blocked(acct.retryAfterSeconds)
   }
 
   // Always run the hash so response time does not reveal whether the username matched.
   const passwordOk = await verifyPassword(password, cfg.passwordHash)
-  const ok = sameString(username, cfg.username) && passwordOk
-  if (!ok) {
-    await Promise.all([
-      recordFailure(ipKey, LOGIN_LIMITS.perIp.windowSeconds),
-      recordFailure(accountKey, LOGIN_LIMITS.perAccount.windowSeconds),
-    ])
+  if (!(usernameOk && passwordOk)) {
     console.warn(JSON.stringify({ type: 'admin_login_failed', at: new Date().toISOString(), ip }))
     return { error: GENERIC }
   }
 
-  await resetLimit(ipKey)
+  await Promise.all([resetLimit(ipKey), resetLimit(accountKey)])
   await startSession(cfg.username)
   console.info(JSON.stringify({ type: 'admin_login', at: new Date().toISOString(), user: cfg.username, ip }))
   redirect('/admin')
