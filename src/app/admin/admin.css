@@ -25,12 +25,15 @@
   align-items: center;
   gap: var(--s3) var(--s5);
   padding: var(--s3) var(--s5);
-  background: var(--ink);
-  color: #e9edf1;
+  background: var(--brand-deep);
+  color: var(--on-brand);
 }
 .admin-bar a,
 .admin-bar .admin-muted {
-  color: #e9edf1;
+  color: var(--on-brand-2);
+}
+.admin-bar__title {
+  color: var(--on-brand) !important;
 }
 .admin-bar__title {
   font-family: var(--font-display);
@@ -50,11 +53,11 @@
   min-height: 2.25rem;
 }
 .admin-bar .button--quiet:hover {
-  background: #2c3846;
+  background: rgb(255 255 255 / 0.12);
   color: #fff;
 }
 .admin-bar :focus-visible {
-  outline-color: #fff;
+  outline-color: var(--accent);
 }
 
 .admin-body {
@@ -86,17 +89,17 @@
 }
 .admin-nav a {
   display: block;
-  padding: var(--s2) var(--s2);
+  padding: var(--s2) var(--s3);
   color: var(--ink);
   text-decoration: none;
-  border-left: 3px solid transparent;
+  border-radius: var(--r-input);
 }
 .admin-nav a:hover {
   background: var(--paper);
 }
 .admin-nav a[aria-current='page'] {
-  border-left-color: var(--action);
-  color: var(--action);
+  background: var(--ink);
+  color: var(--paper);
   font-weight: 600;
 }
 .admin-main {
@@ -139,6 +142,7 @@
   margin: 0 0 var(--s5);
 }
 .admin-stats div {
+  border-radius: var(--r-card);
   border: 1px solid var(--rule);
   background: var(--surface);
   padding: var(--s3) var(--s5);
@@ -155,6 +159,8 @@
 }
 
 .admin-table {
+  border-radius: var(--r-card);
+  overflow: hidden;
   width: 100%;
   border-collapse: collapse;
   background: var(--surface);
@@ -180,7 +186,8 @@
 
 .pill {
   display: inline-block;
-  padding: 0 var(--s2);
+  border-radius: var(--r-pill);
+  padding: 0 var(--s3);
   border: 1px solid currentColor;
   font-size: 0.9rem;
 }
@@ -260,6 +267,7 @@
 }
 .admin-editor__main,
 .admin-editor__side {
+  border-radius: var(--r-card);
   display: grid;
   gap: var(--s4);
   min-width: 0;
@@ -271,6 +279,7 @@
 }
 
 .admin-fieldset {
+  border-radius: var(--r-card);
   border: 1px solid var(--rule);
   background: var(--surface);
   padding: var(--s4);
@@ -286,6 +295,7 @@
 }
 
 .admin-card {
+  border-radius: var(--r-card);
   border: 1px solid var(--rule);
   background: var(--surface);
   padding: var(--s4);
@@ -324,6 +334,7 @@
   gap: var(--s4);
 }
 .admin-media li {
+  border-radius: var(--r-card);
   display: grid;
   gap: var(--s4);
   background: var(--surface);
@@ -336,6 +347,7 @@
   }
 }
 .admin-media img {
+  border-radius: var(--r-input);
   width: 10rem;
   height: 7rem;
   object-fit: cover;

@@ -12,13 +12,18 @@ export const metadata: Metadata = {
 
 export default function SearchPage() {
   return (
-    <div className="wrap">
-      <header className="page-head">
-        <h1>Ara</h1>
+    <>
+      <header className="page-band">
+        <div className="wrap">
+          <h1 className="rise">Ara</h1>
+          <p className="rise rise-2">Yazıların başlık, özet, etiket ve metinlerinde arama yapın.</p>
+        </div>
       </header>
-      <Suspense fallback={<p>Arama yükleniyor…</p>}>
-        <SearchClient categories={getCategories().map((c) => ({ slug: c.slug, name: c.name }))} />
-      </Suspense>
-    </div>
+      <div className="wrap">
+        <Suspense fallback={<p>Arama yükleniyor…</p>}>
+          <SearchClient categories={getCategories().map((c) => ({ slug: c.slug, name: c.name }))} />
+        </Suspense>
+      </div>
+    </>
   )
 }

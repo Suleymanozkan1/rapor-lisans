@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from 'next'
 import '@fontsource/barlow/400.css'
+import '@fontsource/barlow/500.css'
 import '@fontsource/barlow/600.css'
 import '@fontsource/barlow-semi-condensed/500.css'
 import '@fontsource/barlow-semi-condensed/600.css'
 import '@fontsource/barlow-semi-condensed/700.css'
+import '@fontsource/barlow-semi-condensed/800.css'
 import '@fontsource/source-serif-4/400.css'
 import '@fontsource/source-serif-4/400-italic.css'
 import '@fontsource/source-serif-4/600.css'
@@ -23,7 +25,12 @@ export function generateMetadata(): Metadata {
   }
 }
 
-export const viewport: Viewport = { themeColor: '#f4f5f2' }
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f5f7fa' },
+    { media: '(prefers-color-scheme: dark)', color: '#0d131a' },
+  ],
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

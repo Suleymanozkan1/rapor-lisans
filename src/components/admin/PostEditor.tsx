@@ -92,7 +92,7 @@ export function PostEditor({ csrf, post, categories, media }: Props) {
           <label htmlFor="excerpt">Özet</label>
           <textarea id="excerpt" name="excerpt" rows={3} maxLength={400} defaultValue={post?.excerpt} aria-describedby="excerpt-help" />
           <p id="excerpt-help" className="field__help">
-            Listelerde ve yazının başında görünür. 1–2 cümle.
+            Listelerde ve yazının başında görünür. 1-2 cümle.
           </p>
         </div>
         <div className="field">

@@ -7,6 +7,19 @@ import { categoryName } from '@/lib/posts'
 import { slugify } from '@/lib/slug'
 import { formatDate, isoDay } from '@/lib/format'
 import { PostList } from './PostList'
+import { CategoryIcon } from '@/lib/visuals'
+import {
+  ArrowsClockwise,
+  CalendarBlank,
+  Clock,
+  EnvelopeSimple,
+  LinkedinLogo,
+  Stack,
+  Tag,
+  UserCircle,
+  WhatsappLogo,
+  XLogo,
+} from '@phosphor-icons/react/ssr'
 
 type Props = {
   post: Post
@@ -25,51 +38,62 @@ export function ArticleView({ post, rendered, settings, categories, cover, relat
   const enc = shareUrl ? encodeURIComponent(shareUrl) : ''
   const encTitle = encodeURIComponent(post.title)
   return (
-    <article className="wrap">
-      <header className="article-head">
-        <nav className="breadcrumb" aria-label="Konum">
-          <ol>
-            <li>
-              <Link href="/blog">Yazılar</Link>
-            </li>
-            {cat ? (
+    <article>
+      <div className="read-progress" aria-hidden="true" />
+      <header className="page-band page-band--article">
+        <div className="wrap">
+          <div className="article-head">
+          <nav className="breadcrumb" aria-label="Konum">
+            <ol>
               <li>
-                <Link href={`/kategori/${post.category}`}>{cat}</Link>
+                <Link href="/blog">Yazılar</Link>
               </li>
-            ) : null}
-          </ol>
-        </nav>
-        <h1>{post.title}</h1>
-        {post.excerpt ? <p className="lede">{post.excerpt}</p> : null}
+              {cat ? (
+                <li>
+                  <Link href={`/kategori/${post.category}`}>{cat}</Link>
+                </li>
+              ) : null}
+            </ol>
+          </nav>
+          <h1 className="rise">{post.title}</h1>
+          {post.excerpt ? <p className="lede rise rise-2">{post.excerpt}</p> : null}
+          </div>
+        </div>
+      </header>
 
-        <dl className="doc-control" aria-label="Yazı bilgileri">
+      <div className="wrap">
+        <dl className="doc-control rise rise-3" aria-label="Yazı bilgileri">
           <div>
+            <UserCircle size={26} weight="duotone" aria-hidden="true" />
             <dt>Yazar</dt>
             <dd>{settings.author.name}</dd>
           </div>
           <div>
+            <CalendarBlank size={26} weight="duotone" aria-hidden="true" />
             <dt>Yayın tarihi</dt>
             <dd>{post.publishedAt ? <time dateTime={isoDay(post.publishedAt)}>{formatDate(post.publishedAt)}</time> : 'Yayımlanmadı'}</dd>
           </div>
           <div>
+            <ArrowsClockwise size={26} weight="duotone" aria-hidden="true" />
             <dt>Son güncelleme</dt>
             <dd>{updated ? <time dateTime={isoDay(updated)}>{formatDate(updated)}</time> : 'Yok'}</dd>
           </div>
           <div>
+            <Stack size={26} weight="duotone" aria-hidden="true" />
             <dt>Revizyon</dt>
             <dd>{post.revision}</dd>
           </div>
           <div>
+            <CategoryIcon slug={post.category} size={26} />
             <dt>Kategori</dt>
             <dd>{cat ?? 'Genel'}</dd>
           </div>
           <div>
+            <Clock size={26} weight="duotone" aria-hidden="true" />
             <dt>Okuma süresi</dt>
             <dd>{readingMinutes(rendered.words)} dk</dd>
           </div>
         </dl>
-      </header>
-
       {post.cover ? (
         <figure className="cover">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -121,7 +145,10 @@ export function ArticleView({ post, rendered, settings, categories, cover, relat
                 <ul className="filter-links">
                   {post.tags.map((t) => (
                     <li key={t}>
-                      <Link href={`/etiket/${slugify(t)}`}>{t}</Link>
+                      <Link href={`/etiket/${slugify(t)}`}>
+                        <Tag size={16} aria-hidden="true" />
+                        {t}
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -133,21 +160,27 @@ export function ArticleView({ post, rendered, settings, categories, cover, relat
                 <ul>
                   <li>
                     <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${enc}`} target="_blank" rel="noopener noreferrer">
+                      <LinkedinLogo size={18} aria-hidden="true" />
                       LinkedIn
                     </a>
                   </li>
                   <li>
                     <a href={`https://x.com/intent/post?url=${enc}&text=${encTitle}`} target="_blank" rel="noopener noreferrer">
+                      <XLogo size={18} aria-hidden="true" />
                       X
                     </a>
                   </li>
                   <li>
                     <a href={`https://wa.me/?text=${encTitle}%20${enc}`} target="_blank" rel="noopener noreferrer">
+                      <WhatsappLogo size={18} aria-hidden="true" />
                       WhatsApp
                     </a>
                   </li>
                   <li>
-                    <a href={`mailto:?subject=${encTitle}&body=${enc}`}>E-posta</a>
+                    <a href={`mailto:?subject=${encTitle}&body=${enc}`}>
+                      <EnvelopeSimple size={18} aria-hidden="true" />
+                      E-posta
+                    </a>
                   </li>
                 </ul>
               </section>
@@ -156,14 +189,15 @@ export function ArticleView({ post, rendered, settings, categories, cover, relat
         </div>
       </div>
 
-      {related.length > 0 ? (
-        <section className="related" aria-labelledby="related-title">
-          <div className="section__head">
-            <h2 id="related-title">İlgili yazılar</h2>
-          </div>
-          <PostList posts={related} categories={categories} />
-        </section>
-      ) : null}
+        {related.length > 0 ? (
+          <section className="related" aria-labelledby="related-title">
+            <div className="section__head">
+              <h2 id="related-title">İlgili yazılar</h2>
+            </div>
+            <PostList posts={related} categories={categories} />
+          </section>
+        ) : null}
+      </div>
     </article>
   )
 }

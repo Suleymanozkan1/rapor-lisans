@@ -1,5 +1,17 @@
 # AI-slop tarama raporu
 
+> **Güncelleme (2026-10-29, ikinci tur):** İlk tasarım kullanıcı tarafından "fazla basic" bulundu.
+> [donatomm/taste](https://github.com/donatomm/taste) `taste-skill` talimatları baştan okunarak site
+> yeniden tasarlandı. İlk sürüm taste skill'in şu kurallarını ihlal ediyordu: hiç gerçek görsel
+> yok ("yalnızca metinli sayfa minimalizm değil, eksik iştir"), hareket yok, koyu tema yok, her
+> bölüm aynı düzen ailesinde (çizgili liste). Yeni sürümde: lisansı doğrulanmış temsili
+> fotoğraflar, tam genişlik mavi hero, öne çıkan yazı ızgarası, boş hücresiz konu bento'su, sarı
+> iletişim bandı, CSS ile hareket (reduced-motion'da kapalı), açık/koyu tema, Phosphor ikonları,
+> yumuşak köşe sistemi. Tarayıcıya em-dash kuralı (taste 9.G) eklendi ve kontrast iki temada
+> ölçülüyor (50 ölçüm, hepsi AA üstünde). Ayrıntılar `DESIGN.md` içinde. Aşağıdaki tablo ilk
+> turun kayıtlarıdır; SD3 ("gazete kostümü") ve "görselsiz site" yargıları artık geçerli değil.
+
+
 Tarih: 2026-10-29. Kapsam: `src/` altındaki tüm sayfa, bileşen ve CSS dosyaları; masaüstü (1366px)
 ve mobil (390px) ekran görüntüleri.
 

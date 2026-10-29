@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { MagnifyingGlass } from '@phosphor-icons/react'
 
 const LINKS = [
   { href: '/blog', label: 'Yazılar' },
   { href: '/hakkimda', label: 'Hakkımda' },
   { href: '/iletisim', label: 'İletişim' },
-  { href: '/ara', label: 'Ara' },
+  { href: '/ara', label: 'Ara', icon: true },
 ]
 
 export function NavLinks() {
@@ -19,6 +20,7 @@ export function NavLinks() {
         return (
           <li key={l.href}>
             <Link href={l.href} aria-current={active ? 'page' : undefined}>
+              {l.icon ? <MagnifyingGlass size={18} weight="bold" aria-hidden="true" /> : null}
               {l.label}
             </Link>
           </li>

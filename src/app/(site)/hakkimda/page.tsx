@@ -33,30 +33,44 @@ export default async function AboutPage() {
     sameAs: sameAs.length ? sameAs : undefined,
   }
   return (
-    <div className="wrap plain-page">
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(ld) }} />
-      <h1>Hakkımda</h1>
-      {photo ? (
-        <figure className="portrait">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={photo.src} alt={photo.alt} width={mediaFor(photo.src)?.width} height={mediaFor(photo.src)?.height} />
-        </figure>
-      ) : null}
-      <p className="lede">
-        {s.author.name}
-        {s.author.jobTitle ? `, ${s.author.jobTitle}` : ''}
-      </p>
-      {s.author.shortBio ? <p className="intro__bio">{s.author.shortBio}</p> : null}
-      {bio ? (
-        <div className="prose" dangerouslySetInnerHTML={{ __html: bio.html }} />
-      ) : (
-        <div className="empty">
-          <p>Ayrıntılı biyografi yakında eklenecek.</p>
+      <header className="page-band">
+        <div className="wrap">
+          <h1 className="rise">Hakkımda</h1>
+          <p className="rise rise-2">
+            {s.author.name}
+            {s.author.jobTitle ? `, ${s.author.jobTitle}` : ''}
+          </p>
         </div>
-      )}
-      <p>
-        <Link href="/iletisim">İletişim bilgileri</Link>
-      </p>
-    </div>
+      </header>
+      <div className="wrap plain-page about-grid">
+        <div>
+          {s.author.shortBio ? <p className="lede">{s.author.shortBio}</p> : null}
+          {bio ? (
+            <div className="prose" dangerouslySetInnerHTML={{ __html: bio.html }} />
+          ) : (
+            <div className="empty">
+              <strong>Biyografi yakında eklenecek.</strong>
+              <p>Bu arada yazılara göz atabilir veya iletişim bilgilerine ulaşabilirsiniz.</p>
+            </div>
+          )}
+          <p className="page-actions">
+            <Link className="button" href="/blog">
+              Yazıları oku
+            </Link>
+            <Link className="button button--quiet" href="/iletisim">
+              İletişim
+            </Link>
+          </p>
+        </div>
+        {photo ? (
+          <figure className="portrait reveal-media">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photo.src} alt={photo.alt} width={mediaFor(photo.src)?.width} height={mediaFor(photo.src)?.height} />
+          </figure>
+        ) : null}
+      </div>
+    </>
   )
 }

@@ -66,7 +66,7 @@ export default async function AdminPosts({ searchParams }: PageProps<'/admin/yaz
                 <td>
                   <span className={`pill pill--${p.status}`}>{p.status === 'published' ? 'Yayında' : 'Taslak'}</span>
                 </td>
-                <td>{categoryName(r.data.categories, p.category) ?? '—'}</td>
+                <td>{categoryName(r.data.categories, p.category) ?? 'Yok'}</td>
                 <td>{formatDateTime(p.updatedAt ?? p.createdAt)}</td>
               </tr>
             ))}

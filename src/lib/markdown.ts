@@ -105,6 +105,11 @@ function hastText(node: Element | HastRoot): string {
   return out
 }
 
+/** Word count without rendering, for list cards. */
+export function markdownWordCount(source: string): number {
+  return markdownToPlainText(source).split(' ').filter(Boolean).length
+}
+
 export function readingMinutes(words: number): number {
   return Math.max(1, Math.round(words / 200))
 }

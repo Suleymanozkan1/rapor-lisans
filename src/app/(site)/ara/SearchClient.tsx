@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
+import { CalendarBlank, MagnifyingGlass } from '@phosphor-icons/react'
 import { searchDocs, type SearchDoc } from '@/lib/search'
 import { formatDate, isoDay } from '@/lib/format'
 
@@ -66,6 +67,7 @@ export function SearchClient({ categories }: { categories: { slug: string; name:
           </label>
           <input id="q" type="search" name="q" defaultValue={q} placeholder="Örneğin: yüksekte çalışma" maxLength={200} />
           <button className="button" type="submit">
+            <MagnifyingGlass size={18} weight="bold" aria-hidden="true" />
             Ara
           </button>
         </div>
@@ -101,22 +103,27 @@ export function SearchClient({ categories }: { categories: { slug: string; name:
         ) : (
           <>
             <p className="pagination__status">{results.length} sonuç bulundu.</p>
-            <ol className="post-list">
+            <ul className="post-grid">
               {shown.map((d) => (
-                <li key={d.slug} className="post-row">
-                  <div className="post-row__meta">
-                    <time dateTime={isoDay(d.publishedAt)}>{formatDate(d.publishedAt)}</time>
-                    {d.categoryName ? <span className="post-row__cat">{d.categoryName}</span> : null}
-                  </div>
-                  <div>
-                    <h2 className="post-row__title">
-                      <Link href={`/blog/${d.slug}`}>{d.title}</Link>
-                    </h2>
-                    {d.excerpt ? <p>{d.excerpt}</p> : null}
-                  </div>
+                <li key={d.slug}>
+                  <article className="post-card">
+                    <div className="post-card__body">
+                      {d.categoryName ? <span className="chip post-card__cat">{d.categoryName}</span> : null}
+                      <h2>
+                        <Link href={`/blog/${d.slug}`}>{d.title}</Link>
+                      </h2>
+                      {d.excerpt ? <p>{d.excerpt}</p> : null}
+                      <div className="post-card__meta">
+                        <span>
+                          <CalendarBlank size={16} aria-hidden="true" />
+                          <time dateTime={isoDay(d.publishedAt)}>{formatDate(d.publishedAt)}</time>
+                        </span>
+                      </div>
+                    </div>
+                  </article>
                 </li>
               ))}
-            </ol>
+            </ul>
             {totalPages > 1 ? (
               <nav className="pagination" aria-label="Sayfalama">
                 {current > 1 ? (

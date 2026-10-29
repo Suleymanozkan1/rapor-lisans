@@ -1,107 +1,108 @@
 # DESIGN.md: Uğur Durak İSG blogu
 
 Bu dosya sitenin tasarım sözleşmesidir. Public site ve yönetim paneli aynı token'ları kullanır
-(`src/app/globals.css`, `:root`). Yeni bir renk, boşluk veya yazı tipi gerekiyorsa önce buraya
-ekleyin, sonra koda; tek seferlik değer kullanmayın.
+(`src/app/globals.css`, `:root` ve koyu tema bloğu). Yeni bir renk, boşluk, köşe veya yazı tipi
+gerekiyorsa önce buraya ekleyin, sonra koda; tek seferlik değer kullanmayın.
 
-## Yön ve gerekçe
+## Tasarım okuması
 
-Konu iş sağlığı ve güvenliği; okur, işyerinde karar veren ve mevzuatı takip eden biri. Bu yüzden
-site bir girişim tanıtım sayfası gibi değil, **kontrollü bir teknik doküman ve uzmanlık yayını**
-gibi görünmeli:
+[donatomm/taste](https://github.com/donatomm/taste) skill'ine göre: **bir İSG uzmanının
+editoryal blogu; okur işyerinde karar veren, mevzuatı takip eden biri. Dil sahaya yakın, canlı ve
+güven veren; ISO 7010 güvenlik işaretlerinin sinyal mavisi ve güvenlik sarısı, cesur sans
+başlıklar.**
 
-- **Renkler ISO 7010 güvenlik işaretlerinden gelir.** Mavi (zorunluluk işareti) "bunu yap"
-  anlamındadır: bağlantılar ve birincil eylemler. Sarı (uyarı) ve kırmızı (yasak/tehlike) yalnızca
-  gerçek uyarılarda ve geri alınamaz eylemlerde (silme) kullanılır. Yeşil (güvenli durum) yalnızca
-  başarı mesajlarında ve "Yayında" durum etiketinde görünür. Dekoratif sarı-siyah şerit, uyarı
-  üçgeni süsü vb. kullanılmaz.
-- **Zemin soğuk, kâğıt beyazı** (`#f4f5f2`): basılı form ve prosedür kâğıdı. Krem/parşömen değil.
-- **Tipografi iki iş yapar:** başlıklar ve arayüz için tabela/teknik doküman karakterli yarı dar
-  bir grotesk (Barlow Semi Condensed, Barlow), uzun okuma için kitap serifi (Source Serif 4).
-  Üçü de SIL Open Font License; `@fontsource` paketleriyle siteden servis edilir (Google'a istek
-  yok).
-- **İmza detay: doküman kontrol bloğu.** Her yazının başında İSG prosedürlerindeki doküman başlık
-  tablosu gibi bir blok vardır: yazar, yayın tarihi, son güncelleme, revizyon no, kategori, okuma
-  süresi. Revizyon numarası gerçek veridir: yayındaki yazı her düzenlendiğinde artar.
+Kadranlar: `DESIGN_VARIANCE 7` (asimetrik hero ve bento), `MOTION_INTENSITY 5` (giriş
+animasyonları, kaydırmada belirme, hover fiziği, okuma çubuğu), `VISUAL_DENSITY 4`.
+
+İlk sürüm (çizgili dizin, gölgesiz, görselsiz) "fazla sade" bulundu; bu sürüm taste skill'in şu
+kurallarını uygular: gerçek görseller, hareket, iki tema, tek vurgu rengi, kart/bento
+çeşitliliği, boş hücresiz ızgara, eyebrow kısıtı, em-dash yasağı.
 
 ## Renk rolleri
 
-| Token | Değer | Rol |
-|---|---|---|
-| `--paper` | `#f4f5f2` | Sayfa zemini |
-| `--surface` | `#ffffff` | Form alanları, tablolar, doküman bloğu |
-| `--ink` | `#17202b` | Ana metin, başlıklar |
-| `--ink-2` | `#47515d` | İkincil metin (tarih, açıklama) |
-| `--rule` | `#c7cdd3` | İnce ayırıcı çizgiler |
-| `--rule-strong` | `#17202b` | Bölüm başı kalın çizgi |
-| `--action` / `--action-hover` | `#12467f` / `#0b3360` | Bağlantı, birincil düğme, odak halkası |
-| `--warn` / `--warn-tint` | `#f2b200` / `#fdf3d3` | Yalnızca uyarı kutusu çerçevesi/zemini |
-| `--danger` / `--danger-tint` | `#9e2018` / `#f8e3e1` | Hata mesajı, silme düğmesi |
-| `--ok` / `--ok-tint` | `#1c6141` / `#e1efe7` | Başarı mesajı, "Yayında" etiketi |
+| Token | Açık | Koyu | Rol |
+|---|---|---|---|
+| `--paper` | `#f5f7fa` | `#0d131a` | Sayfa zemini |
+| `--surface` / `--surface-2` | `#ffffff` / `#edf1f6` | `#141c26` / `#1b2531` | Kartlar, form alanları |
+| `--ink` / `--ink-2` | `#111a24` / `#4a5563` | `#e9eef4` / `#a9b4c2` | Metin, ikincil metin |
+| `--brand` / `--brand-deep` | `#0c3c78` / `#082a55` | `#0f3466` / `#0a2346` | Sinyal mavisi: hero, sayfa bantları, footer |
+| `--brand-tint` | `#e3ebf6` | `#17263a` | Öne çıkan kart, çipler, açık kutular |
+| `--accent` | `#ffc61a` | aynı | **Tek vurgu:** birincil düğme, okuma çubuğu, sarı bant, marka işareti |
+| `--action` | `#0c4a94` | `#8cb8ff` | Bağlantılar, odak halkası |
+| `--danger`, `--ok`, `--warn` | | | Yalnızca hata, başarı, uyarı mesajları |
 
-Kontrast (WCAG 2.1, `npm run scan:design` ile her çalıştırmada hesaplanır): ana metin 15.0:1,
-ikincil metin 7.4:1, bağlantı 8.7:1, düğme metni 9.5:1, uyarı kutusu metni 14.8:1. Sarı hiçbir
-zaman metin rengi olarak kullanılmaz (beyaz zeminde AA'yı geçmez).
+Sarı hiçbir zaman açık zeminde metin rengi olarak kullanılmaz; sarı zeminde metin `--on-accent`
+(mürekkep). Kontrast `npm run scan:design` ile iki temada toplam 50 ölçüm olarak hesaplanır; hepsi WCAG AA
+üstünde.
 
 ## Tipografi
 
-| Rol | Yazı tipi | Boyut / satır | Kullanım |
-|---|---|---|---|
-| Display | Barlow Semi Condensed 700 | `clamp(2.1rem, 1.4rem + 3vw, 3.4rem)` / 1.12 | Sayfa başlığı (h1) |
-| Başlık | Barlow Semi Condensed 600 | h2 `clamp(1.5rem…1.9rem)`, h3 1.3rem | Bölüm başlıkları |
-| Arayüz | Barlow 400/600 | 1rem / 1.55 | Menü, form, tablo, meta bilgi |
-| Metin | Source Serif 4 400/600, italik | 1.15rem / 1.7, en fazla 68ch | Yazı gövdesi, özetler |
+| Rol | Yazı tipi | Kullanım |
+|---|---|---|
+| Hero | Barlow Semi Condensed 800, `clamp(3rem, 2rem + 5vw, 5.8rem)`, satır 0.95 | Ana sayfa h1 |
+| Başlık | Barlow Semi Condensed 700/600 | h1, h2, h3, düğmeler, menü |
+| Arayüz | Barlow 400/500/600 | Metin, kartlar, formlar |
+| Yazı gövdesi | Source Serif 4 400/600 (68ch, satır 1.75) | Yalnızca makale metni |
 
-Kurallar: büyük harfli etiket (ALL CAPS), harf aralığı açılmış "eyebrow", başlıkta tek kelimeyi
-renklendirme yok. Etiketler cümle düzeninde ve gövde yazı tipindedir. Orta nokta (`·`) ile meta
-birleştirme yerine ayrı satır veya virgül kullanılır.
+Serif yalnızca uzun okuma metninde: taste skill serifi varsayılan olarak önermez, burada gerekçe
+yayın/makale okunabilirliği. Başlıkta tek kelimeyi farklı renk/yazı tipiyle vurgulama yok.
 
-## Boşluk ve grid
+## Şekil ve derinlik
 
-Ölçek: `--s1` 0.25rem, `--s2` 0.5, `--s3` 0.75, `--s4` 1, `--s5` 1.5, `--s6` 2, `--s7` 3,
-`--s8` 4.5, `--s9` 7rem. Bölümler arası `--s7`/`--s8`, bileşen içi `--s2`–`--s4`.
+- Köşe kuralı: kartlar 16px, görseller 20px, form alanları 10px, düğmeler ve çipler tam hap.
+- Gölge yalnızca üste binen öğelerde (hero "son yazı" kartı, filtre paneli, doküman bloğu,
+  iletişim kartları) ve hover'da. Gölge rengi markaya tonlanır, saf siyah değildir.
 
-- Sayfa genişliği `--page` 74rem; kenar boşluğu mobilde 1rem, 48rem üstünde 2rem.
-- Ana sayfa girişi 60rem üstünde 7/5 iki sütun (biyografi | konu alanları), altında tek sütun.
-- Yazı listesi kart ızgarası değil, **çizgili bir dizin**: solda tarih + kategori (9.5rem), sağda
-  başlık + özet.
-- Yazı sayfası 64rem üstünde metin (68ch) + sağda yapışkan içerik tablosu (14–18rem).
-- Köşe yarıçapı 2px (`--radius`); gölge kullanılmaz. Yüzeyler 1px çizgiyle ayrılır.
+## Düzen
 
-## Responsive kurallar
+- **Ana sayfa:** mavi tam genişlik hero (solda ad, unvan, kısa biyografi, iki düğme; sağda
+  fotoğraf, arkasında sarı blok, üstüne binen "Son yazı" kartı) → öne çıkan yazı ızgarası
+  (2x2 büyük kart + 5 kart, 3 sütunu tam doldurur) → konu alanları bento'su (6 kutu, 4 sütunda
+  boşluksuz: fotoğraflı, sarı, açık, koyu ve iki geniş kutu) → sarı iletişim bandı (sağda
+  çapraz kesilmiş fotoğraf) → koyu mavi footer.
+- **Liste sayfaları:** mavi sayfa bandı + üstüne binen arama/filtre paneli + kart ızgarası.
+- **Yazı sayfası:** mavi başlık bandı + üstüne binen **doküman kontrol bloğu** (imza detay:
+  İSG prosedür dokümanlarındaki başlık tablosu; yazar, tarih, son güncelleme, revizyon,
+  kategori, okuma süresi, her biri ikonlu) + metin ve yapışkan içerik tablosu + kaynakça kartı +
+  etiket ve paylaşım hapları + ilgili yazı kartları.
+- Mobilde tüm çok sütunlu düzenler tek sütuna iner; 390px'te yatay kaydırma yok (testli).
 
-- Tüm sayfalar 390px genişlikte yatay kaydırma olmadan çalışır (Playwright ile test edilir).
-- Tablolar (yazı içi ve panel) dar ekranda kendi içinde yatay kayar; sayfa kaymaz.
-- Menü dar ekranda sarar; hamburger menü yok (dört bağlantı sığar).
-- Dokunma hedefleri en az 44px yükseklikte (`.button`, form alanları).
+## Hareket
 
-## Erişilebilirlik
+Hepsi CSS, JavaScript kütüphanesi yok; `prefers-reduced-motion: reduce` altında tamamen kapanır.
 
-- Her sayfada tek `h1`, başlık seviyeleri atlanmaz (testte denetlenir).
-- "İçeriğe geç" bağlantısı ilk odaklanabilir öğedir; tüm etkileşimli öğelerde 3px görünür odak
-  halkası (`:focus-visible`).
-- Form alanlarının hepsinde `<label>`; yardım metni `aria-describedby` ile bağlı; hatalı alanda
-  `aria-invalid`. Hata kutuları `role="alert"`, başarı `role="status"`.
-- Görsellerde alt metin zorunludur (yükleme sırasında doğrulanır).
-- `prefers-reduced-motion: reduce` altında tüm animasyon ve geçişler kapanır. Site zaten hareket
-  kullanmaz; kural ileride eklenecek animasyonlar için emniyettir.
-- Dil `tr`; tarih biçimi `tr-TR`, saat dilimi Europe/Istanbul.
+| Hareket | Ne anlatır |
+|---|---|
+| Hero ve sayfa başlıklarında kademeli yükselme (`.rise`) | Okuma sırası: unvan, ad, metin, düğmeler |
+| Hero fotoğrafının yukarıdan açılması (`.reveal-media`) | Sayfanın ana görselini öne çıkarır |
+| Kart ve kutuların görünür alana girince belirmesi (`animation-timeline: view()`) | İçeriğin sırayla gelmesi |
+| Kart, düğme ve kutularda hover'da yükselme, görselde hafif büyüme | Tıklanabilirlik geri bildirimi |
+| Yazı sayfasında sarı okuma ilerleme çubuğu (`animation-timeline: scroll()`) | Okurun metindeki yeri |
 
-## Panel
+## İkonlar
 
-Panel aynı token'ları daha yoğun kullanır: koyu üst bar (`--ink`), solda dikey menü, beyaz
-yüzeyli form grupları. Durum renkleri yalnızca anlamlı yerde: "Yayında" yeşil, silme kırmızı,
-önizleme uyarısı sarı çerçeve.
+[Phosphor](https://phosphoricons.com) (MIT), tek aile. Yalnızca anlam taşıyan yerlerde: kategori
+kimliği (risk: pano, kaza: ilk yardım, mevzuat: terazi, eğitim: tahta, saha: baret, acil: siren),
+doküman bloğu alanları, tarih/okuma süresi, paylaşım ve iletişim kanalları, arama.
 
 ## Görseller
 
-Yalnızca kullanım hakkı olan fotoğraflar yüklenir. Temsili bir görsel gerçek olay fotoğrafı gibi
-sunulmaz; gerekirse alt metinde ve metinde "temsili" denir. Stok "gülümseyen ekip" fotoğrafı,
-3D blob, yapay zekâ ile üretilmiş sahte saha fotoğrafı kullanılmaz.
+`public/images/` altında, Unsplash Lisansı ile; lisans her fotoğrafın sayfasından doğrulandı
+(`public/images/CREDITS.md`). Hepsi **temsilidir**: hero altında "Temsili görsel" notu, footer'da
+ve gizlilik sayfasında kaynak belirtilir. Ziyaretçi tarayıcısı Unsplash'e istek atmaz (dosyalar
+sitede barındırılır). Güvensiz uygulama gösteren fotoğraflar (ör. emniyet kemersiz yüksekte
+çalışma) bilinçli olarak seçilmedi. Yönetici panelden portre yüklerse hero'da temsili görsel
+yerine portre gösterilir.
 
-## Yapılmayacaklar (tasarım denetimi)
+## Erişilebilirlik
 
-Mor-mavi degrade, ortalanmış dev hero, üçlü ikon kartı, cam efekti, parıltı, her yüzeye gölge,
-anlamsız ikon, dekoratif 01/02/03, oklu düğme metni ("Devam →"), sahte istatistik şeridi, sahte
-müşteri logosu/yorumu/sertifika. `npm run scan:design` bunların koddan tespit edilebilenlerini
-denetler.
+Tek h1, atlanmayan başlık seviyeleri, ilk odak "İçeriğe geç", tüm etkileşimli öğelerde 3px odak
+halkası, form etiketleri, zorunlu alt metin, iki temada AA kontrast, reduced-motion desteği,
+dokunma hedefleri en az 44px (testlerle denetlenir).
+
+## Yapılmayacaklar
+
+Mor-mavi degrade, ortalanmış hero, üç eşit ikon kartı, cam efekti, neon parıltı, büyük harfli
+eyebrow her bölümde, dekoratif 01/02/03, oklu düğme metni, em-dash, sahte istatistik, sahte
+logo/yorum/sertifika, div'den sahte ekran görüntüsü, kartın içinde boş hücre. `npm run
+scan:design` bunların koddan tespit edilebilenlerini denetler.

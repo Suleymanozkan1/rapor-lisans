@@ -13,9 +13,14 @@ export default function PrivacyPage() {
   const s = getSettings()
   const controller = s.privacy.controller || s.author.name
   return (
-    <div className="wrap plain-page">
-      <h1>Gizlilik ve KVKK bilgilendirmesi</h1>
-      {s.privacy.updatedAt ? <p className="lede">Son güncelleme: {formatDate(s.privacy.updatedAt)}</p> : null}
+    <>
+      <header className="page-band">
+        <div className="wrap">
+          <h1 className="rise">Gizlilik ve KVKK bilgilendirmesi</h1>
+          {s.privacy.updatedAt ? <p className="rise rise-2">Son güncelleme: {formatDate(s.privacy.updatedAt)}</p> : null}
+        </div>
+      </header>
+      <div className="wrap plain-page">
       <div className="prose">
         <h2>Veri sorumlusu</h2>
         <p>
@@ -52,7 +57,13 @@ export default function PrivacyPage() {
           KVKK’nın 11. maddesi uyarınca kişisel verilerinizin işlenip işlenmediğini öğrenme, düzeltilmesini veya silinmesini
           isteme gibi haklara sahipsiniz. Talepleriniz için yukarıdaki iletişim adresini kullanabilirsiniz.
         </p>
+        <h2>Görseller</h2>
+        <p>
+          Sitedeki genel fotoğraflar temsilidir ve belirli bir işyerini veya olayı göstermez. Kaynak: Unsplash (Unsplash Lisansı);
+          fotoğrafçılar Declan Sun, Tanya Paquet ve John Cardamone.
+        </p>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
