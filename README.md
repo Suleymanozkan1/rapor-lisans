@@ -200,6 +200,8 @@ Tüm içerik Git'tedir; deponun kendisi yedektir.
 - İçerik Güvenlik Politikası (CSP), `X-Frame-Options: DENY`, `nosniff`, HSTS, sıkı
   `Referrer-Policy` ve `Permissions-Policy`.
 - Denetim raporu: [`docs/security-audit-report.md`](docs/security-audit-report.md).
+- Test raporu: [`docs/TEST-REPORT.md`](docs/TEST-REPORT.md). Tasarım denetimi:
+  [`docs/ai-slop-report.md`](docs/ai-slop-report.md).
 
 ## Dosya haritası
 
