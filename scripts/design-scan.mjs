@@ -47,12 +47,11 @@ if (!motionOk) findings.push({ id: 'M6', level: 'error', file: 'src/app/globals.
 const focusOk = /:focus-visible/.test(css)
 if (!focusOk) findings.push({ id: 'K7', level: 'error', file: 'src/app/globals.css', line: 0, what: 'no :focus-visible style' })
 
-// WCAG 2.1 contrast, checked for the light tokens and for the dark overrides.
+// WCAG 2.1 contrast for the colour tokens (the site has a single dark theme).
 const block = (src) => Object.fromEntries([...src.matchAll(/--([a-z0-9-]+):\s*(#[0-9a-f]{6})/gi)].map((m) => [m[1], m[2]]))
-const lightSrc = css.slice(css.indexOf(':root {'), css.indexOf('}', css.indexOf(':root {')))
-const darkStart = css.indexOf('@media (prefers-color-scheme: dark)')
-const darkSrc = css.slice(darkStart, css.indexOf('}', css.indexOf(':root {', darkStart)))
-const themes = { light: block(lightSrc), dark: { ...block(lightSrc), ...block(darkSrc) } }
+const rootSrc = css.slice(css.indexOf(':root {'), css.indexOf('}', css.indexOf(':root {')))
+if (/prefers-color-scheme/.test(css)) findings.push({ id: 'THEME', level: 'error', file: 'src/app/globals.css', line: 0, what: 'a prefers-color-scheme rule exists, but the design is dark-only' })
+const themes = { dark: block(rootSrc) }
 const lum = (hex) => {
   const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
   return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
@@ -87,9 +86,7 @@ const pairs = [
   ['danger', 'surface', 4.5, 'danger links'],
   ['ok', 'surface', 4.5, 'published pill'],
   ['signal', 'surface', 3, 'red check icons (non-text)'],
-  ['#ffffff', 'danger', 4.5, 'danger button', ['light']],
   ['#1a0b0a', 'danger', 4.5, 'danger button', ['dark']],
-  ['ink', 'brand-tint', 3, 'topic icon (non-text)', ['light']],
   ['action', 'brand-tint', 3, 'topic icon (non-text)', ['dark']],
   ['#e6e6df', '#0a0a0a', 4.5, 'photo tile text over scrim'],
   ['focus', 'paper', 3, 'focus ring (non-text)'],

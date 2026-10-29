@@ -13,7 +13,7 @@ Son durum, deponun taze bir kopyasında (`git clone` + `npm ci`) README'deki kom
 | `npm run typecheck` | Başarılı |
 | `npm test` (Vitest) | **100/100 geçti**, 13 dosya |
 | `npm run build` | Başarılı; public rotalar statik (○/●), `/admin/*` dinamik (ƒ); uyarı yok |
-| `npm run test:e2e` (Playwright) | **54/54 geçti** (masaüstü Chrome 38, mobil Pixel 7 16) |
+| `npm run test:e2e` (Playwright) | **58/58 geçti** (masaüstü Chrome 40, mobil Pixel 7 18) |
 | `npm run scan:design` | Bulgu yok; iki temada 58 kontrast ölçümünün hepsi WCAG AA üstünde |
 
 Atlanan, silinen veya gevşetilen test yok.
@@ -42,6 +42,9 @@ Test verisiyle (`tests/fixtures/content`: 12 yayımlanmış yazı, 1 taslak, 1 g
 1 XSS denemesi; 3 ürün: yayında ve satılık, örnek ve taslak, birinde XSS denemesi) ayrı bir production build alınır ve `127.0.0.1:3100` üzerinde çalıştırılır.
 
 **Public site** (masaüstü ve mobil):
+ana sayfa slider'ı (tanıtım + yazılar + ürünler, `carousel` rolü, görünmeyen slaytların `inert`
+olması, önceki/sonraki/nokta düğmeleri, duraklatma, kendiliğinden geçiş ve reduced-motion'da
+geçmemesi),
 ana sayfa (tek h1, `lang="tr"`, konsol hatası yok), güvenlik başlıkları ve ziyaretçiye çerez
 yazılmaması, "İçeriğe geç" bağlantısı ve görünür odak, blog sayfalama (10 + 3, geçersiz sayfa
 404), kategori ve etiket filtreleri (Türkçe etiket adı ile), yazı sayfası meta verisi (title,

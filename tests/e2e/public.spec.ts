@@ -31,6 +31,49 @@ test('home page renders with one h1, topics and latest posts', async ({ page }) 
   expect(errors).toEqual([])
 })
 
+test('home slider: intro first, then posts and products; controls, pause and auto-advance', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium')
+  await page.goto('/')
+  const slides = page.locator('.hero-slide')
+  // Intro + 3 posts + 2 published products (the fixtures have two).
+  await expect(slides).toHaveCount(6)
+  await expect(slides.nth(0)).toHaveClass(/is-active/)
+  await expect(page.locator('.hero-slider')).toHaveAttribute('aria-roledescription', 'carousel')
+  // Hidden slides are inert: their links are not reachable.
+  expect(await page.locator('.hero-slide[inert] a').count()).toBeGreaterThan(0)
+  expect(await page.locator('.hero-slide.is-active[inert]').count()).toBe(0)
+  await expect(slides.nth(2)).toContainText('Mağaza')
+
+  await page.getByRole('button', { name: 'Sonraki' }).click()
+  await expect(slides.nth(1)).toHaveClass(/is-active/)
+  await expect(slides.nth(1)).toContainText('Gündem')
+  await page.getByRole('button', { name: '3. öğe', exact: false }).click()
+  await expect(slides.nth(2)).toHaveClass(/is-active/)
+  await page.getByRole('button', { name: 'Önceki' }).click()
+  await expect(slides.nth(1)).toHaveClass(/is-active/)
+
+  await page.getByRole('button', { name: 'Otomatik geçişi durdur' }).click()
+  await expect(page.getByRole('button', { name: 'Otomatik geçişi başlat' })).toBeVisible()
+  await expect(page.locator('.hero-slider__progress')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Otomatik geçişi başlat' }).click()
+
+  // Auto-advance once the pointer and focus leave the slider.
+  await page.locator('h2', { hasText: 'Son yazılar' }).focus().catch(() => {})
+  await page.mouse.move(5, 5)
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+  await expect(slides.nth(2)).toHaveClass(/is-active/, { timeout: 10_000 })
+})
+
+test('home slider does not rotate when reduced motion is preferred', async ({ browser }) => {
+  const ctx = await browser.newContext({ reducedMotion: 'reduce' })
+  const page = await ctx.newPage()
+  await page.goto('/')
+  await expect(page.locator('.hero-slider__progress')).toHaveCount(0)
+  await page.waitForTimeout(1500)
+  await expect(page.locator('.hero-slide').nth(0)).toHaveClass(/is-active/)
+  await ctx.close()
+})
+
 test('security headers are set', async ({ request }) => {
   const res = await request.get('/')
   const h = res.headers()

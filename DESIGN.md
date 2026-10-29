@@ -1,7 +1,8 @@
 # DESIGN.md: Güvenli Çalış
 
 Bu dosya sitenin tasarım sözleşmesidir. Public site ve yönetim paneli aynı token'ları kullanır
-(`src/app/globals.css`, `:root` ve koyu tema bloğu). Yeni bir renk, boşluk, köşe veya yazı tipi
+(`src/app/globals.css`, `:root`). Site **yalnızca koyu temadır**: açık tema yoktur ve
+`prefers-color-scheme` kuralı yazılmaz (`npm run scan:design` buna hata verir). Yeni bir renk, boşluk, köşe veya yazı tipi
 gerekiyorsa önce buraya ekleyin, sonra koda; tek seferlik değer kullanmayın.
 
 ## Tasarım okuması
@@ -28,24 +29,22 @@ yapıldı; ardından sitenin Instagram hesabına benzemesi istendi. Bu sürüm h
 
 ## Renk rolleri
 
-| Token | Açık | Koyu | Rol |
-|---|---|---|---|
-| `--paper` | `#f4f4f1` | `#0f0f0e` | Sayfa zemini (nötr, krem değil) |
-| `--surface` / `--surface-2` | `#ffffff` / `#ebebe6` | `#191917` / `#232320` | Kartlar, form alanları |
-| `--ink` / `--ink-2` | `#141414` / `#4d4d48` | `#f2f2ec` / `#b3b3aa` | Metin, ikincil metin |
-| `--brand` / `--brand-deep` | `#141414` / `#0a0a0a` | `#1b1b19` / `#080808` | Siyah marka zemini: hero'nun sağı, sayfa bantları, footer |
-| `--brand-tint` | `#fff2bf` | `#2b260f` | Öne çıkan kart, çipler, bilgi kutuları |
-| `--accent` | `#ffd306` | aynı | **Tek büyük vurgu (logo sarısı):** hero paneli, birincil düğme, sarı bant, okuma çubuğu |
-| `--signal` | `#d90102` | `#ff5a4f` | Baret kırmızısı, yalnızca küçük işaretler: uyarı ikonu, onay işaretleri |
-| `--action` | `#b00000` | `#ffd306` | Bağlantılar (açıkta koyu kırmızı, koyuda sarı) |
-| `--focus` | `#141414` | `#ffd306` | Odak halkası; sarı zeminlerde her iki temada siyah |
-| `--danger`, `--ok`, `--warn` | | | Yalnızca hata, başarı, uyarı mesajları |
+| Token | Değer | Rol |
+|---|---|---|
+| `--paper` | `#0f0f0e` | Sayfa zemini |
+| `--surface` / `--surface-2` | `#191917` / `#232320` | Kartlar, form alanları |
+| `--ink` / `--ink-2` | `#f2f2ec` / `#b3b3aa` | Metin, ikincil metin |
+| `--brand` / `--brand-deep` | `#1b1b19` / `#080808` | Hero'nun siyah alanı, sayfa bantları, footer |
+| `--brand-tint` / `--accent-tint` | `#2b260f` | Öne çıkan kart, çipler, bilgi kutuları |
+| `--accent` | `#ffd306` | **Tek büyük vurgu (logo sarısı):** hero paneli, birincil düğme, sarı bant, okuma çubuğu |
+| `--signal` | `#ff5a4f` | Baret kırmızısı, yalnızca küçük işaretler (onay işaretleri) |
+| `--action` / `--focus` | `#ffd306` | Bağlantılar ve odak halkası; sarı zeminlerde siyah |
+| `--danger`, `--ok`, `--warn` | | Yalnızca hata, başarı, uyarı mesajları |
 
 Kurallar: sarı hiçbir zaman açık zeminde metin rengi olmaz. Sarı zeminde metin, düğme ve odak
 halkası her iki temada sabit siyahtır (`--on-accent`, `.button--black`,
 `.button--outline-black`). Kırmızı dolgu yalnızca silme düğmesinde ve hata mesajında
-kullanılır. Kontrast `npm run scan:design` ile iki temada toplam 58 ölçüm olarak hesaplanır;
-hepsi WCAG AA üstünde.
+kullanılır. Kontrast `npm run scan:design` ile her renk çifti için hesaplanır; hepsi WCAG AA üstünde.
 
 ## Tipografi
 
@@ -67,6 +66,14 @@ yayın/makale okunabilirliği. Başlıkta tek kelimeyi farklı renk/yazı tipiyl
 
 ## Düzen
 
+- **Ana sayfa slider'ı:** hero bir slider'dır: ilk slayt site tanıtımı (logo, ad, amaç cümleleri),
+  ardından son 3 yazı ("Gündem": kategori, başlık, özet, tarih, okuma süresi, kapak) ve 3 mağaza
+  ürünü (fiyat, biçim, "Satın al"/"İncele", ürün kapağı) sırayla, karışık. 6,5 saniyede bir
+  kendiliğinden geçer; altta duraklat, önceki/sonraki düğmeleri, noktalar ve ilerleme çubuğu
+  vardır. Fare üstündeyken veya klavye odağı içindeyken durur; `prefers-reduced-motion`
+  isteyen ziyaretçide hiç kendiliğinden geçmez. Görünmeyen slaytlar `inert`'tir (klavye ve ekran
+  okuyucu yalnızca görüneni bulur). Tüm slaytlar aynı ızgara hücresinde durur, yükseklik
+  zıplamaz. Slaytların düzeni aşağıdaki hero düzeninin aynısıdır.
 - **Ana sayfa:** hero solda eğik kenarlı sarı panel (logo, site adı, sitenin amacını anlatan
   dört kısa cümle ve ikonları, "Hazırlayan: Uğur Durak", "Yazıları oku" ve "Mağaza"
   düğmeleri), sağda siyah alan üzerinde temsili fotoğraf, arkasında sarı blok, üstüne binen
@@ -96,7 +103,7 @@ yayın/makale okunabilirliği. Başlıkta tek kelimeyi farklı renk/yazı tipiyl
 
 ## Hareket
 
-Hepsi CSS, JavaScript kütüphanesi yok; `prefers-reduced-motion: reduce` altında tamamen kapanır.
+Hepsi CSS (slider'ın zamanlayıcısı da ilerleme çubuğunun CSS animasyonudur), hareket kütüphanesi yok; `prefers-reduced-motion: reduce` altında tamamen kapanır.
 
 | Hareket | Ne anlatır |
 |---|---|
@@ -106,6 +113,7 @@ Hepsi CSS, JavaScript kütüphanesi yok; `prefers-reduced-motion: reduce` altın
 | Ürün kartında hover'da sarı panelin eğiminin hafifçe açılması | Kartın tıklanabilir olduğu |
 | Kart, düğme ve kutularda hover'da yükselme, görselde hafif büyüme | Tıklanabilirlik geri bildirimi |
 | Yazı sayfasında sarı okuma ilerleme çubuğu (`animation-timeline: scroll()`) | Okurun metindeki yeri |
+| Slider: slaytlar arasında solma, yeni slaytta metnin kademeli yükselmesi ve görselin açılması, ilerleme çubuğu | Sıradaki habere/ürüne geçiş ve ne zaman geçileceği |
 
 ## İkonlar
 

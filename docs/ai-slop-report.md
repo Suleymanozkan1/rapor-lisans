@@ -1,5 +1,10 @@
 # AI-slop tarama raporu
 
+> **Güncelleme (2026-10-29, beşinci tur):** Site yalnızca koyu temaya geçti; ana sayfa hero'su
+> yazılar ve ürünler arasında dönen bir slider oldu. Slider kendiliğinden geçer ama duraklatılabilir,
+> üzerine gelince ve odaklanınca durur, reduced-motion'da dönmez; noktalar 44 px dokunma alanına
+> sahip. `scan:design` açık tema kuralı bulunursa hata verir.
+
 > **Güncelleme (2026-10-29, dördüncü tur, ödeme):** Mağaza kendi ödeme sistemine geçti. Yeni
 > ekranlar (ödeme formu, sipariş sayfası, panelde siparişler) aynı token, köşe ve tipografi
 > kurallarını kullanır. Baskı dili yok: sahte "son 2 ürün", geri sayım, indirim veya "şu an 5 kişi
