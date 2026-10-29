@@ -1,4 +1,4 @@
-import { imageSize } from 'image-size'
+import { cleanJpeg, cleanPng, cleanWebp, ImageFormatError } from './image-meta'
 import { slugify } from './slug'
 
 /** Vercel Functions reject request bodies above 4.5 MB; stay well below it. */
@@ -24,6 +24,8 @@ export type ValidatedUpload = {
   width: number
   height: number
   fileName: string
+  /** The file to store: metadata (EXIF/GPS, XMP, comments) and trailing bytes removed. */
+  data: Buffer
 }
 
 export class UploadError extends Error {}
@@ -50,11 +52,10 @@ export function validateImageUpload(
 
   let dims
   try {
-    dims = imageSize(new Uint8Array(buf))
-  } catch {
-    throw new UploadError('Görsel okunamadı; dosya bozuk olabilir.')
+    dims = kind === 'jpeg' ? cleanJpeg(buf) : kind === 'png' ? cleanPng(buf) : cleanWebp(buf)
+  } catch (e) {
+    throw new UploadError(e instanceof ImageFormatError ? `Görsel okunamadı: ${e.message}.` : 'Görsel okunamadı; dosya bozuk olabilir.')
   }
-  if (!dims.width || !dims.height) throw new UploadError('Görsel boyutları okunamadı.')
   if (dims.width > MAX_DIMENSION || dims.height > MAX_DIMENSION) {
     throw new UploadError(`Görsel en fazla ${MAX_DIMENSION}×${MAX_DIMENSION} piksel olabilir.`)
   }
@@ -62,5 +63,5 @@ export function validateImageUpload(
   const base = slugify(dot >= 0 ? baseName.slice(0, dot) : baseName).slice(0, 50).replace(/-+$/, '') || 'gorsel'
   const suffix = Date.now().toString(36)
   const finalExt = kind === 'jpeg' ? 'jpg' : ext
-  return { kind, mime: MIME[kind], ext: finalExt, width: dims.width, height: dims.height, fileName: `${base}-${suffix}.${finalExt}` }
+  return { kind, mime: MIME[kind], ext: finalExt, width: dims.width, height: dims.height, fileName: `${base}-${suffix}.${finalExt}`, data: dims.data }
 }

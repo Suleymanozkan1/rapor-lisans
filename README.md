@@ -182,12 +182,17 @@ Tüm içerik Git'tedir; deponun kendisi yedektir.
 
 - Parola: scrypt (N=2^17, r=8, p=1), yalnızca hash ortam değişkeninde.
 - Oturum: HMAC-SHA256 imzalı, 8 saat geçerli, `__Host-` önekli, HttpOnly, Secure,
-  SameSite=Strict çerez. `SESSION_VERSION` artırılınca tüm oturumlar düşer.
+  SameSite=Strict çerez. `SESSION_VERSION` artırılınca veya parola değiştirilince tüm oturumlar
+  düşer.
 - Her panel işlemi sunucuda oturum + oturuma bağlı CSRF token'ı + Origin kontrolü yapar;
   `proxy.ts` yalnızca ilk kapıdır.
-- Giriş hız sınırı: IP başına 15 dakikada 5, hesap başına 20 başarısız deneme. Sınır varsayılan
-  olarak her sunucu örneğinin belleğindedir (sunucusuz ortamda kısmi koruma); paylaşılan sayaç
-  için isteğe bağlı Upstash değişkenleri.
+- Giriş hız sınırı: IP başına 15 dakikada 5 deneme (parola kontrolünden önce atomik sayılır),
+  doğru kullanıcı adıyla hesap başına 20 deneme. Kullanıcı adını tahmin edilemez seçin. Sınır
+  varsayılan olarak her sunucu örneğinin belleğindedir (sunucusuz ortamda kısmi koruma);
+  paylaşılan sayaç için isteğe bağlı Upstash değişkenleri. `x-forwarded-for` yalnızca Vercel'de
+  veya `TRUST_PROXY=1` ile kullanılır.
+- Yüklenen görsellerden konum/kamera bilgisi (EXIF, XMP, yorumlar) silinir; yalnızca yön
+  bilgisi korunur.
 - Markdown'daki ham HTML işlenmez; çıktı ayrıca rehype-sanitize ile temizlenir. Yalnızca http(s),
   mailto ve tel bağlantıları kalır.
 - Yükleme: yalnızca JPEG/PNG/WebP, gerçek içerik imzası + uzantı + MIME uyumu, 3 MB, 6000 px

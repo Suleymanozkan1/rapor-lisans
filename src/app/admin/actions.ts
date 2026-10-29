@@ -261,7 +261,7 @@ export async function saveSettingsAction(_prev: ActionState, fd: FormData): Prom
         instagram: str(fd, 'instagram', 300).trim(),
         youtube: str(fd, 'youtube', 300).trim(),
       },
-      seo: { defaultOgImage: str(fd, 'defaultOgImage', 300) },
+      seo: { defaultOgImage: image('defaultOgImage')?.src ?? '' },
       privacy: { controller: str(fd, 'privacyController', 200), updatedAt: isoDay(new Date().toISOString()) },
     })
     await saveSettings(next, sha, session.sub)
@@ -287,8 +287,8 @@ export async function uploadMediaAction(_prev: ActionState, fd: FormData): Promi
     const src = `/uploads/${year}/${v.fileName}`
     const { sha } = await getAdminMedia()
     await addMedia(
-      { name: v.fileName, content: buf },
-      { src, alt: alt.trim(), width: v.width, height: v.height, bytes: buf.length, uploadedAt: new Date().toISOString() },
+      { name: v.fileName, content: v.data },
+      { src, alt: alt.trim(), width: v.width, height: v.height, bytes: v.data.length, uploadedAt: new Date().toISOString() },
       sha,
       session.sub,
     )

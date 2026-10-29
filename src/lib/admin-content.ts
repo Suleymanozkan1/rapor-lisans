@@ -205,9 +205,12 @@ export async function deleteMedia(src: string, sha: string | null, user: string)
   if (current.sha !== sha) throw new ConflictError('Medya listesi değişmiş. Sayfayı yenileyin.')
   if (!current.value.some((m) => m.src === src)) throw new ConflictError('Görsel bulunamadı.')
   const rel = src.replace(/^\/uploads\//, '')
-  await getStore().commit(
+  const store = getStore()
+  // If the file is already gone, only the index entry is removed (a delete of a missing path would fail).
+  const exists = (await store.read(`uploads/${rel}`)) !== null
+  await store.commit(
     [
-      { path: `uploads/${rel}`, delete: true },
+      ...(exists ? [{ path: `uploads/${rel}` as const, delete: true as const }] : []),
       { path: 'content/media.json', content: json(current.value.filter((m) => m.src !== src)), expectedSha: sha },
     ],
     message(user, 'görseli sildi', src),

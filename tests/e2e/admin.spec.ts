@@ -39,8 +39,8 @@ test('anonymous users are redirected from every admin route', async ({ request }
 
 test('a forged session cookie does not grant access', async ({ page, context }) => {
   await context.addCookies([
-    { name: '__Host-isg_admin', value: 'eyJzdWIiOiJ5b25ldGljaSJ9.forged', url: 'https://localhost:3100', secure: true },
-    { name: 'isg_admin', value: 'eyJzdWIiOiJ5b25ldGljaSJ9.forged', url: 'http://localhost:3100' },
+    { name: '__Host-isg_admin', value: 'eyJzdWIiOiJ5b25ldGljaSJ9.forged', url: 'https://127.0.0.1:3100', secure: true },
+    { name: 'isg_admin', value: 'eyJzdWIiOiJ5b25ldGljaSJ9.forged', url: 'http://127.0.0.1:3100' },
   ])
   await page.goto('/admin/yazilar/gizli-taslak/onizleme')
   await expect(page).toHaveURL(/\/admin\/giris$/)
@@ -188,7 +188,7 @@ test('replaying a captured server action without the session cookie changes noth
   const after = readFileSync(path.join(work, 'content/categories.json'), 'utf8')
 
   // Without any cookie the proxy already redirects to the login page.
-  const anon = await playwright.request.newContext({ baseURL: 'http://localhost:3100' })
+  const anon = await playwright.request.newContext({ baseURL: 'http://127.0.0.1:3100' })
   const res = await replay(anon, cap)
   expect(res.status()).toBeGreaterThanOrEqual(300)
   expect(res.status()).toBeLessThan(400)
@@ -196,7 +196,7 @@ test('replaying a captured server action without the session cookie changes noth
   await anon.dispose()
 
   // With a forged cookie the request passes the proxy but the action's own session check rejects it.
-  const forged = await playwright.request.newContext({ baseURL: 'http://localhost:3100' })
+  const forged = await playwright.request.newContext({ baseURL: 'http://127.0.0.1:3100' })
   const res2 = await forged.post(cap.url, {
     headers: { ...Object.fromEntries(Object.entries(cap.headers).filter(([k]) => k !== 'cookie')), cookie: '__Host-isg_admin=forged.value' },
     data: cap.body,
@@ -250,6 +250,24 @@ test('media: rejects SVG and spoofed files, accepts a PNG with alt text', async 
   const media = JSON.parse(readFileSync(path.join(work, 'content/media.json'), 'utf8'))
   expect(media[0].alt).toBe('İskele korkuluğu kontrolü')
   expect(media[0].width).toBe(1)
+
+  // A JPEG with EXIF GPS data, a comment and an appended HTML payload is stored cleaned and still decodes.
+  const jpg = readFileSync(path.resolve(import.meta.dirname, '../fixtures/images/ornek.jpg'))
+  const exif = Buffer.concat([Buffer.from('Exif\0\0MM\0*\0\0\0\x08\0\0\0\0\0\0', 'latin1'), Buffer.from('GPSLatitude 41.0082')])
+  const app1 = Buffer.concat([Buffer.from([0xff, 0xe1, (exif.length + 2) >> 8, (exif.length + 2) & 0xff]), exif])
+  const dirty = Buffer.concat([jpg.subarray(0, 2), app1, jpg.subarray(2), Buffer.from('<html><script>alert(1)</script>')])
+  await upload('saha.jpg', 'image/jpeg', dirty, 'Saha fotoğrafı')
+  await expect(page.locator('main').getByRole('status').filter({ hasText: 'Görsel yüklendi' })).toBeVisible()
+  const stored = readdirSync(path.join(work, 'uploads', year)).find((f) => f.startsWith('saha-'))!
+  const bytes = readFileSync(path.join(work, 'uploads', year, stored))
+  expect(bytes.toString('latin1')).not.toMatch(/GPSLatitude|<script>/)
+  const decoded = await page.evaluate(async (b64) => {
+    const img = new Image()
+    img.src = `data:image/jpeg;base64,${b64}`
+    await img.decode()
+    return [img.naturalWidth, img.naturalHeight]
+  }, bytes.toString('base64'))
+  expect(decoded).toEqual([40, 24])
 })
 
 test('settings: validates URLs and e-mail, saves valid data', async ({ page }) => {

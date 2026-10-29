@@ -127,14 +127,17 @@ export class GithubStore implements ContentStore {
     const { treeSha } = await this.headCommit()
     const tree = await this.tree(treeSha)
     const out = new Map<LogicalPath, StoredFile>()
-    await Promise.all(
-      paths.map(async (p) => {
-        const entry = tree.find((e) => e.type === 'blob' && e.path === this.repoPath(p))
-        if (!entry) return
+    // A few requests at a time keeps clear of GitHub's secondary rate limits.
+    const queue = [...paths]
+    const worker = async () => {
+      for (let p = queue.shift(); p !== undefined; p = queue.shift()) {
+        const entry = tree.find((e) => e.type === 'blob' && e.path === this.repoPath(p!))
+        if (!entry) continue
         const blob = await this.api<{ content: string }>('GET', `/git/blobs/${entry.sha}`)
         out.set(p, { path: p, content: Buffer.from(blob!.content, 'base64'), sha: entry.sha })
-      }),
-    )
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(6, paths.length) }, worker))
     return out
   }
 

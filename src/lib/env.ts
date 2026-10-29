@@ -34,7 +34,11 @@ export type StoreKind = 'github' | 'local' | 'none'
  */
 export function storeKind(): StoreKind {
   const requested = process.env.CONTENT_STORE
-  if (requested === 'local') return process.env.VERCEL ? 'none' : 'local'
+  if (requested === 'local') {
+    // Never on Vercel; in a production build only for the e2e suite's disposable copy.
+    if (process.env.VERCEL) return 'none'
+    return process.env.NODE_ENV !== 'production' || process.env.E2E_LOCAL_STORE === '1' ? 'local' : 'none'
+  }
   if (requested === 'github' || (!requested && process.env.GITHUB_TOKEN)) {
     return githubConfig() ? 'github' : 'none'
   }

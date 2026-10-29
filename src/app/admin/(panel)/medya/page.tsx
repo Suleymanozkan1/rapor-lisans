@@ -24,7 +24,7 @@ export default async function MediaPage({ searchParams }: PageProps<'/admin/medy
         <p className="admin-muted">
           JPEG, PNG veya WebP; en fazla {MAX_UPLOAD_BYTES / 1024 / 1024} MB. Yüklemeden önce görseli web için küçültün (örneğin 1600 px
           genişlik). Yalnızca kullanım hakkına sahip olduğunuz görselleri yükleyin; temsili bir görseli gerçek olay fotoğrafı gibi
-          sunmayın.
+          sunmayın. Konum (GPS), kamera ve yazılım bilgileri (EXIF/XMP) yüklemede dosyadan silinir; yalnızca yön bilgisi korunur.
         </p>
         <UploadForm csrf={session.csrf} />
       </section>

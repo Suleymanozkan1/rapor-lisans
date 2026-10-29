@@ -26,6 +26,7 @@ const env = {
   CONTENT_DIR: '.e2e/content',
   UPLOADS_DIR: '.e2e/uploads',
   CONTENT_STORE: 'local',
+  E2E_LOCAL_STORE: '1',
   // Tests send X-Forwarded-For per test so login rate limits do not leak between tests.
   TRUST_PROXY: '1',
   NEXT_PUBLIC_SITE_URL: 'http://localhost:3100',
@@ -40,6 +41,6 @@ if (!process.env.E2E_SKIP_BUILD) {
   const b = spawnSync('npx', ['next', 'build'], { cwd: root, env, stdio: 'inherit' })
   if (b.status !== 0) process.exit(b.status ?? 1)
 }
-const server = spawn('npx', ['next', 'start', '-p', '3100'], { cwd: root, env, stdio: 'inherit' })
+const server = spawn('npx', ['next', 'start', '-H', '127.0.0.1', '-p', '3100'], { cwd: root, env, stdio: 'inherit' })
 for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => server.kill(sig))
 server.on('exit', (code) => process.exit(code ?? 0))
