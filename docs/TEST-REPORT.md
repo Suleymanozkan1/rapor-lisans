@@ -14,7 +14,7 @@ Son durum, deponun taze bir kopyasında (`git clone` + `npm ci`) README'deki kom
 | `npm test` (Vitest) | **100/100 geçti**, 13 dosya |
 | `npm run build` | Başarılı; public rotalar statik (○/●), `/admin/*` dinamik (ƒ); uyarı yok |
 | `npm run test:e2e` (Playwright) | **58/58 geçti** (masaüstü Chrome 40, mobil Pixel 7 18) |
-| `npm run scan:design` | Bulgu yok; iki temada 58 kontrast ölçümünün hepsi WCAG AA üstünde |
+| `npm run scan:design` | Bulgu yok; koyu temada 29 kontrast ölçümünün hepsi WCAG AA üstünde |
 
 Atlanan, silinen veya gevşetilen test yok.
 

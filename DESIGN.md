@@ -42,7 +42,7 @@ yapıldı; ardından sitenin Instagram hesabına benzemesi istendi. Bu sürüm h
 | `--danger`, `--ok`, `--warn` | | Yalnızca hata, başarı, uyarı mesajları |
 
 Kurallar: sarı hiçbir zaman açık zeminde metin rengi olmaz. Sarı zeminde metin, düğme ve odak
-halkası her iki temada sabit siyahtır (`--on-accent`, `.button--black`,
+halkası sabit siyahtır (`--on-accent`, `.button--black`,
 `.button--outline-black`). Kırmızı dolgu yalnızca silme düğmesinde ve hata mesajında
 kullanılır. Kontrast `npm run scan:design` ile her renk çifti için hesaplanır; hepsi WCAG AA üstünde.
 
@@ -135,7 +135,7 @@ yerine portre gösterilir.
 ## Erişilebilirlik
 
 Tek h1, atlanmayan başlık seviyeleri, ilk odak "İçeriğe geç", tüm etkileşimli öğelerde 3px odak
-halkası, form etiketleri, zorunlu alt metin, iki temada AA kontrast, reduced-motion desteği,
+halkası, form etiketleri, zorunlu alt metin, AA kontrast, reduced-motion desteği,
 dokunma hedefleri en az 44px (testlerle denetlenir).
 
 ## Ürün kapağı (`.product-art`)
