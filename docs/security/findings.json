@@ -1,0 +1,347 @@
+[
+  {
+    "verdict": "confirmed",
+    "fingerprint": "login-rate-limit/check-then-act-race",
+    "title": "Login rate limit can be exceeded by concurrent requests (check-then-act across the scrypt await)",
+    "description": "The login Server Action read the per-IP and per-account failure counters, awaited the scrypt password hash, and only then recorded the failure. All requests in a concurrent burst observed the counter below its limit, so the 5-per-IP and 20-per-account limits did not bound password guesses.",
+    "root_cause": "Non-atomic read (checkLimit) and write (recordFailure) separated by an asynchronous password hash.",
+    "intended_behavior": "At most 5 password evaluations per IP and 20 per account in any 15-minute window, regardless of concurrency.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/app/admin/login-actions.ts",
+        "line": 21,
+        "scope": "login",
+        "description": "Public Server Action reachable without authentication."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/app/admin/login-actions.ts",
+        "line": 32,
+        "scope": "login",
+        "description": "checkLimit reads counters without reserving a slot."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/app/admin/login-actions.ts",
+        "line": 42,
+        "scope": "login",
+        "description": "await verifyPassword (scrypt N=2^17) yields for hundreds of milliseconds."
+      },
+      {
+        "kind": "sink",
+        "file": "src/app/admin/login-actions.ts",
+        "line": 46,
+        "scope": "login",
+        "description": "recordFailure increments only after the hash, too late for concurrent requests."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/lib/auth/rate-limit.ts",
+        "line": 45,
+        "description": "checkLimit returns allowed when count < max and does not increment."
+      },
+      {
+        "file": "src/lib/auth/rate-limit.ts",
+        "line": 66,
+        "description": "memory.clear() above 10,000 keys also discards the account counter."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authentication_level",
+        "description": "None: anonymous network access to the login action."
+      },
+      {
+        "kind": "timing_dependency",
+        "description": "Requests must be concurrent within one instance's window."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Anonymous internet client",
+      "payloads": [
+        "50 concurrent login submissions with wrong passwords from one client address"
+      ],
+      "instructions": [
+        "Configure dummy admin credentials in a local test.",
+        "Call the login action 20 or more times concurrently with a wrong password from one IP.",
+        "Count how many responses report a wrong password (password was evaluated) versus the limit message."
+      ],
+      "observed_result": "Independent verifier measured about 5.7 scrypt evaluations per second per instance with no limiting effect from the counters; regression test tests/unit/login.test.ts now shows exactly 5 of 20 concurrent attempts evaluated."
+    },
+    "remediation": {
+      "strategy": "Reserve the attempt atomically before hashing (consume() increments synchronously in memory, or INCR+EXPIRE in one Upstash pipeline and compare the returned count); reset on success; evict only expired or per-IP buckets.",
+      "code_changes": [
+        {
+          "file_name": "src/lib/auth/rate-limit.ts",
+          "fixed_code": "consume(key, max, windowSeconds) increments before returning allowed = count <= max; makeRoom() never evicts login:acct:* buckets"
+        },
+        {
+          "file_name": "src/app/admin/login-actions.ts",
+          "fixed_code": "const ipLimit = await consume(ipKey, ...); if (!ipLimit.allowed) return blocked(...) // before verifyPassword"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "medium",
+        "reason": "Requires only scripting concurrent requests."
+      },
+      "impact": {
+        "score": "medium",
+        "reason": "Defeats the brute-force control on the single admin account; actual takeover still depends on password strength."
+      },
+      "overall_severity": "medium"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Source trace verified by an independent agent and measured; regression test reproduces the bound."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "login-rate-limit/anonymous-account-lockout",
+    "title": "Anonymous failures could lock the sole admin out of login",
+    "description": "The per-account failure counter was keyed on the configured admin username and incremented on every failed attempt with any username. Once it reached 20 the check rejected the request before verifying the password, so the owner's correct credentials were refused for as long as an attacker kept failing.",
+    "root_cause": "Account budget spent by attempts that never named the account; successful login did not reset it.",
+    "intended_behavior": "Failures by someone who does not know the admin username must not block the owner's correct login.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/app/admin/login-actions.ts",
+        "line": 21,
+        "scope": "login",
+        "description": "Public Server Action."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/app/admin/login-actions.ts",
+        "line": 29,
+        "scope": "login",
+        "description": "accountKey derived from cfg.username, not the submitted username."
+      },
+      {
+        "kind": "sink",
+        "file": "src/app/admin/login-actions.ts",
+        "line": 33,
+        "scope": "login",
+        "description": "checkLimit(accountKey) blocks before verifyPassword."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/app/admin/login-actions.ts",
+        "line": 47,
+        "description": "recordFailure(accountKey) on every failure."
+      },
+      {
+        "file": "src/app/admin/login-actions.ts",
+        "line": 53,
+        "description": "Success resets only ipKey."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authentication_level",
+        "description": "None."
+      },
+      {
+        "kind": "network_routing",
+        "description": "About 20 failures per 15 minutes from 4 or more client addresses (or one address using the race)."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Anonymous internet client",
+      "payloads": [
+        "20 failed logins with username 'admin' from rotating addresses"
+      ],
+      "instructions": [
+        "Submit 40 failed logins with a wrong username from different addresses.",
+        "Submit the correct credentials from a new address."
+      ],
+      "observed_result": "Before the fix the correct login returned the 'too many attempts' message; regression test now shows a successful redirect."
+    },
+    "remediation": {
+      "strategy": "Spend the account budget only when the submitted username matches (username is not public), reset both counters on success.",
+      "code_changes": [
+        {
+          "file_name": "src/app/admin/login-actions.ts",
+          "fixed_code": "if (usernameOk) { const acct = await consume(accountKey, ...); if (!acct.allowed) return blocked(...) } ... await Promise.all([resetLimit(ipKey), resetLimit(accountKey)])"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "medium",
+        "reason": "Cheap and repeatable."
+      },
+      "impact": {
+        "score": "low",
+        "reason": "Availability of new admin logins only; public site and existing sessions unaffected."
+      },
+      "overall_severity": "low"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Verified independently; regression test."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "upload/image-size-quadratic-jpeg",
+    "title": "Quadratic JPEG header parsing in image-size lets one upload burn minutes of CPU",
+    "description": "validateImageUpload passed untrusted JPEG bytes to image-size 2.0.4, whose JPEG parser copies the remaining buffer on every step. A crafted file within the 3 MB limit takes minutes of CPU and blocks the instance's event loop.",
+    "root_cause": "Third-party parser uses Uint8Array.slice in a byte-wise loop (O(n^2)).",
+    "intended_behavior": "Header parsing of an upload completes in time linear in its size.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/app/admin/actions.ts",
+        "line": 277,
+        "scope": "uploadMediaAction",
+        "description": "Admin-only Server Action receives the file."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/app/admin/actions.ts",
+        "line": 283,
+        "scope": "uploadMediaAction",
+        "description": "File buffered (<= 3 MB)."
+      },
+      {
+        "kind": "sink",
+        "file": "src/lib/upload.ts",
+        "line": 53,
+        "scope": "validateImageUpload",
+        "description": "imageSize(new Uint8Array(buf)) on the untrusted bytes."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/lib/upload.ts",
+        "line": 53,
+        "description": "Measured: 100 KB 0.7-0.95 s, 200 KB 2.8 s, 400 KB 11 s (about 4x per doubling)."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authentication_level",
+        "description": "Valid admin session and CSRF token (e.g. admin uploads an attacker-supplied file)."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Admin uploading a hostile file",
+      "payloads": [
+        "FF D8 FF E0 followed by zero bytes, 400 KB"
+      ],
+      "instructions": [
+        "Call image-size 2.0.4 imageSize() on the buffer and time it."
+      ],
+      "observed_result": "11.1 s for 400 KB; extrapolated about 10 minutes for 3 MB."
+    },
+    "remediation": {
+      "strategy": "Replace image-size with a linear, capped marker/chunk walker (src/lib/image-meta.ts) and cap admin request duration (maxDuration = 30).",
+      "code_changes": [
+        {
+          "file_name": "src/lib/image-meta.ts",
+          "fixed_code": "cleanJpeg/cleanPng/cleanWebp: offset += segment length, MAX_SEGMENTS cap"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "low",
+        "reason": "Requires an admin-privileged upload."
+      },
+      "impact": {
+        "score": "low",
+        "reason": "CPU/quota burn and a blocked instance; no data impact."
+      },
+      "overall_severity": "low"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Measured by finder and verifier; regression test asserts <500 ms on 3 MB hostile inputs."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "upload/exif-metadata-published",
+    "title": "Uploaded photos were published with their EXIF/GPS metadata",
+    "description": "Uploads were validated but committed byte-for-byte, so GPS coordinates, device data and timestamps in phone photos were served from /uploads and kept in Git history.",
+    "root_cause": "No metadata stripping or re-encoding step between validation and storage.",
+    "intended_behavior": "Stored images carry no location or device metadata.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/app/admin/actions.ts",
+        "line": 277,
+        "scope": "uploadMediaAction",
+        "description": "Admin upload."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/app/admin/actions.ts",
+        "line": 289,
+        "scope": "uploadMediaAction",
+        "description": "Original buffer passed to addMedia."
+      },
+      {
+        "kind": "sink",
+        "file": "src/lib/admin-content.ts",
+        "line": 186,
+        "scope": "addMedia",
+        "description": "Bytes committed unchanged to uploads/."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/lib/admin-content.ts",
+        "line": 186,
+        "description": "content: file.content written as-is."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "user_interaction",
+        "description": "Admin uploads a photo containing metadata (default for phone cameras)."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Any visitor viewing an uploaded image",
+      "payloads": [
+        "JPEG with APP1 Exif GPS IFD"
+      ],
+      "instructions": [
+        "Upload the JPEG through the media page.",
+        "Inspect the stored file for the Exif segment."
+      ],
+      "observed_result": "Metadata present before the fix; e2e test now asserts the stored file contains no GPS text and still decodes."
+    },
+    "remediation": {
+      "strategy": "Strip metadata segments/chunks (JPEG APP1-APP15 except ICC/Adobe, COM; PNG text/eXIf/tIME; WebP EXIF/XMP) keeping only orientation, and drop trailing bytes.",
+      "code_changes": [
+        {
+          "file_name": "src/lib/upload.ts",
+          "fixed_code": "dims = kind === 'jpeg' ? cleanJpeg(buf) : kind === 'png' ? cleanPng(buf) : cleanWebp(buf); return { ..., data: dims.data }"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "medium",
+        "reason": "Most phone photos carry GPS."
+      },
+      "impact": {
+        "score": "informational",
+        "reason": "Owner's own privacy; depends on what is uploaded."
+      },
+      "overall_severity": "informational"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Direct source trace; verified independently."
+    }
+  }
+]

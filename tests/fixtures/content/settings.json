@@ -1,0 +1,45 @@
+{
+  "siteName": "Güvenli Çalış",
+  "tagline": "İş sağlığı ve güvenliği",
+  "description": "Test verisi: bu içerik yalnızca otomatik testler ve yerel demo içindir.",
+  "motto": [
+    "Güvensiz çalışma = Risk",
+    "Güvenli çalışma = Hayat"
+  ],
+  "author": {
+    "name": "Uğur Durak",
+    "jobTitle": "İş Sağlığı ve Güvenliği Uzmanı",
+    "shortBio": "Test verisi kısa biyografi.",
+    "bio": "Test verisi **biyografi** metni."
+  },
+  "contact": {
+    "email": "ornek@example.com",
+    "phone": "",
+    "location": "",
+    "note": ""
+  },
+  "social": {
+    "linkedin": "",
+    "x": "",
+    "instagram": "https://www.instagram.com/guvenlicalis",
+    "youtube": ""
+  },
+  "seller": {
+    "legalName": "Test Satıcı Ltd. Şti.",
+    "address": "Test Mah. Örnek Sok. No: 1, Kadıköy / İstanbul",
+    "phone": "+90 216 000 00 00",
+    "email": "satis@example.com",
+    "taxOffice": "Kadıköy",
+    "taxNumber": "1234567890",
+    "mersisNo": "0123456789000017",
+    "kep": "",
+    "chamber": "İstanbul Ticaret Odası"
+  },
+  "seo": {
+    "defaultOgImage": ""
+  },
+  "privacy": {
+    "controller": "",
+    "updatedAt": ""
+  }
+}
