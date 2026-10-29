@@ -160,6 +160,24 @@ test('webhook settles a payment whose buyer never came back; a bad signature is 
   await expect.poll(() => mails(email).length).toBe(1)
 })
 
+test('an unsigned error from iyzico leaves the order pending; "Durumu yenile" completes it later', async ({ page }) => {
+  const email = `bekle-${Date.now()}@example.com`
+  await fillCheckout(page, email)
+  await consentAndPay(page)
+  const { token } = await (await page.request.get(`${MOCK}/__test/last`)).json()
+  // The buyer comes back while iyzico still answers with an (unsigned) error.
+  await page.goto('/odeme/sonuc')
+  const back = await page.request.post('/odeme/iyzico', { form: { token }, maxRedirects: 0 })
+  await page.goto(back.headers()['location'].replace('localhost', '127.0.0.1'))
+  await expect(page.locator('h1')).toHaveText('Ödemeniz doğrulanıyor')
+  expect(mails(email)).toHaveLength(0)
+
+  await page.request.post(`${MOCK}/__test/set`, { data: { token, patch: { state: 'paid' } } })
+  await page.getByRole('button', { name: 'Durumu yenile' }).click()
+  await expect(page.locator('h1')).toHaveText('Siparişiniz tamamlandı')
+  await expect.poll(() => mails(email).length).toBe(1)
+})
+
 test('unknown or missing tokens on the payment return lead to a neutral page', async ({ page }) => {
   const r = await page.request.post('/odeme/iyzico', { form: { token: 'yok-boyle-bir-token' }, maxRedirects: 0 })
   expect(r.status()).toBe(303)

@@ -167,8 +167,10 @@ export function judgeRetrieve(
   token: string,
   r: Record<string, unknown>,
 ): Verdict {
+  // An error response is unsigned and may be transient (outage, rate limit, abandoned form):
+  // it never fails an order. Only a signed FAILURE or a fraud rejection does.
   if (r.status !== 'success') {
-    return { outcome: 'failed', reason: typeof r.errorMessage === 'string' ? r.errorMessage.slice(0, 200) : 'Ödeme tamamlanmadı' }
+    return { outcome: 'pending', reason: typeof r.errorMessage === 'string' ? r.errorMessage.slice(0, 200) : 'Sonuç alınamadı' }
   }
   const expected = responseSignature(secret, [
     r.paymentStatus,

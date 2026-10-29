@@ -53,12 +53,14 @@ export default async function OrderPage({ params, searchParams }: PageProps<'/si
             {order.status === 'refunded' ? <WarningCircle size={26} weight="fill" aria-hidden="true" /> : null}
             <span>
               {order.status === 'paid'
-                ? `Ödemeniz onaylandı. Onay e-postası ${order.buyer.email} adresine gönderildi.`
+                ? order.emailSentAt
+                  ? `Ödemeniz onaylandı. Onay e-postası ${order.buyer.email} adresine gönderildi.`
+                  : 'Ödemeniz onaylandı. Dosyanızı aşağıdan indirebilirsiniz; onay e-postası birazdan gönderilecek.'
                 : order.status === 'pending'
                   ? 'Ödeme sağlayıcısından sonuç bekleniyor. Bu genellikle birkaç dakika sürer.'
                   : order.status === 'refunded'
                     ? 'Bu siparişin ödemesi iade edildi; dosya indirilemez.'
-                    : 'Ödeme alınamadı; kartınızdan tahsilat yapılmadı. Tekrar deneyebilirsiniz.'}
+                    : 'Ödeme sağlayıcısı ödemenin alınmadığını bildirdi. Tekrar deneyebilirsiniz.'}
             </span>
           </p>
           <dl className="order-facts">
@@ -101,7 +103,7 @@ export default async function OrderPage({ params, searchParams }: PageProps<'/si
             <p>İndirme hakkınız bitti veya süresi doldu. Yeni bağlantı için aşağıdaki adrese sipariş numaranızla yazın.</p>
           ) : null}
 
-          {order.status === 'pending' ? (
+          {order.status === 'pending' || (order.status === 'paid' && !order.emailSentAt) ? (
             <form action={refreshOrderAction}>
               <input type="hidden" name="id" value={order.id} />
               <input type="hidden" name="token" value={token} />

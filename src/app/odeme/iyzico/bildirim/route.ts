@@ -20,8 +20,8 @@ const ok = () => NextResponse.json({ ok: true }, { headers: { 'Cache-Control': '
 export async function POST(request: Request) {
   const cfg = iyzicoConfig()
   if (!cfg) return NextResponse.json({ error: 'not configured' }, { status: 503 })
-  const ip = (await clientIp()) ?? 'unknown'
-  if (!(await consume(`webhook:ip:${ip}`, 120, 60)).allowed) return NextResponse.json({ error: 'rate limited' }, { status: 429 })
+  const ip = await clientIp()
+  if (ip && !(await consume(`webhook:ip:${ip}`, 120, 60)).allowed) return NextResponse.json({ error: 'rate limited' }, { status: 429 })
 
   const raw = await request.text()
   if (raw.length > 10_000) return NextResponse.json({ error: 'too large' }, { status: 413 })

@@ -75,15 +75,19 @@ export async function settleByToken(token: string): Promise<repo.Order | null> {
   const db = await getDb()
   const order = await repo.getOrderByToken(db, token)
   if (!order) return null
-  if (order.status === 'paid' || order.status === 'refunded') return order
+  if (order.status === 'refunded') return order
+  if (order.status === 'paid') {
+    // A confirmation that failed earlier is retried by any later callback, webhook or refresh.
+    if (!order.emailSentAt) await sendConfirmationOnce(order.id)
+    return repo.getOrder(db, order.id)
+  }
   const result = await retrieveCheckout(cfg, token, order.id)
   const verdict = judgeRetrieve(cfg.secretKey, order, token, result)
   if (verdict.outcome === 'paid') {
     const paid = await repo.markPaid(db, order.id, verdict.paymentId, DOWNLOAD_DAYS)
-    if (paid) {
-      log('order_paid', { order: order.id })
-      await deliver(paid).catch((e) => log('order_mail_failed', { order: order.id, error: (e as Error).message }))
-    }
+    if (paid) log('order_paid', { order: order.id })
+    // Throws if the e-mail fails: the webhook then answers 503 and iyzico retries.
+    await sendConfirmationOnce(order.id)
   } else if (verdict.outcome === 'failed') {
     await repo.markFailed(db, order.id, verdict.reason)
     log('order_failed', { order: order.id, reason: verdict.reason })
@@ -123,6 +127,20 @@ async function deliver(o: repo.Order) {
   await sendMail(confirmationMail(o, getSettings()))
   await repo.markEmailSent(await getDb(), o.id)
   log('order_mail_sent', { order: o.id })
+}
+
+/** First confirmation e-mail: claimed atomically so racing callers send it once; released on failure. */
+async function sendConfirmationOnce(id: string) {
+  const db = await getDb()
+  const claimed = await repo.claimEmail(db, id)
+  if (!claimed) return
+  try {
+    await deliver(claimed)
+  } catch (e) {
+    await repo.releaseEmail(db, id)
+    log('order_mail_failed', { order: id, error: (e as Error).message })
+    throw e
+  }
 }
 
 /** Admin: send the confirmation (with a fresh link) again. */

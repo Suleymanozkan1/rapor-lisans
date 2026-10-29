@@ -11,9 +11,9 @@ Son durum, deponun taze bir kopyasında (`git clone` + `npm ci`) README'deki kom
 | `npm ci` | Başarılı, 0 bilinen açık (`npm audit`: 0 vulnerabilities; `@vercel/blob` alt bağımlılığındaki eski zod sürümü `overrides` ile yamalı sürüme sabitlendi) |
 | `npm run lint` | Başarılı, 0 hata, 0 uyarı (`--max-warnings 0` ile de denendi) |
 | `npm run typecheck` | Başarılı |
-| `npm test` (Vitest) | **99/99 geçti**, 13 dosya |
+| `npm test` (Vitest) | **100/100 geçti**, 13 dosya |
 | `npm run build` | Başarılı; public rotalar statik (○/●), `/admin/*` dinamik (ƒ); uyarı yok |
-| `npm run test:e2e` (Playwright) | **53/53 geçti** (masaüstü Chrome 37, mobil Pixel 7 16) |
+| `npm run test:e2e` (Playwright) | **54/54 geçti** (masaüstü Chrome 38, mobil Pixel 7 16) |
 | `npm run scan:design` | Bulgu yok; iki temada 58 kontrast ölçümünün hepsi WCAG AA üstünde |
 
 Atlanan, silinen veya gevşetilen test yok.
@@ -80,7 +80,8 @@ telefon, TCKN yer tutucusu, sanal sepet ve kargo adresi olmaması; ödeme sonras
 bağlantısı olmadan), tekrar gönderilen geri dönüşün ikinci e-posta üretmemesi, indirilen dosyanın
 bayt bayt aynı olması, 5 indirme sınırı, GET ile indirme olmaması (405), sahte bağlantı
 token'ının reddi; reddedilen kartta e-posta ve indirme olmaması; imzası doğru ama tutarı farklı
-sonucun kabul edilmemesi; tarayıcısı dönmeyen alıcının webhook ile tamamlanması ve sahte imzalı
+sonucun kabul edilmemesi; iyzico'nun imzasız hata yanıtında siparişin beklemede kalıp "Durumu
+yenile" ile tamamlanması; tarayıcısı dönmeyen alıcının webhook ile tamamlanması ve sahte imzalı
 webhook'un reddi (401); bilinmeyen token; 390 px'te ödeme sayfası; panelde sipariş, fatura
 numarası kaydı, yeni bağlantının eskisini geçersiz kılması ve iade sonrası indirmenin kapanması.
 Panelde ürün dosyası yükleme: sahte PDF (HTML) ve izinsiz uzantının reddi, gerçek PDF'in

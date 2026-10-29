@@ -104,3 +104,15 @@ describe('orders', () => {
     expect(await repo.listOrders(db, { limit: 2 })).toHaveLength(2)
   })
 })
+
+describe('confirmation e-mail claim', () => {
+  it('is claimed once, only for paid orders, and can be released for a retry', async () => {
+    const o = await repo.createOrder(db, input())
+    expect(await repo.claimEmail(db, o.id)).toBeNull() // not paid yet
+    await repo.markPaid(db, o.id, 'p', 7)
+    const claims = await Promise.all([repo.claimEmail(db, o.id), repo.claimEmail(db, o.id)])
+    expect(claims.filter(Boolean)).toHaveLength(1)
+    await repo.releaseEmail(db, o.id)
+    expect(await repo.claimEmail(db, o.id)).not.toBeNull()
+  })
+})

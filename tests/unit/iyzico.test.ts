@@ -104,9 +104,10 @@ describe('judging a retrieve result', () => {
     expect(judgeRetrieve(secret, order, 'tok', sign({ ...base, fraudStatus: 0 }))).toEqual({ outcome: 'pending', reason: 'Ödeme risk incelemesinde' })
   })
 
-  it('records a failure for declined payments', () => {
+  it('records a failure only for a signed declined payment or a fraud rejection', () => {
     expect(judgeRetrieve(secret, order, 'tok', sign({ ...base, paymentStatus: 'FAILURE' })).outcome).toBe('failed')
     expect(judgeRetrieve(secret, order, 'tok', sign({ ...base, fraudStatus: -1 })).outcome).toBe('failed')
-    expect(judgeRetrieve(secret, order, 'tok', { status: 'failure', errorMessage: 'Kart limiti yetersiz' })).toEqual({ outcome: 'failed', reason: 'Kart limiti yetersiz' })
+    // An unsigned error response (outage, abandoned form) leaves the order pending.
+    expect(judgeRetrieve(secret, order, 'tok', { status: 'failure', errorMessage: 'Sistem hatası' })).toEqual({ outcome: 'pending', reason: 'Sistem hatası' })
   })
 })

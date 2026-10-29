@@ -16,7 +16,8 @@ export async function refreshOrderAction(fd: FormData): Promise<void> {
   const db = await getDb()
   const order = secret ? await getOrder(db, id) : null
   if (!secret || !order || !verifyLinkToken(secret, order.id, order.downloadVersion, token)) redirect('/odeme/sonuc')
-  if (order.status === 'pending' && order.providerToken && (await consume(`order-refresh:${order.id}`, 10, 600)).allowed) {
+  const open = order.status === 'pending' || (order.status === 'paid' && !order.emailSentAt)
+  if (open && order.providerToken && (await consume(`order-refresh:${order.id}`, 10, 600)).allowed) {
     await settleByToken(order.providerToken).catch(() => null)
   }
   redirect(`/siparis/${order.id}/${token}`)

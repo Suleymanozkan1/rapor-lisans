@@ -41,8 +41,11 @@ export async function checkoutAction(_prev: CheckoutState, fd: FormData): Promis
   const missing = ['preInfo', 'contract', 'digital'].filter((k) => fd.get(k) !== 'on')
   if (missing.length) return { error: 'Siparişi verebilmek için üç onay kutusunu da işaretleyin.', fields: Object.fromEntries(missing.map((k) => [k, 'Onay gerekli'])) }
 
-  const ip = (await clientIp()) ?? '0.0.0.0'
-  const perIp = await consume(`checkout:ip:${ip}`, 10, 3600)
+  // Without a trusted client IP (only off Vercel without TRUST_PROXY) all buyers would share one
+  // bucket, so the per-IP limit is skipped and the per-e-mail limit remains.
+  const trustedIp = await clientIp()
+  const ip = trustedIp ?? '0.0.0.0'
+  const perIp = trustedIp ? await consume(`checkout:ip:${trustedIp}`, 10, 3600) : { allowed: true }
   const perEmail = await consume(`checkout:email:${parsed.data.email.toLowerCase()}`, 5, 900)
   if (!perIp.allowed || !perEmail.allowed) return { error: 'Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.' }
 

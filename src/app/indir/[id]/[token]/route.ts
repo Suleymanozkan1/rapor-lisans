@@ -31,14 +31,19 @@ export async function POST(_request: Request, ctx: RouteContext<'/indir/[id]/[to
     return new NextResponse('Bağlantı geçersiz.', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' } })
   }
   const back = NextResponse.redirect(new URL(`/siparis/${order.id}/${token}?indirme=olmadi`, siteUrl()), { status: 303, headers: { 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' } })
-  const counted = await consumeDownload(db, order.id, order.downloadVersion)
-  if (!counted) return back
-  await addEvent(db, order.id, 'download', { n: counted.downloadCount })
-  const file = await openFile(order.filePathname)
+  if (order.status !== 'paid') return back
+  // Open the file first, so a storage outage does not use up a download.
+  const file = await openFile(order.filePathname).catch(() => null)
   if (!file) {
     console.error(JSON.stringify({ type: 'order_file_missing', at: new Date().toISOString(), order: order.id }))
     return back
   }
+  const counted = await consumeDownload(db, order.id, order.downloadVersion)
+  if (!counted) {
+    await file.stream.cancel().catch(() => {})
+    return back
+  }
+  await addEvent(db, order.id, 'download', { n: counted.downloadCount })
   return new NextResponse(file.stream, {
     headers: {
       'Content-Type': file.contentType,

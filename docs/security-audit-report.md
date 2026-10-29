@@ -191,23 +191,36 @@ Ajan düzeltmeleri kodun kopyasında çalıştırdı: 50 paralel denemeden tam 5
 Bu ikinci tur düzeltmeler ayrıca yeniden denetlenmedi; her biri kendi testiyle ve tüm test
 paketinin yeniden çalıştırılmasıyla doğrulandı.
 
-## Mağaza ve marka değişikliği denetimi (2026-10-29)
+## Mağaza: kendi ödeme sistemi denetimi (2026-10-29)
 
-Kapsam: `content/products`, `/magaza` sayfaları, panelde ürün ekleme, düzenleme ve silme,
-ayarlara eklenen `motto` ve `shop.url` alanları, panel formlarının `onSubmit` ile gönderilmesi.
-Yeni bulgu yok. Kontrol edilenler:
+Kapsam: iyzico istemcisi (`src/lib/payments`), sipariş veritabanı ve servis (`src/lib/orders`),
+ödeme formu ve Server Action'ı, iyzico dönüş ve bildirim rotaları, indirme rotası, alıcı
+sipariş sayfası, panelde siparişler ve ürün dosyası yükleme, CSP. Yöntem: kendi incelemem,
+ardından bu kararları görmeden kodu okuyan ayrı bir denetçi ajan (her bulgu kod yolu izlenerek
+doğrulandı). Kritik veya yüksek bulgu yok.
 
-| Konu | Sonuç |
-|---|---|
-| Satın alma bağlantısıyla zararlı adrese yönlendirme | Şema yalnızca `https:` + `shopier.com` / `www.shopier.com` ana makinesini, kimlik bilgisi ve port olmadan, boş olmayan bir yolla kabul eder. `shopier.com.evil.example`, `evilshopier.com`, `www.shopier.com.`, `//`, `javascript:` ve ters eğik çizgi denemeleri reddedilir veya Shopier'e çözülür (birim testi). Kural panelde ve build'de aynı şemadan uygulanır; elle commit edilen bozuk dosya build'i durdurur. |
-| Ürün açıklamasında saklanan XSS | Açıklama yazılarla aynı `rehype-sanitize` hattından geçer; e2e testi `<script>`, `onerror` ve `javascript:` bağlantısının çalışmadığını doğrular. Özellik maddeleri ve amaç cümleleri düz metin olarak işlenir. |
-| JSON-LD enjeksiyonu | `Product` verisi mevcut `jsonLd()` kaçışıyla yazılır. |
-| Yetkisiz yazma | `saveProductAction` ve `deleteProductAction` ilk satırda `requireAdminAction` çağırır (oturum + CSRF + Origin). Anonim istekler tüm `/admin/urunler` rotalarından yönlendirilir (e2e). |
-| Yol geçişi | Ürün yolları `isValidSlug` ile doğrulanır ve depo katmanının mantıksal yol kontrolünden geçer. |
-| Eşzamanlı düzenleme | Ürün kaydı blob SHA ile iyimser kilit kullanır; eski sekmeden kayıt reddedilir (birim testi). |
-| Kişisel veri | Site sipariş, ödeme veya müşteri verisi almaz; gizlilik sayfasına Shopier'in bu verileri işlediği bilgisi eklendi. Dış bağlantılar `rel="noopener noreferrer"` ile açılır. |
-| Sahte teklif | Örnek ürünler etiketli, `noindex`, site haritası ve JSON-LD dışında; yayına almadan önce silinmeleri README'de belirtildi. |
-| Form değerlerinin korunması | `onSubmit` yolu aynı Server Action'ı aynı FormData ile (CSRF alanı dahil) çağırır; güvenlik denetimleri değişmedi. |
+| # | Bulgu | Önem | Düzeltme | Test |
+|---|---|---|---|---|
+| 1 | iyzico'nun **imzasız** hata yanıtı (geçici kesinti, kota) ödenmiş bir siparişi "başarısız" yapıp alıcıya "tahsilat yapılmadı" diyebiliyordu; alıcı ikinci kez ödeyebilirdi | Orta | İmzasız hata yanıtı siparişi yalnızca beklemede bırakır; "başarısız" yalnızca imzalı `FAILURE` veya risk reddinde. "Başarısız" kayıt doğrulanmış bir ödemeyle yine "ödendi" olabilir | `iyzico.test.ts`, `orders.test.ts`, e2e "Durumu yenile" |
+| 2 | Ödeme sonrası onay e-postası başarısız olursa bir daha denenmiyordu (webhook 200 dönüyordu) | Düşük | E-posta atomik olarak üstlenilir, başarısızlıkta geri bırakılır; sonraki dönüş, webhook (503 ile iyzico'ya yeniden deneme) veya sayfa yenilemesi tekrar dener; sayfa e-posta gitmediyse bunu söyler | `orders.test.ts` (claim) |
+| 3 | İndirme, dosya açılmadan sayılıyordu; depolama kesintisinde hak boşa gidiyordu | Düşük | Dosya önce açılır, sonra sayılır | e2e indirme sınırı |
+| 4 | Vercel dışında, güvenilir IP yokken tüm alıcılar tek hız sınırı kovasını paylaşıyordu | Düşük | Güvenilir IP yoksa IP sınırı atlanır, e-posta başına sınır kalır | (kod incelemesi) |
+
+Temiz çıkan kontroller (özet): yanıt imzasının 8 alanı ve sıfır kırpma; token, sepet ve sipariş
+eşleşmesi; tutar ve para birimi sunucu verisinden; taksit kapalı; `fraudStatus`; başlatma
+yanıtı imzası ve ödeme sayfası alan adı (açık yönlendirme yok); webhook sahteciliğinin hiçbir
+siparişi ödenmiş yapamaması; tek seferlik atomik durum geçişleri ve yarışlar; imzalı, sürümlü
+indirme bağlantısı ve sabit zamanlı karşılaştırma; IDOR yok; yönlendirmeler `siteUrl()`'den;
+`Content-Disposition` başlık enjeksiyonu yok; yerel ve Blob deposunda yol geçişi ve SSRF yok;
+yükleme rotasında oturum + CSRF + Origin, yol, tür, boyut ve dosya imzası kontrolü; panel
+sipariş işlemlerinde `requireAdminAction`; günlüklerde kişisel veri yok; e-posta başlık
+enjeksiyonu yok; sözleşme metni sunucuda üretiliyor; CSP yalnızca iyzico ve Vercel Blob'a açık.
+
+Önceki tur (Shopier vitrini) artık geçerli değil; Shopier bağlantısı kaldırıldı.
+
+Kalan riskler: canlı iyzico, Neon, Blob ve Resend bu ortamda denenemedi (sandbox ile uçtan uca
+deneme README'de istenir). iyzico webhook imzası hesapta açılmamışsa bildirim imzasız gelir;
+bu durumda da yalnızca imzalı Retrieve sonucu geçerlidir.
 
 ## Sapmalar (yöntem uyarlaması)
 

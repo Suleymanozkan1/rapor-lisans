@@ -231,6 +231,16 @@ export async function markEmailSent(db: Db, id: string) {
   await db.query('UPDATE orders SET email_sent_at = now(), updated_at = now() WHERE id = $1', [id])
 }
 
+/** Claims the first confirmation e-mail of a paid order (exactly one caller wins). */
+export async function claimEmail(db: Db, id: string): Promise<Order | null> {
+  return one(await db.query(`UPDATE orders SET email_sent_at = now() WHERE id = $1 AND status = 'paid' AND email_sent_at IS NULL RETURNING *`, [id]))
+}
+
+/** Gives the claim back after a failed send, so the next callback, webhook or refresh retries. */
+export async function releaseEmail(db: Db, id: string) {
+  await db.query('UPDATE orders SET email_sent_at = NULL WHERE id = $1', [id])
+}
+
 export async function addEvent(db: Db, id: string, type: string, detail: Record<string, unknown>) {
   await db.query('INSERT INTO order_events (order_id, type, detail) VALUES ($1, $2, $3::jsonb)', [id, type, JSON.stringify(detail)])
 }
