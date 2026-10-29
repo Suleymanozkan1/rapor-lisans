@@ -12,6 +12,7 @@ rmSync(work, { recursive: true, force: true })
 mkdirSync(work, { recursive: true })
 cpSync(path.join(root, 'tests/fixtures/content'), path.join(work, 'content'), { recursive: true })
 mkdirSync(path.join(work, 'uploads'), { recursive: true })
+cpSync(path.join(root, 'tests/fixtures/private'), path.join(work, 'private'), { recursive: true })
 
 const password = 'e2e-test-parolasi-2026'
 const salt = randomBytes(16)
@@ -33,7 +34,19 @@ const env = {
   ADMIN_USERNAME: 'yonetici',
   ADMIN_PASSWORD_HASH: hash,
   SESSION_SECRET: randomBytes(32).toString('base64url'),
+  // Store: orders in PGlite, files in a local folder, payments against the mock iyzico, mail to files.
+  ORDER_DB: 'pglite',
+  ORDER_DB_DIR: '.e2e/orders-db',
+  PRIVATE_FILES_DIR: '.e2e/private',
+  MAIL_OUTBOX_DIR: '.e2e/mail',
+  DOWNLOAD_SECRET: randomBytes(32).toString('base64url'),
+  IYZICO_API_KEY: 'mock-api-key',
+  IYZICO_SECRET_KEY: 'mock-secret-key',
+  IYZICO_BASE_URL: 'http://127.0.0.1:3101',
 }
+delete env.DATABASE_URL
+delete env.BLOB_READ_WRITE_TOKEN
+delete env.RESEND_API_KEY
 delete env.VERCEL
 delete env.GITHUB_TOKEN
 
@@ -41,6 +54,14 @@ if (!process.env.E2E_SKIP_BUILD) {
   const b = spawnSync('npx', ['next', 'build'], { cwd: root, env, stdio: 'inherit' })
   if (b.status !== 0) process.exit(b.status ?? 1)
 }
+const mock = spawn('node', [path.join(root, 'scripts/mock-iyzico.mjs')], { cwd: root, env, stdio: 'inherit' })
 const server = spawn('npx', ['next', 'start', '-H', '127.0.0.1', '-p', '3100'], { cwd: root, env, stdio: 'inherit' })
-for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => server.kill(sig))
-server.on('exit', (code) => process.exit(code ?? 0))
+for (const sig of ['SIGINT', 'SIGTERM'])
+  process.on(sig, () => {
+    mock.kill(sig)
+    server.kill(sig)
+  })
+server.on('exit', (code) => {
+  mock.kill()
+  process.exit(code ?? 0)
+})

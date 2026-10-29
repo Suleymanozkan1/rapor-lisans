@@ -23,10 +23,13 @@ import {
   setPostStatus,
 } from '@/lib/admin-content'
 import { isValidSlug, slugify } from '@/lib/slug'
-import { referenceSchema, settingsSchema, type Settings } from '@/lib/types'
+import { referenceSchema, settingsSchema, type ProductFrontmatter, type Settings } from '@/lib/types'
 import { UploadError, validateImageUpload, MAX_UPLOAD_BYTES } from '@/lib/upload'
 import { isoDay } from '@/lib/format'
 import { parsePrice } from '@/lib/products'
+import { hashFile, headFile, readFileHead } from '@/lib/files'
+import { extensionOf, matchesSignature } from '@/lib/product-files'
+import { productFileSchema, PRODUCT_FILE_TYPES } from '@/lib/types'
 
 export type ActionState = { ok?: string; error?: string; fields?: Record<string, string> }
 
@@ -176,6 +179,21 @@ export async function saveProductAction(_prev: ActionState, fd: FormData): Promi
     }
     const order = Number.parseInt(str(fd, 'order', 5), 10)
 
+    // The browser only reports where it uploaded; size, type and content are re-checked here.
+    const filePathname = str(fd, 'filePathname', 300)
+    let file: ProductFrontmatter['file']
+    if (filePathname) {
+      const fileName = str(fd, 'fileName', 120).trim()
+      const ext = extensionOf(fileName)
+      const meta = await headFile(filePathname)
+      if (!meta) return { error: 'Satılacak dosya depoda bulunamadı. Dosyayı yeniden yükleyin.' }
+      if (extensionOf(filePathname) !== ext || meta.contentType !== PRODUCT_FILE_TYPES[ext]) return { error: 'Dosya türü uyuşmuyor. Dosyayı yeniden yükleyin.' }
+      const head = await readFileHead(filePathname)
+      if (!head || !matchesSignature(head, ext)) return { error: 'Dosyanın içeriği uzantısıyla uyuşmuyor (ör. PDF değil). Dosyayı kontrol edin.' }
+      const sha256 = (await hashFile(filePathname)) ?? undefined
+      file = productFileSchema.parse({ pathname: filePathname, name: fileName, size: meta.size, contentType: meta.contentType, sha256 })
+    }
+
     await saveProduct(
       {
         originalSlug: str(fd, 'originalSlug', 100) || null,
@@ -187,7 +205,7 @@ export async function saveProductAction(_prev: ActionState, fd: FormData): Promi
           excerpt: str(fd, 'excerpt', 300),
           status: str(fd, 'status') === 'published' ? 'published' : 'draft',
           price,
-          shopierUrl: str(fd, 'shopierUrl', 500).trim(),
+          file,
           format: str(fd, 'format', 80).trim() || undefined,
           features: str(fd, 'features', 3000)
             .split('\n')
@@ -335,7 +353,17 @@ export async function saveSettingsAction(_prev: ActionState, fd: FormData): Prom
         instagram: str(fd, 'instagram', 300).trim(),
         youtube: str(fd, 'youtube', 300).trim(),
       },
-      shop: { url: str(fd, 'shopUrl', 500).trim() },
+      seller: {
+        legalName: str(fd, 'sellerLegalName', 160),
+        address: str(fd, 'sellerAddress', 300),
+        phone: str(fd, 'sellerPhone', 40),
+        email: str(fd, 'sellerEmail', 200).trim(),
+        taxOffice: str(fd, 'sellerTaxOffice', 80),
+        taxNumber: str(fd, 'sellerTaxNumber', 20).replace(/\s+/g, ''),
+        mersisNo: str(fd, 'sellerMersisNo', 30).replace(/\s+/g, ''),
+        kep: str(fd, 'sellerKep', 200).trim(),
+        chamber: str(fd, 'sellerChamber', 200),
+      },
       seo: { defaultOgImage: image('defaultOgImage')?.src ?? '' },
       privacy: { controller: str(fd, 'privacyController', 200), updatedAt: isoDay(new Date().toISOString()) },
     })

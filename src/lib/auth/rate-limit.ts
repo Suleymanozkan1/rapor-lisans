@@ -10,7 +10,10 @@
 export type LimitResult = { allowed: boolean; retryAfterSeconds: number }
 
 type Bucket = { count: number; resetAt: number }
-const memory = new Map<string, Bucket>()
+// Shared through globalThis: Next.js bundles routes separately, and the login,
+// checkout and webhook limits must count in one place per process.
+const g = globalThis as typeof globalThis & { __rateLimitMemory?: Map<string, Bucket> }
+const memory = (g.__rateLimitMemory ??= new Map<string, Bucket>())
 const MAX_KEYS = 10_000
 
 export const LOGIN_LIMITS = {

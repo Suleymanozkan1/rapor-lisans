@@ -2,11 +2,17 @@ import type { NextConfig } from 'next'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
+// The checkout form ends with a redirect to iyzico's hosted payment page; without
+// JavaScript that redirect follows a form POST, so form-action must allow it.
+// The e2e suite points IYZICO_BASE_URL at a local mock.
+const mockIyzico = /^http:\/\/127\.0\.0\.1:\d+$/.test(process.env.IYZICO_BASE_URL ?? '') ? ` ${process.env.IYZICO_BASE_URL}` : ''
+
 /*
  * Pages are statically generated, so a per-request nonce is not possible
  * for public pages; Next.js' inline bootstrap scripts need 'unsafe-inline'.
  * Article HTML is sanitized server-side, and no third-party origin is
- * allowed for scripts, frames, forms or connections.
+ * allowed for scripts or frames. Forms may lead to iyzico's payment page,
+ * and the admin browser may upload product files to Vercel Blob.
  */
 const csp = [
   "default-src 'self'",
@@ -14,9 +20,10 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self'",
-  `connect-src 'self'${isDev ? ' ws:' : ''}`,
+  // Admin product-file uploads go from the browser straight to Vercel Blob.
+  `connect-src 'self' https://vercel.com/api/blob https://*.blob.vercel-storage.com${isDev ? ' ws:' : ''}`,
   "frame-ancestors 'none'",
-  "form-action 'self'",
+  `form-action 'self' https://*.iyzipay.com${mockIyzico}`,
   "base-uri 'self'",
   "object-src 'none'",
   "manifest-src 'self'",
@@ -37,6 +44,8 @@ const nextConfig: NextConfig = {
   // Lets the e2e suite build the fixture site without touching .next
   distDir: process.env.NEXT_DIST_DIR || '.next',
   poweredByHeader: false,
+  // PGlite (local/e2e order database) ships WebAssembly and must not be bundled.
+  serverExternalPackages: ['@electric-sql/pglite'],
   reactStrictMode: true,
   experimental: {
     // Uploads are limited to 3 MB in code; Vercel rejects bodies over 4.5 MB.

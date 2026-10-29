@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: 'Gizlilik ve KVKK bilgilendirmesi', a
  */
 export default function PrivacyPage() {
   const s = getSettings()
-  const controller = s.privacy.controller || s.author.name
+  const controller = s.privacy.controller || s.seller.legalName || s.author.name
   return (
     <>
       <header className="page-band">
@@ -35,7 +35,7 @@ export default function PrivacyPage() {
         <h2>Ziyaretçilerden toplanan veriler</h2>
         <p>
           Site, ziyaretçiler için çerez kullanmaz; analiz, reklam veya takip amaçlı üçüncü taraf betik içermez ve iletişim
-          formu bulundurmaz. Yazı tipleri sitenin kendi sunucusundan yüklenir. Shopier veya Instagram bağlantılarına
+          formu bulundurmaz. Yazı tipleri sitenin kendi sunucusundan yüklenir. Instagram gibi dış bağlantılara
           tıkladığınızda o sitelerin kendi gizlilik kuralları geçerli olur.
         </p>
         <p>
@@ -43,13 +43,39 @@ export default function PrivacyPage() {
           tarayıcı bilgisi ve istek zamanı gibi teknik kayıtları sınırlı süre tutabilir. Bu kayıtlar yurt dışındaki sunucularda
           işlenebilir.
         </p>
-        <h2>Mağaza ve ödemeler</h2>
+        <h2>Sipariş verdiğinizde</h2>
         <p>
-          Mağaza sayfasındaki ürünler yalnızca tanıtılır; satın alma bu sitede gerçekleşmez. “Shopier’de satın al”
-          düğmesi sizi Shopier’deki ürün sayfasına götürür. Sipariş, ödeme, fatura ve teslimat için verdiğiniz bilgiler
-          (ad, e-posta, telefon, fatura adresi, ödeme bilgileri) Shopier tarafından ve Shopier’in gizlilik politikası ile
-          kullanım koşullarına göre işlenir. Bu site sipariş veya ödeme bilgisi almaz ve saklamaz; satıcıya iletilen
-          sipariş bilgileri yalnızca siparişin teslimi, faturalandırılması ve yasal yükümlülükler için kullanılır.
+          Veriler, ödeme formunu doldurmanızla elektronik ortamda toplanır. Mağazadan ürün satın aldığınızda adınız, soyadınız, e-posta adresiniz, telefon numaranız, il ve fatura adresiniz,
+          siparişin içeriği ve tutarı, onayladığınız sözleşme metni, onay zamanı ve IP adresiniz işlenir.
+        </p>
+        <ul>
+          <li>
+            <strong>Amaçlar:</strong> siparişin alınması ve ödemenin doğrulanması, dosyanın teslimi ve indirme bağlantısının
+            gönderilmesi, faturalandırma, iade ve şikayetlerin yanıtlanması, yasal saklama yükümlülükleri ve kötüye kullanımın
+            önlenmesi.
+          </li>
+          <li>
+            <strong>Hukuki sebepler (KVKK m. 5/2):</strong> sözleşmenin kurulması ve ifası (c), hukuki yükümlülüğün yerine
+            getirilmesi (ç; fatura, vergi ve tüketici mevzuatı kayıtları), bir hakkın tesisi, kullanılması veya korunması (e;
+            uyuşmazlıklarda ispat) ve meşru menfaat (f; dolandırıcılığın önlenmesi). Bu işlemeler için açık rıza istenmez.
+          </li>
+          <li>
+            <strong>Aktarılan taraflar:</strong> ödeme için iyzico Ödeme Hizmetleri A.Ş. (kart bilgilerini yalnızca iyzico alır;
+            bu site görmez ve saklamaz), barındırma için Vercel Inc., sipariş kayıtları için veritabanı sağlayıcısı, e-posta
+            gönderimi için e-posta sağlayıcısı, fatura için GİB e-Arşiv sistemi veya özel entegratör ve mali müşavir, yasal
+            zorunluluk halinde yetkili kamu kurumları. Barındırma (Vercel), veritabanı ve e-posta sağlayıcılarının sunucuları
+            yurt dışında (ABD veya AB) bulunabilir; bu aktarımlar KVKK m. 9/4 uyarınca Kurul’un belirlediği standart sözleşmeye
+            dayanılarak yapılır.
+          </li>
+          <li>
+            <strong>Saklama süresi:</strong> sipariş ve sözleşme kayıtları en az üç yıl (Mesafeli Sözleşmeler Yönetmeliği m.
+            20), fatura ve muhasebe kayıtları vergi ve ticaret mevzuatındaki süreler boyunca saklanır, sonra silinir veya anonim
+            hâle getirilir.
+          </li>
+        </ul>
+        <p>
+          Ödeme sayfasında kart bilgileriniz doğrudan iyzico’ya iletilir; iyzico’nun kendi gizlilik politikası geçerlidir. Bu
+          site, ziyaretçiler veya alıcılar için çerez kullanmaz.
         </p>
         <h2>Çerezler</h2>
         <p>

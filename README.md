@@ -16,13 +16,12 @@ ayarlandı. Veritabanı gerektirmez: içerik Git deposunda durur.
 >    kullanım kredisi** dahil. Kredi aşılırsa kullanım ayrıca faturalanır; %75'te e-posta uyarısı
 >    gelir. Bu site statik olduğu için normal trafikte kredinin içinde kalması beklenir, ama
 >    **Settings > Billing > Spend Management** altında bir harcama sınırı koymanızı öneririm.
-> 2. **Satış Shopier'de yapılır.** Mağaza sayfası ürünleri (görsel, açıklama, fiyat) gösterir;
->    "Shopier'de satın al" düğmesi ürünün Shopier sayfasını açar. Ödeme, fatura, dijital teslimat
->    ve iade Shopier'de yürür; site kart, sipariş veya müşteri bilgisi almaz ve saklamaz.
->    Mesafeli satış sözleşmesi, ön bilgilendirme formu, cayma hakkı (dijital içerikteki
->    istisnası dahil) ve fatura gibi satıcı yükümlülükleri sizin ve Shopier hesabınızın
->    sorumluluğundadır: Shopier ürün sayfalarınızda bu metinlerin doğru göründüğünü kontrol edin,
->    gerekirse bir hukukçuya danışın.
+> 2. **Mağaza sitenin kendi ödeme sistemidir.** Alıcı bilgilerini girer, ön bilgilendirme
+>    formunu ve mesafeli satış sözleşmesini onaylar, iyzico'nun güvenli ödeme sayfasında öder;
+>    ödeme doğrulanınca dosya sipariş sayfasından indirilir ve bağlantı e-postayla gelir. Kart
+>    bilgisi bu siteye hiç ulaşmaz. Satış, aşağıdaki [Mağaza kurulumu](#mağaza-kurulumu)
+>    adımlarının hepsi tamamlanana kadar **kapalı** kalır. Hukuki metinler şablondur;
+>    yayına almadan önce bir hukukçuya ve mali müşavirinize inceletin.
 > 3. **İçerik deposu gizli (private) olmalı.** Taslaklar da Git'e commit edilir. Bu kod şu an
 >    **public** bir GitHub deposunda (`rapor-lisans`); taslaklar, silinen yazılar ve commit
 >    geçmişi herkes tarafından okunabilir. Yayına almadan önce projeyi **private** bir depoya
@@ -37,7 +36,8 @@ ayarlandı. Veritabanı gerektirmez: içerik Git deposunda durur.
 - [Vercel'e dağıtım](#vercele-dağıtım)
 - [GitHub entegrasyonu](#github-entegrasyonu)
 - [Yayın akışı](#yayın-akışı)
-- [Mağaza (Shopier vitrini)](#mağaza-shopier-vitrini)
+- [Mağaza kurulumu](#mağaza-kurulumu)
+- [Mağazayı işletmek](#mağazayı-işletmek)
 - [Marka: logo ve renkler](#marka-logo-ve-renkler)
 - [Kotalar, maliyet ve aşıldığında ne olur](#kotalar-maliyet-ve-aşıldığında-ne-olur)
 - [Yedekleme ve geri yükleme](#yedekleme-ve-geri-yükleme)
@@ -88,9 +88,14 @@ yazıyı silin. Kapak görselleri `public/uploads/2026/` altındadır (lisanslar
 
 `content/products/` altında da **3 örnek ürün** vardır (`sample: true`). Fiyatları ve içerikleri
 gerçek değildir; kartlarında "Örnek ürün" etiketi ve sayfalarında uyarı görünür, `noindex`
-taşırlar ve site haritasına girmezler. Satın al düğmeleri Shopier mağazasının ana sayfasını
-(`shopier.com/guvenlicalis`) açar. **Yayına almadan önce bunları silin** veya gerçek ürün
-bilgisi ve Shopier ürün adresiyle panelden kaydedin (kaydedince etiket kalkar).
+taşırlar, site haritasına girmezler ve **satın alınamazlar** (dosyaları yok). Yayına almadan önce
+bunları silin veya gerçek açıklama, fiyat ve satılacak dosyayla panelden kaydedin (kaydedince
+etiket kalkar).
+
+Yerelde mağazayı denemek için `.env.local` içine `ORDER_DB=pglite` yazın (siparişler yerel
+PGlite veritabanına, dosyalar `.private-files/` klasörüne yazılır) ve iyzico **sandbox**
+anahtarlarını girin. Ödemeyi uçtan uca otomatik testler sahte bir iyzico sunucusuyla
+(`scripts/mock-iyzico.mjs`) sınar.
 
 ## Komutlar
 
@@ -153,24 +158,75 @@ yapılandırılmamış" uyarısı çıkar, kayıt işlemleri açık bir hata mes
 Gelecek tarihli yayın tarihi olan yazı, o tarihten sonraki ilk build'de görünür; zamanlanmış
 otomatik build yoktur.
 
-## Mağaza (Shopier vitrini)
+## Mağaza kurulumu
 
-1. Ürünü önce **Shopier**'de oluşturun (fiyat, dosya, teslimat ve iade koşulları orada).
-   Ürünün Shopier adresini kopyalayın.
-2. Panelde **Ürünler > Yeni ürün**: ad, Shopier ürün adresi, kısa açıklama, "Neler var?"
-   maddeleri, fiyat (Shopier'deki fiyatla aynı), biçim (örneğin "PDF, 24 sayfa") ve isteğe bağlı
-   görsel. Görsel seçilmezse sarı-siyah Güvenli Çalış gönderi stilinde bir kapak otomatik çizilir.
-3. **Yayında** seçip kaydedin. Mağaza bir sonraki build'de güncellenir.
+Satış ancak aşağıdakilerin hepsi tamamlanınca açılır; eksikler panelde **Siparişler** ve
+**Ürünler** sayfalarının üstünde tek tek listelenir.
 
-Güvenlik kuralları: satın alma bağlantısı yalnızca `https://shopier.com` veya
-`https://www.shopier.com` altındaki bir sayfa olabilir (başka alan adı, `http`, kullanıcı
-adı/parola veya port içeren adres reddedilir; birim ve e2e testleri var). Fiyat Shopier'de
-değişirse sitede de güncelleyin; sitedeki fiyat bilgi amaçlıdır, ödenecek tutarı Shopier
-belirler. Ürün açıklamaları yazılarla aynı Markdown temizleyicisinden geçer (HTML/betik
-çalışmaz). Gerçek ürünlerde `Product` yapılandırılmış verisi (JSON-LD) üretilir.
+1. **iyzico şirket hesabı.** iyzico'da bireysel hesaplarda API kullanılamaz; şirket (iyziPOS)
+   başvurusu gerekir. Önce [sandbox](https://sandbox-merchant.iyzipay.com/auth/register) hesabı
+   açıp deneyin (test kartı: `5528790000000008`, SMS kodu `123456`). Anahtarlar: Merchant Panel >
+   Settings > Merchant Settings > API Keys ("Show detail"). Vercel'e `IYZICO_API_KEY`, `IYZICO_SECRET_KEY` ve
+   `IYZICO_BASE_URL` (`https://sandbox-api.iyzipay.com`, canlıda `https://api.iyzipay.com`)
+   girin.
+2. **iyzico bildirim (webhook) adresi.** Merchant Panel > Settings > Merchant Settings > Merchant Notifications:
+   `https://<alan-adınız>/odeme/iyzico/bildirim`. Bu, ödeme sonrası tarayıcısını kapatan
+   alıcıların siparişini de tamamlar. İmzalı bildirim (`X-IYZ-SIGNATURE-V3`) için
+   entegrasyon@iyzico.com'dan imza özelliğinin açılmasını isteyin. İmza gelirse doğrulanır;
+   gelmezse bildirim yalnızca siparişin iyzico'dan yeniden sorgulanmasını tetikler, kendi başına
+   hiçbir siparişi ödenmiş saymaz.
+3. **Sipariş veritabanı.** Vercel > Storage > Create > **Neon (Postgres)**, projeye bağlayın;
+   `DATABASE_URL` otomatik eklenir. Tablolar ilk siparişte kendiliğinden oluşur.
+4. **Özel dosya deposu.** Vercel > Storage > Create > **Blob**, erişim **Private** seçin (sonradan
+   değiştirilemez) ve projeye bağlayın. `BLOB_READ_WRITE_TOKEN` panelden doğrudan yükleme için
+   gereklidir. Dosyalar herkese açık değildir; yalnızca ödeme yapmış alıcı, imzalı ve süreli
+   bağlantıyla indirebilir.
+5. **`DOWNLOAD_SECRET`.** En az 32 karakter rastgele değer (`SESSION_SECRET`'tan farklı):
+   `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`.
+6. **E-posta.** [Resend](https://resend.com) hesabında alan adınızı doğrulayın; `RESEND_API_KEY`
+   ve `MAIL_FROM` (örneğin `Güvenli Çalış <siparis@alanadiniz.com>`) girin. Onay e-postası
+   ön bilgilendirme formunu ve sözleşmeyi içerir (kalıcı veri saklayıcısı); bu yüzden e-posta
+   olmadan satış açılmaz.
+7. **Satıcı bilgileri.** Panel > Site ayarları > Satıcı bilgileri: unvan, adres, telefon,
+   e-posta, vergi dairesi ve numarası (MERSİS, KEP ve meslek odası varsa). Bunlar sözleşmede,
+   "Satış ve iade koşulları" ve "İletişim" sayfalarında görünür.
+8. **KVKK yurt dışı aktarım.** Vercel (ABD), Neon ve Resend sunucuları yurt dışında olabilir.
+   KVKK m. 9 uyarınca bu sağlayıcılarla Kurul'un **standart sözleşmesini** değiştirmeden
+   imzalamanız ve imzadan sonra **5 iş günü içinde Kurum'a bildirmeniz** gerekir; gizlilik
+   sayfası bu güvenceye dayanıldığını söyler. Ayrıca VERBİS kayıt yükümlülüğünüzü kontrol edin.
+9. **Hukuki metinler.** `src/lib/legal.ts` (ön bilgilendirme formu ve sözleşme), "Satış ve iade
+   koşulları" ve gizlilik sayfası, Mesafeli Sözleşmeler Yönetmeliği, 6502, 6563, ETHS
+   Yönetmeliği ve KVKK'ya göre hazırlanmış **şablonlardır**. Bir hukukçuya inceletin; metni
+   değiştirirseniz `CONTRACT_VERSION` değerini de değiştirin (her sipariş onaylanan metni ve
+   sürümünü saklar).
 
-Mağaza adresi **Site ayarları > Mağaza** altından girilir; altbilgide ve mağaza sayfasında
-"Shopier mağazasını aç" bağlantısı olarak görünür.
+## Mağazayı işletmek
+
+- **Ürün eklemek:** Panel > Ürünler > Yeni ürün: ad, açıklama, "Neler var?" maddeleri, KDV
+  dahil fiyat, biçim ve **satılacak dosya** (PDF, XLSX, DOCX, PPTX veya ZIP, en fazla 100 MB).
+  Dosya tarayıcıdan doğrudan özel Blob deposuna yüklenir; kaydederken sunucu boyutu, türü ve
+  dosya imzasını (ör. gerçekten PDF mi) yeniden kontrol eder ve SHA-256 özetini kaydeder.
+  Görsel seçilmezse sarı-siyah marka kapağı çizilir.
+- **Sipariş akışı:** alıcı bilgileri ve üç onay (ön bilgilendirme, sözleşme, anında teslim ve
+  cayma hakkı istisnası) > iyzico ödeme sayfası > site, iyzico'dan **imzalı** sonucu sorgular;
+  yalnızca imzası doğru, tutarı ve sipariş numarası eşleşen ve risk kontrolünden geçmiş
+  (`fraudStatus = 1`) ödeme siparişi "ödendi" yapar. İnceleme süren ödemeler bekler ve bildirimle
+  tamamlanır.
+- **Teslim:** sipariş sayfasında indirme düğmesi; bağlantı 7 gün ve 5 indirme geçerlidir (posta
+  tarayıcıları bağlantıyı açsa bile indirme hakkı harcanmaz). Panel > Siparişler'den onay
+  e-postasını yeniden gönderebilir veya **yeni bağlantı** gönderebilirsiniz (eskisi geçersiz olur).
+- **Fatura:** 1 Ocak 2026'dan itibaren tüketiciye her satış için **e-Arşiv fatura** düzenlenmesi
+  gerekir (VUK 509, 573 ve 589 sayılı tebliğler). Site faturayı otomatik kesmez: GİB e-Arşiv
+  Portal'dan veya entegratörünüzden düzenleyip alıcıya e-postayla gönderin, numarasını sipariş
+  sayfasına kaydedin. Faturada "Bu satış internet üzerinden yapılmıştır." ibaresi, web adresi,
+  ödeme şekli, ödeme ve teslim tarihi bulunmalıdır. Ayrıntıyı mali müşavirinize sorun.
+- **İade:** dijital içerikte cayma hakkı yoktur, ama dosya bozuk veya eksikse alıcının yasal
+  hakları vardır. İadeyi iyzico panelinden yapın, sonra siparişi panelde "İade edildi" olarak
+  işaretleyin (indirme kapanır).
+- **Kayıtlar:** her sipariş; onaylanan metni, sürümünü, onay zamanını, IP'yi, teslim edilen
+  dosyanın özetini, ödeme numarasını ve olay geçmişini (ödeme, e-posta, indirme) saklar. Mesafeli
+  Sözleşmeler Yönetmeliği m. 20 bu kayıtların en az 3 yıl saklanmasını ister; vergi kayıtları
+  için daha uzun süreler geçerlidir.
 
 ## Marka: logo ve renkler
 
@@ -196,7 +252,10 @@ Değerler 2026-10-29 tarihinde resmî belgelerden okundu; değişebilir, kendini
 | Vercel Pro: CDN | Aylık 1 milyon CDN isteği ve 1 TB veri aktarımı (Flat Rate CDN en düşük kademe) | Statik sayfalar, görseller | Kredi bittikten sonra kullanım faturalanır; harcama sınırı koyun |
 | Vercel Pro: fonksiyonlar | 20 $ kredinin içinden | Yalnızca panel sayfaları ve işlemleri; giriş (scrypt ~0,4 s, bu ortamda ölçüldü) | Aynı |
 | Vercel: Deployments | Plan sınırı (belgelere bakın) | Panelde her kayıt = 1 commit = 1 build | Sınırda yeni deploy başlamaz; site son hâliyle yayında kalır |
-| Shopier | Shopier'in kendi komisyon ve ücretleri | Ödeme ve teslimat | Site tarafında maliyet yok |
+| iyzico | iyzico'nun sözleşmenizdeki komisyon oranları | Her kartlı ödeme | Site tarafında ek maliyet yok |
+| Neon Postgres (Vercel Storage) | Sağlayıcının güncel ücretsiz/ücretli planı | Sipariş kayıtları (küçük) | Plan sınırında yazma durabilir; satış başlatılamaz, hata gösterilir |
+| Vercel Blob (private) | Kullanım 20 $ kredisinden; depolama ~0,023 $/GB-ay, aktarım bölgeye göre | Satılan dosyalar ve indirmeler | Kredi sonrası faturalanır |
+| Resend | Sağlayıcının güncel planı | Sipariş onay e-postaları | Gönderim başarısızsa sipariş yine ödenmiş kalır, panelden yeniden gönderilir |
 | Vercel Image Optimization | 5.000 dönüşüm | **Kullanılmıyor** (görseller olduğu gibi servis edilir) | — |
 | GitHub REST API | Token başına saatlik sınır (GitHub belgelerine bakın) | Panelde sayfa başına birkaç istek | API 403/429 döner; panel "API kotası doldu" hatası gösterir, kayıt yapılmaz |
 | Upstash Redis (isteğe bağlı) | Sağlayıcının güncel ücretsiz planı | Yalnızca başarısız giriş sayaçları | İstek başarısız olursa kod bellek içi sınıra döner |
@@ -264,7 +323,11 @@ Tüm içerik Git'tedir; deponun kendisi yedektir.
 ```
 content/                 İçerik (Git'te). posts/*.md, products/*.md, settings.json, categories.json, media.json
 public/uploads/          Yüklenen görseller
-src/app/(site)/          Public sayfalar (statik), magaza/ = Shopier vitrini
+src/app/(site)/          Public sayfalar (statik); magaza/ ürünler ve ödeme formu, siparis/ alıcının sipariş sayfası
+src/app/odeme/           iyzico dönüş adresi ve bildirim (webhook)
+src/app/indir/           Ödeme sonrası dosya indirme (POST, imzalı bağlantı)
+src/lib/orders/          Sipariş veritabanı, imzalı bağlantılar, ödeme akışı
+src/lib/payments/        iyzico istemcisi (imza ve doğrulama)
 src/app/admin/           Yönetim paneli (sunucu tarafı), actions.ts = tüm kayıt işlemleri
 src/lib/                 İçerik okuma, Markdown, oturum, yükleme doğrulama, depo (GitHub/yerel)
 src/proxy.ts             /admin için ilk kapı (Next.js 16'da middleware'in yeni adı)

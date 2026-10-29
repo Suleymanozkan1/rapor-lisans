@@ -103,16 +103,21 @@ export function SettingsForm({ csrf, settings: s, sha, media }: Props) {
         <Text id="youtube" label="YouTube" type="url" value={s.social.youtube} max={300} />
       </fieldset>
 
-      <fieldset id="magaza" className="admin-fieldset">
-        <legend>Mağaza</legend>
-        <Text
-          id="shopUrl"
-          label="Shopier mağaza adresi"
-          type="url"
-          value={s.shop.url}
-          max={500}
-          help="Örneğin https://www.shopier.com/magaza-adi. Mağaza sayfasında ve site altbilgisinde bağlantı olarak görünür."
-        />
+      <fieldset id="satici" className="admin-fieldset">
+        <legend>Satıcı bilgileri (mağaza)</legend>
+        <p className="field__help">
+          Mesafeli satış sözleşmesi, ön bilgilendirme formu ve “Satış ve iade koşulları” sayfasında görünür. Bu alanlar (MERSİS ve
+          KEP hariç) doluncaya kadar satış kapalı kalır. Bilgileri vergi levhanızdaki gibi yazın.
+        </p>
+        <Text id="sellerLegalName" label="Ad soyad veya ticaret unvanı" value={s.seller.legalName} max={160} />
+        <Text id="sellerAddress" label="Açık adres" value={s.seller.address} max={300} />
+        <Text id="sellerPhone" label="Telefon" value={s.seller.phone} max={40} />
+        <Text id="sellerEmail" label="Satış e-postası" type="email" value={s.seller.email} max={200} help="Sipariş e-postalarına yanıt bu adrese gelir." />
+        <Text id="sellerTaxOffice" label="Vergi dairesi" value={s.seller.taxOffice} max={80} />
+        <Text id="sellerTaxNumber" label="Vergi kimlik no (VKN) veya TCKN" value={s.seller.taxNumber} max={20} />
+        <Text id="sellerMersisNo" label="MERSİS numarası (varsa)" value={s.seller.mersisNo} max={30} help="Şirketler için 16 haneli. Şahıs işletmelerinde boş bırakılabilir." />
+        <Text id="sellerKep" label="KEP adresi (varsa)" value={s.seller.kep} max={200} />
+        <Text id="sellerChamber" label="Bağlı olunan meslek odası (varsa)" value={s.seller.chamber} max={200} help="Örneğin kayıtlı olduğunuz ticaret odası." />
       </fieldset>
 
       <fieldset className="admin-fieldset">

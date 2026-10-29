@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowSquareOut, CheckCircle, FileText, ShieldCheck } from '@phosphor-icons/react/ssr'
+import { CheckCircle, FileText, LockSimple, ShieldCheck } from '@phosphor-icons/react/ssr'
 import { getPublishedProduct, getPublishedProducts, getSettings } from '@/lib/content'
 import { markdownToPlainText, renderMarkdown } from '@/lib/markdown'
 import { formatPrice } from '@/lib/products'
 import { siteUrl } from '@/lib/env'
 import { absoluteUrl, clip, jsonLd } from '@/lib/seo'
+import { isForSale } from '@/lib/types'
 import { ProductList, ProductMedia } from '@/components/site/ProductList'
 
 export const dynamicParams = false
@@ -40,6 +41,7 @@ export default async function ProductPage({ params }: PageProps<'/magaza/[slug]'
   const base = siteUrl()
   const others = getPublishedProducts().filter((x) => x.slug !== p.slug).slice(0, 3)
 
+  const forSale = isForSale(p)
   const ld = p.sample
     ? null
     : {
@@ -51,9 +53,9 @@ export default async function ProductPage({ params }: PageProps<'/magaza/[slug]'
         image: p.cover ? absoluteUrl(base, p.cover.src) : undefined,
         brand: { '@type': 'Brand', name: s.siteName },
         offers:
-          p.price === undefined
-            ? undefined
-            : { '@type': 'Offer', price: p.price.toFixed(2), priceCurrency: 'TRY', url: p.shopierUrl, availability: 'https://schema.org/InStock' },
+          forSale && p.price !== undefined
+            ? { '@type': 'Offer', price: p.price.toFixed(2), priceCurrency: 'TRY', url: absoluteUrl(base, `/magaza/${p.slug}`), availability: 'https://schema.org/InStock' }
+            : undefined,
       }
 
   return (
@@ -88,7 +90,7 @@ export default async function ProductPage({ params }: PageProps<'/magaza/[slug]'
                   {price}
                 </>
               ) : (
-                'Fiyat Shopier sayfasında'
+                'Fiyat yakında'
               )}
             </p>
             {p.format ? (
@@ -97,16 +99,19 @@ export default async function ProductPage({ params }: PageProps<'/magaza/[slug]'
                 {p.format}
               </p>
             ) : null}
-            <a className="button buy-box__button" href={p.shopierUrl} target="_blank" rel="noopener noreferrer">
-              Shopier’de satın al
-              <ArrowSquareOut size={20} weight="bold" aria-hidden="true" />
-              <span className="visually-hidden"> (yeni sekmede açılır)</span>
-            </a>
+            {forSale ? (
+              <Link className="button buy-box__button" href={`/magaza/${p.slug}/satin-al`}>
+                <LockSimple size={20} weight="bold" aria-hidden="true" />
+                Satın al
+              </Link>
+            ) : (
+              <p className="buy-box__soon">{p.sample ? 'Örnek ürün: satın alınamaz.' : 'Yakında satışta.'}</p>
+            )}
             <p className="buy-box__note">
               <ShieldCheck size={20} aria-hidden="true" />
               <span>
-                Ödeme Shopier’in sayfasında yapılır; teslimat, fatura ve iade Shopier üzerinden yürür. Bu site ödeme veya
-                sipariş bilgisi almaz.
+                Ödeme iyzico’nun güvenli ödeme sayfasında yapılır; kart bilgileriniz bu siteye ulaşmaz. Ödeme onaylanınca dosyayı
+                indirme bağlantısı e-postanıza gönderilir.
               </span>
             </p>
           </aside>
@@ -116,7 +121,7 @@ export default async function ProductPage({ params }: PageProps<'/magaza/[slug]'
           <div className="notice notice--warn sample-notice" role="note">
             <p>
               <strong>Örnek ürün.</strong> Bu kayıt mağaza görünümünü göstermek için hazırlanmıştır; fiyatı ve içeriği gerçek
-              değildir. Satın alma düğmesi Shopier mağazasının ana sayfasını açar.
+              değildir ve satın alınamaz.
             </p>
           </div>
         ) : null}

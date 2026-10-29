@@ -4,7 +4,6 @@ excerpt: İskele, seyyar merdiven, platform ve ankraj noktaları için sahada ya
 status: published
 createdAt: 2026-10-18T09:00:00+03:00
 price: 149
-shopierUrl: https://www.shopier.com/guvenlicalis
 format: PDF, 12 sayfa
 features:
   - İskele kurulum ve günlük kontrol listesi

@@ -48,6 +48,35 @@ export default function ContactPage() {
             <strong>İletişim bilgileri henüz eklenmedi.</strong>
           </div>
         )}
+        {s.seller.legalName ? (
+          <section className="seller-contact" aria-labelledby="seller-title">
+            <h2 id="seller-title">Satıcı bilgileri</h2>
+            <dl className="seller-facts">
+              {(
+                [
+                  ['Unvan / ad soyad', s.seller.legalName],
+                  ['MERSİS numarası', s.seller.mersisNo],
+                  ['Adres', s.seller.address],
+                  ['Telefon', s.seller.phone],
+                  ['E-posta', s.seller.email],
+                  ['KEP adresi', s.seller.kep],
+                  ['Vergi dairesi ve no', [s.seller.taxOffice, s.seller.taxNumber].filter(Boolean).join(', ')],
+                  ['Meslek odası', s.seller.chamber],
+                ] as [string, string][]
+              )
+                .filter(([, v]) => v)
+                .map(([k, v]) => (
+                  <div key={k}>
+                    <dt>{k}</dt>
+                    <dd>{v}</dd>
+                  </div>
+                ))}
+            </dl>
+            <p>
+              Satış, teslimat ve iade koşulları: <a href="/satis-bilgileri">Satış ve iade koşulları</a>.
+            </p>
+          </section>
+        ) : null}
         <div className="notice">
           <p>
             Bu sitede iletişim formu bulunmuyor; ileti göndermek için e-posta istemcinizi kullanırsınız. Paylaştığınız kişisel

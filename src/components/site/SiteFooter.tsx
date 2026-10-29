@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { InstagramLogo, LinkedinLogo, Rss, ShoppingBagOpen, XLogo, YoutubeLogo } from '@phosphor-icons/react/ssr'
+import { InstagramLogo, LinkedinLogo, Rss, XLogo, YoutubeLogo } from '@phosphor-icons/react/ssr'
 import { getCategories, getSettings } from '@/lib/content'
 import { BrandMark } from './SiteHeader'
 
@@ -9,7 +9,6 @@ export function SiteFooter() {
     { href: s.social.linkedin, label: 'LinkedIn', Icon: LinkedinLogo },
     { href: s.social.x, label: 'X', Icon: XLogo },
     { href: s.social.instagram, label: 'Instagram', Icon: InstagramLogo },
-    { href: s.shop.url, label: 'Shopier mağazası', Icon: ShoppingBagOpen },
     { href: s.social.youtube, label: 'YouTube', Icon: YoutubeLogo },
   ].filter((x) => x.href)
   const categories = getCategories().slice(0, 6)
@@ -55,6 +54,9 @@ export function SiteFooter() {
                 <Link href="/gizlilik">Gizlilik ve KVKK</Link>
               </li>
               <li>
+                <Link href="/satis-bilgileri">Satış ve iade koşulları</Link>
+              </li>
+              <li>
                 <Link href="/rss.xml">
                   <Rss size={18} aria-hidden="true" />
                   RSS
@@ -62,7 +64,7 @@ export function SiteFooter() {
               </li>
               {social.map(({ href, label, Icon }) => (
                 <li key={label}>
-                  <a href={href} rel={label.startsWith('Shopier') ? 'noopener noreferrer' : 'me noopener noreferrer'} target="_blank">
+                  <a href={href} rel="me noopener noreferrer" target="_blank">
                     <Icon size={18} aria-hidden="true" />
                     {label}
                   </a>

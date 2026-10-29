@@ -4,6 +4,8 @@ import { getAdminSettings, listAdminProducts } from '@/lib/admin-content'
 import { safeLoad } from '@/lib/safe'
 import { formatDateTime } from '@/lib/format'
 import { formatPrice } from '@/lib/products'
+import { shopStatus } from '@/lib/shop'
+import { isForSale } from '@/lib/types'
 import { LoadError } from '@/components/admin/LoadError'
 import { StatusBanner } from '@/components/admin/StatusBanner'
 
@@ -15,6 +17,7 @@ export default async function AdminProducts({ searchParams }: PageProps<'/admin/
   const r = await safeLoad(async () => ({ list: await listAdminProducts(), settings: (await getAdminSettings()).value }))
   if (r.error !== undefined) return <LoadError message={r.error} />
   const { products, broken } = r.data.list
+  const status = shopStatus(r.data.settings)
   return (
     <>
       <div className="admin-head">
@@ -25,15 +28,17 @@ export default async function AdminProducts({ searchParams }: PageProps<'/admin/
       </div>
       <StatusBanner code={sp.durum} />
       <p className="admin-muted">
-        Ürünler sitede vitrin olarak listelenir; “Shopier’de satın al” düğmesi ürünün Shopier sayfasını açar. Ödeme, teslimat,
-        fatura ve iade Shopier’de yürür, site sipariş bilgisi tutmaz.
-        {r.data.settings.shop.url ? null : (
-          <>
-            {' '}
-            Mağaza adresini <Link href="/admin/ayarlar#magaza">site ayarlarından</Link> ekleyebilirsiniz.
-          </>
-        )}
+        Ürünler sitede satılır: alıcı iyzico’nun ödeme sayfasında öder, ödeme onaylanınca dosyayı indirme bağlantısı e-postayla
+        gönderilir. Fiyatı ve dosyası olmayan ürün “Yakında” olarak görünür.
       </p>
+      {status.ready ? null : (
+        <div className="notice notice--warn" role="status">
+          <p>
+            Satış kapalı. Eksikler: {status.missing.join('; ')}. <Link href="/admin/siparisler">Siparişler</Link> sayfasında da
+            görünür.
+          </p>
+        </div>
+      )}
       {broken.length > 0 ? (
         <div className="notice notice--danger" role="alert">
           <p>Okunamayan ürün dosyaları: {broken.map((b) => `${b.path} (${b.error})`).join('; ')}</p>
@@ -64,7 +69,10 @@ export default async function AdminProducts({ searchParams }: PageProps<'/admin/
                 <td>
                   <span className={`pill pill--${p.status}`}>{p.status === 'published' ? 'Yayında' : 'Taslak'}</span>
                 </td>
-                <td>{formatPrice(p.price) ?? 'Shopier’de'}</td>
+                <td>
+                  {formatPrice(p.price) ?? 'Fiyat yok'}
+                  <div className="admin-muted">{isForSale(p) ? 'Satışta' : p.sample ? 'Örnek, satılamaz' : !p.file ? 'Dosya yok' : 'Fiyat yok'}</div>
+                </td>
                 <td>{formatDateTime(p.updatedAt ?? p.createdAt)}</td>
               </tr>
             ))}

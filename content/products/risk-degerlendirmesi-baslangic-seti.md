@@ -4,7 +4,6 @@ excerpt: Küçük ve orta ölçekli işyerleri için tehlike tanımlama formu, 5
 status: published
 createdAt: 2026-10-20T09:00:00+03:00
 price: 249
-shopierUrl: https://www.shopier.com/guvenlicalis
 format: Excel ve PDF, düzenlenebilir
 features:
   - Bölüm bölüm tehlike tanımlama formu

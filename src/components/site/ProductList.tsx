@@ -45,7 +45,7 @@ export function ProductList({ products, headingLevel = 2 }: { products: Product[
               </H>
               {p.excerpt ? <p>{p.excerpt}</p> : null}
               <div className="product-card__foot">
-                <strong className="price">{formatPrice(p.price) ?? 'Fiyat Shopier’de'}</strong>
+                <strong className="price">{formatPrice(p.price) ?? 'Yakında'}</strong>
                 {p.format ? (
                   <span>
                     <FileText size={16} aria-hidden="true" />

@@ -9,7 +9,7 @@ export const DEFAULT_SETTINGS: Settings = {
   author: { name: 'Uğur Durak', jobTitle: 'İş Sağlığı ve Güvenliği Uzmanı', shortBio: '', bio: '' },
   contact: { email: '', phone: '', location: '', note: '' },
   social: { linkedin: '', x: '', instagram: '', youtube: '' },
-  shop: { url: '' },
+  seller: { legalName: '', address: '', phone: '', email: '', taxOffice: '', taxNumber: '', mersisNo: '', kep: '', chamber: '' },
   seo: { defaultOgImage: '' },
   privacy: { controller: '', updatedAt: '' },
 }

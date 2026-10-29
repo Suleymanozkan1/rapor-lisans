@@ -30,7 +30,7 @@ export function toEditorProduct(p: AdminProduct) {
     body: p.body,
     status: p.status,
     price: p.price === undefined ? '' : String(p.price).replace('.', ','),
-    shopierUrl: p.shopierUrl,
+    file: p.file ?? null,
     format: p.format ?? '',
     features: p.features.join('\n'),
     coverSrc: p.cover?.src ?? '',

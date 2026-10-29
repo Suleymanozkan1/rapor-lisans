@@ -19,8 +19,8 @@ export default async function DeleteProductPage({ params }: PageProps<'/admin/ur
       <h1>Ürünü sil</h1>
       <div className="notice notice--danger">
         <p>
-          <strong>{product.title}</strong> sitedeki mağazadan kalıcı olarak silinecek. Shopier’deki ürün etkilenmez; onu
-          Shopier panelinden ayrıca kaldırmanız gerekir.
+          <strong>{product.title}</strong> mağazadan kalıcı olarak silinecek. Daha önce satın alanların siparişleri ve indirme
+          bağlantıları etkilenmez: satılan dosya depoda kalır.
         </p>
       </div>
       <DeleteProductForm csrf={session.csrf} slug={product.slug} sha={product.sha} />

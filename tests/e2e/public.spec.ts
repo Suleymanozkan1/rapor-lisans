@@ -126,45 +126,54 @@ test('stored XSS in a post does not execute', async ({ page }) => {
   expect(dialogs).toEqual([])
 })
 
-test('store lists published products and links to Shopier only', async ({ page }) => {
+test('store lists published products; a product for sale links to its own checkout', async ({ page }) => {
   const errors = trackConsole(page)
   await page.goto('/magaza')
   await expect(page.locator('h1')).toHaveText('Mağaza')
   await expect(page.locator('.product-card')).toHaveCount(2)
   await expect(page.locator('.product-card').first()).toContainText('₺149,90')
   await expect(page.locator('.product-card').nth(1)).toContainText('Örnek ürün')
-  await expect(page.getByRole('link', { name: 'Shopier mağazasını aç' })).toHaveAttribute('href', 'https://www.shopier.com/test-magaza')
+  await expect(page.getByRole('link', { name: 'Satış ve iade koşulları' }).first()).toHaveAttribute('href', '/satis-bilgileri')
   await noHorizontalScroll(page)
 
   await page.locator('.product-card').first().click()
   await expect(page).toHaveURL(/\/magaza\/test-kontrol-listesi$/)
   await expect(page.locator('h1')).toHaveText('Test kontrol listesi')
-  const buy = page.getByRole('link', { name: /Shopier’de satın al/ })
-  await expect(buy).toHaveAttribute('href', 'https://www.shopier.com/test-magaza/111')
-  await expect(buy).toHaveAttribute('target', '_blank')
-  await expect(buy).toHaveAttribute('rel', 'noopener noreferrer')
+  await expect(page.getByRole('link', { name: 'Satın al' })).toHaveAttribute('href', '/magaza/test-kontrol-listesi/satin-al')
   await expect(page.locator('.product-features li')).toHaveText(['Birinci madde', 'İkinci madde'])
-  // Every outbound purchase link on the site goes to shopier.com.
+  // No third-party purchase links any more: outbound links are only the social profiles.
   const hrefs = await page.locator('a[href^="http"]').evaluateAll((as) => as.map((a) => new URL((a as HTMLAnchorElement).href).hostname))
-  for (const h of hrefs) expect(['localhost', 'www.shopier.com', 'www.instagram.com']).toContain(h)
+  for (const h of hrefs) expect(['localhost', 'www.instagram.com']).toContain(h)
   const ld = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent())!)
   expect(ld['@type']).toBe('Product')
-  expect(ld.offers).toMatchObject({ price: '149.90', priceCurrency: 'TRY', url: 'https://www.shopier.com/test-magaza/111' })
+  expect(ld.offers).toMatchObject({ price: '149.90', priceCurrency: 'TRY', url: 'http://localhost:3100/magaza/test-kontrol-listesi' })
   await expect(page.locator('meta[name="robots"]')).toHaveCount(0)
   await noHorizontalScroll(page)
   expect(errors).toEqual([])
 })
 
-test('sample product is labelled, noindex and kept out of the sitemap', async ({ page, request }) => {
+test('sample product is labelled, not for sale, noindex and kept out of the sitemap', async ({ page, request }) => {
   await page.goto('/magaza/test-ornek-urun')
   await expect(page.locator('.sample-notice')).toContainText('Örnek ürün')
-  await expect(page.locator('.buy-box__price')).toHaveText('Fiyat Shopier sayfasında')
+  await expect(page.locator('.buy-box__price')).toHaveText('Fiyat yakında')
+  await expect(page.locator('.buy-box__soon')).toHaveText('Örnek ürün: satın alınamaz.')
+  await expect(page.getByRole('link', { name: 'Satın al' })).toHaveCount(0)
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/)
   await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(0)
+  await page.goto('/magaza/test-ornek-urun/satin-al')
+  await expect(page.getByRole('status')).toContainText('satışta değil')
   const sitemap = await (await request.get('/sitemap.xml')).text()
   expect(sitemap).toContain('<loc>http://localhost:3100/magaza</loc>')
   expect(sitemap).toContain('<loc>http://localhost:3100/magaza/test-kontrol-listesi</loc>')
+  expect(sitemap).toContain('<loc>http://localhost:3100/satis-bilgileri</loc>')
   expect(sitemap).not.toContain('test-ornek-urun')
+})
+
+test('sales terms page shows the seller identity', async ({ page }) => {
+  await page.goto('/satis-bilgileri')
+  await expect(page.locator('h1')).toHaveText('Satış ve iade koşulları')
+  for (const t of ['Test Satıcı Ltd. Şti.', '0123456789000017', '1234567890', 'Kadıköy', 'İstanbul Ticaret Odası', 'madde 15']) await expect(page.locator('main')).toContainText(t)
+  await noHorizontalScroll(page)
 })
 
 test('stored XSS in a product description does not execute', async ({ page }) => {

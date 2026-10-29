@@ -28,7 +28,7 @@ test.beforeEach(async ({ context }) => {
 })
 
 test('anonymous users are redirected from every admin route', async ({ request }) => {
-  for (const url of ['/admin', '/admin/yazilar', '/admin/yazilar/yeni', '/admin/yazilar/gizli-taslak', '/admin/yazilar/gizli-taslak/onizleme', '/admin/ayarlar', '/admin/medya', '/admin/kayitlar', '/admin/urunler', '/admin/urunler/yeni', '/admin/urunler/gizli-taslak-urun', '/admin/urunler/gizli-taslak-urun/sil']) {
+  for (const url of ['/admin', '/admin/yazilar', '/admin/yazilar/yeni', '/admin/yazilar/gizli-taslak', '/admin/yazilar/gizli-taslak/onizleme', '/admin/ayarlar', '/admin/medya', '/admin/kayitlar', '/admin/urunler', '/admin/urunler/yeni', '/admin/urunler/gizli-taslak-urun', '/admin/urunler/gizli-taslak-urun/sil', '/admin/siparisler', '/admin/siparisler/00000000-0000-4000-8000-000000000000']) {
     const res = await request.get(url, { maxRedirects: 0 })
     expect(res.status(), url).toBeGreaterThanOrEqual(300)
     expect(res.status(), url).toBeLessThan(400)
@@ -132,23 +132,26 @@ test('post lifecycle: draft, preview, publish, edit, delete with confirmation', 
   await expect(page.locator('table')).toContainText('panel: yazıyı sildi yuksekte-calismada-dusme-onleme')
 })
 
-test('product lifecycle: refuse a non-Shopier link, create, edit, delete with confirmation', async ({ page }) => {
+test('product lifecycle: upload the sold file (signature checked), create, edit, delete with confirmation', async ({ page }) => {
   await login(page)
   await page.goto('/admin/urunler')
   await expect(page.locator('table')).toContainText('TASLAK-URUN-GIZLI')
   await page.getByRole('link', { name: 'Yeni ürün' }).click()
   await page.getByLabel('Ürün adı').fill('İskele kontrol formu')
   await expect(page.getByLabel('Adres (slug)')).toHaveValue('iskele-kontrol-formu')
-  // The store address from settings is prefilled.
-  await expect(page.getByLabel('Shopier ürün adresi')).toHaveValue('https://www.shopier.com/test-magaza')
+
+  // A file that only pretends to be a PDF is refused before it is stored.
+  await page.getByLabel('Dosya seç').setInputFiles({ name: 'sahte.pdf', mimeType: 'application/pdf', buffer: Buffer.from('<html><script>alert(1)</script></html>') })
+  await expect(page.locator('main .field__error')).toContainText('uyuşmuyor')
+  await page.getByLabel('Dosya seç').setInputFiles({ name: 'virus.exe', mimeType: 'application/octet-stream', buffer: Buffer.from('MZ') })
+  await expect(page.locator('main .field__error')).toContainText('İzin verilen dosya türleri')
 
   const file = path.join(work, 'content/products/iskele-kontrol-formu.md')
-  await page.getByLabel('Shopier ürün adresi').fill('https://odeme.example.com/urun/1')
-  await page.getByRole('button', { name: 'Kaydet', exact: true }).click()
-  await expect(page.locator('main').getByRole('alert')).toContainText('shopierUrl')
-  expect(existsSync(file)).toBe(false)
+  await page.getByLabel('Dosya seç').setInputFiles(path.resolve(import.meta.dirname, '../fixtures/private/urunler/test-kontrol-listesi/ornek-7f3k.pdf'))
+  await expect(page.getByRole('status').filter({ hasText: 'ornek-7f3k.pdf' })).toBeVisible()
+  const stored = readdirSync(path.join(work, 'private/urunler/iskele-kontrol-formu'))
+  expect(stored.some((f) => /^ornek-7f3k-[0-9a-f]{8}\.pdf$/.test(f))).toBe(true)
 
-  await page.getByLabel('Shopier ürün adresi').fill('https://www.shopier.com/test-magaza/222')
   await page.getByLabel('Fiyat (TL)').fill('12,345')
   await page.getByRole('button', { name: 'Kaydet', exact: true }).click()
   await expect(page.locator('main').getByRole('alert')).toContainText('149,90')
@@ -163,7 +166,9 @@ test('product lifecycle: refuse a non-Shopier link, create, edit, delete with co
   await expect(page.locator('main').getByRole('status').filter({ hasText: 'Ürün kaydedildi' })).toBeVisible()
   const saved = readFileSync(file, 'utf8')
   expect(saved).toContain('price: 89.9')
-  expect(saved).toContain('shopierUrl: https://www.shopier.com/test-magaza/222')
+  expect(saved).toMatch(/pathname: urunler\/iskele-kontrol-formu\/ornek-7f3k-[0-9a-f]{8}\.pdf/)
+  expect(saved).toContain('contentType: application/pdf')
+  expect(saved).toMatch(/sha256: [0-9a-f]{64}/)
   expect(saved).toMatch(/features:\n {2}- Günlük kontrol\n {2}- Haftalık kontrol/)
   await expect(page.getByLabel('Fiyat (TL)')).toHaveValue('89,9')
 
@@ -334,10 +339,10 @@ test('settings: validates URLs and e-mail, saves valid data', async ({ page }) =
   await page.getByRole('button', { name: 'Ayarları kaydet' }).click()
   await expect(page.locator('main').getByRole('alert')).toContainText('social.linkedin')
   await page.getByLabel('LinkedIn').fill('https://www.linkedin.com/in/ornek')
-  await page.getByLabel('Shopier mağaza adresi').fill('https://www.example.com/magaza')
+  await page.getByLabel('Vergi kimlik no (VKN) veya TCKN').fill('12')
   await page.getByRole('button', { name: 'Ayarları kaydet' }).click()
-  await expect(page.locator('main').getByRole('alert')).toContainText('shop.url')
-  await page.getByLabel('Shopier mağaza adresi').fill('https://www.shopier.com/test-magaza')
+  await expect(page.locator('main').getByRole('alert')).toContainText('seller.taxNumber')
+  await page.getByLabel('Vergi kimlik no (VKN) veya TCKN').fill('1234567890')
   await page.getByLabel('Sitenin amacı (ana sayfa, her satıra bir cümle)').fill('Birinci satır\n\n  İkinci   satır ')
   await page.getByLabel('Kısa biyografi (ana sayfa)').fill('E2E kısa biyografi')
   await page.getByLabel('Varsayılan paylaşım görseli').selectOption({ index: 1 })
@@ -347,7 +352,7 @@ test('settings: validates URLs and e-mail, saves valid data', async ({ page }) =
   expect(s.social.linkedin).toBe('https://www.linkedin.com/in/ornek')
   expect(s.author.shortBio).toBe('E2E kısa biyografi')
   expect(s.motto).toEqual(['Birinci satır', 'İkinci satır'])
-  expect(s.shop.url).toBe('https://www.shopier.com/test-magaza')
+  expect(s.seller).toMatchObject({ legalName: 'Test Satıcı Ltd. Şti.', taxNumber: '1234567890', chamber: 'İstanbul Ticaret Odası' })
   expect(s.seo.defaultOgImage).toMatch(/^\/uploads\//)
   // Saving again without touching the field keeps it (regression: it used to be cleared).
   await page.getByRole('button', { name: 'Ayarları kaydet' }).click()
@@ -369,7 +374,7 @@ test('admin pages are usable at phone width', async ({ browser }) => {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, extraHTTPHeaders: { 'X-Forwarded-For': freshIp() } })
   const page = await ctx.newPage()
   await login(page)
-  for (const url of ['/admin', '/admin/yazilar', '/admin/yazilar/yeni', '/admin/urunler', '/admin/urunler/yeni', '/admin/ayarlar']) {
+  for (const url of ['/admin', '/admin/yazilar', '/admin/yazilar/yeni', '/admin/urunler', '/admin/urunler/yeni', '/admin/siparisler', '/admin/ayarlar']) {
     await page.goto(url)
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
     expect(overflow, url).toBeLessThanOrEqual(0)

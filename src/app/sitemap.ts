@@ -17,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/hakkimda` },
     { url: `${base}/iletisim` },
     { url: `${base}/gizlilik` },
+    { url: `${base}/satis-bilgileri` },
     ...posts.map((p) => ({ url: `${base}/blog/${p.slug}`, lastModified: p.updatedAt ?? p.publishedAt })),
     ...products.map((p) => ({ url: `${base}/magaza/${p.slug}`, lastModified: p.updatedAt ?? p.createdAt })),
     ...usedCats.map((c) => ({ url: `${base}/kategori/${c.slug}` })),

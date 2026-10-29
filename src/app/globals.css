@@ -1983,6 +1983,259 @@ textarea:focus-visible {
   max-width: 44em;
 }
 
+/* ---------- Checkout and order pages ---------- */
+
+.seller-contact {
+  margin: var(--s7) 0 var(--s5);
+  max-width: 48rem;
+}
+.seller-contact h2 {
+  margin-bottom: var(--s4);
+}
+
+.buy-box__soon {
+  margin: 0;
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-input);
+  background: var(--surface-2);
+  font-weight: 600;
+}
+.checkout-wrap {
+  padding-top: var(--s6);
+}
+.checkout {
+  display: grid;
+  gap: var(--s5);
+  max-width: 54rem;
+}
+.checkout__section {
+  margin: 0;
+  padding: var(--s5);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  min-width: 0;
+}
+.checkout__section legend {
+  padding: 0 var(--s2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+.checkout__grid {
+  display: grid;
+  gap: 0 var(--s4);
+}
+@media (min-width: 40rem) {
+  .checkout__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .checkout__wide {
+    grid-column: 1 / -1;
+  }
+}
+.checkout .field {
+  display: grid;
+  gap: var(--s1);
+  margin-bottom: var(--s4);
+}
+.checkout label {
+  font-weight: 600;
+}
+.checkout input[type='text'],
+.checkout input[type='email'],
+.checkout input[type='tel'],
+.checkout textarea {
+  width: 100%;
+  min-height: 2.9rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-input);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+.checkout [aria-invalid='true'] {
+  border-color: var(--danger);
+  border-width: 2px;
+}
+.field__help {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 0.92rem;
+}
+.field__error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+.checkout__doc {
+  margin-bottom: var(--s3);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-input);
+  background: var(--paper);
+}
+.checkout__doc summary {
+  cursor: pointer;
+  padding: var(--s3) var(--s4);
+  font-weight: 600;
+}
+.checkout__doc pre,
+.order-contract pre {
+  margin: 0;
+  max-height: 22rem;
+  overflow: auto;
+  padding: var(--s4);
+  border-top: 1px solid var(--rule);
+  white-space: pre-wrap;
+  font-family: var(--font-ui);
+  /* At least 12 pt (16 px) for pre-contract information (MSY m. 6/1). */
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.checkout__consent {
+  display: flex;
+  gap: var(--s3);
+  align-items: flex-start;
+  margin: var(--s3) 0;
+  font-weight: 500 !important;
+  line-height: 1.45;
+}
+.checkout__consent input {
+  flex: none;
+  width: 1.3rem;
+  height: 1.3rem;
+  margin-top: 0.1rem;
+  accent-color: var(--ink);
+}
+.checkout__consent--error {
+  color: var(--danger);
+}
+.checkout__pay {
+  display: grid;
+  gap: var(--s3);
+  padding: var(--s5);
+  border-radius: var(--r-card);
+  background: var(--brand-tint);
+}
+.checkout__pay h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+.checkout__summary {
+  display: grid;
+  gap: var(--s2);
+  margin: 0;
+}
+.checkout__summary div {
+  display: grid;
+  grid-template-columns: minmax(7rem, 9rem) 1fr;
+  gap: var(--s3);
+}
+.checkout__summary dt {
+  font-weight: 600;
+}
+.checkout__summary dd {
+  margin: 0;
+}
+.checkout__summary strong {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}
+@media (max-width: 30rem) {
+  .checkout__summary div {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+.checkout__obligation {
+  margin: 0;
+  font-weight: 600;
+}
+
+.order {
+  display: grid;
+  gap: var(--s5);
+  padding-top: var(--s6);
+}
+.order > * {
+  max-width: 48rem;
+}
+.order-card {
+  display: grid;
+  gap: var(--s4);
+  padding: var(--s5);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.order-card form {
+  margin: 0;
+}
+.order-state {
+  display: flex;
+  gap: var(--s3);
+  align-items: flex-start;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.order-state svg {
+  flex: none;
+}
+.order-state--paid svg {
+  color: var(--ok);
+}
+.order-state--failed svg,
+.order-state--refunded svg {
+  color: var(--danger);
+}
+.order-facts,
+.seller-facts {
+  display: grid;
+  gap: var(--s2);
+  margin: 0;
+}
+.order-facts div,
+.seller-facts div {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) 1fr;
+  gap: var(--s3);
+  padding-bottom: var(--s2);
+  border-bottom: 1px solid var(--rule);
+}
+.order-facts dt,
+.seller-facts dt {
+  color: var(--ink-2);
+}
+.order-facts dd,
+.seller-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 30rem) {
+  .order-facts div,
+  .seller-facts div {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+.order-help {
+  margin: 0;
+  color: var(--ink-2);
+}
+.order-contract {
+  border: 1px solid var(--rule);
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+.order-contract summary {
+  cursor: pointer;
+  padding: var(--s4);
+  font-weight: 600;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .rise {
     animation: rise 0.8s var(--ease-out) both;

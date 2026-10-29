@@ -1,5 +1,11 @@
 # AI-slop tarama raporu
 
+> **Güncelleme (2026-10-29, dördüncü tur, ödeme):** Mağaza kendi ödeme sistemine geçti. Yeni
+> ekranlar (ödeme formu, sipariş sayfası, panelde siparişler) aynı token, köşe ve tipografi
+> kurallarını kullanır. Baskı dili yok: sahte "son 2 ürün", geri sayım, indirim veya "şu an 5 kişi
+> bakıyor" yok; onay kutuları önceden işaretli değil, tek birincil düğme var. `scan:design`: bulgu
+> yok.
+
 > **Güncelleme (2026-10-29, üçüncü tur, marka):** Site, kullanıcının Instagram hesabı
 > @guvenlicalis'e göre "Güvenli Çalış" olarak yeniden markalandı. Palet logodan alındı (siyah,
 > logo sarısı `#ffd306`, baret kırmızısı yalnızca küçük işaretlerde); mavi tamamen kalktı. Hero,

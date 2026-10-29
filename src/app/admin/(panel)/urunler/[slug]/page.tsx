@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { requireAdmin } from '@/lib/auth/guard'
-import { getAdminMedia, getAdminProduct, getAdminSettings } from '@/lib/admin-content'
+import { getAdminMedia, getAdminProduct } from '@/lib/admin-content'
 import { safeLoad } from '@/lib/safe'
+import { fileStoreKind } from '@/lib/files'
 import { toEditorProduct } from '@/lib/editor'
 import { ProductEditor } from '@/components/admin/ProductEditor'
 import { LoadError } from '@/components/admin/LoadError'
@@ -17,19 +18,15 @@ export default async function EditProduct({ params, searchParams }: PageProps<'/
   const r = await safeLoad(async () => ({
     product: await getAdminProduct(slug),
     media: (await getAdminMedia()).value,
-    settings: (await getAdminSettings()).value,
   }))
   if (r.error !== undefined) return <LoadError message={r.error} />
-  const { product, media, settings } = r.data
+  const { product, media } = r.data
   if (!product) notFound()
   return (
     <>
       <div className="admin-head">
         <h1>Ürünü düzenle</h1>
         <div className="admin-actions">
-          <a className="button button--quiet" href={product.shopierUrl} target="_blank" rel="noopener noreferrer">
-            Shopier sayfasını aç
-          </a>
           <Link className="button button--danger" href={`/admin/urunler/${product.slug}/sil`}>
             Sil
           </Link>
@@ -45,7 +42,7 @@ export default async function EditProduct({ params, searchParams }: PageProps<'/
           </>
         ) : null}
       </p>
-      <ProductEditor key={product.sha} csrf={session.csrf} product={toEditorProduct(product)} media={media} shopUrl={settings.shop.url} />
+      <ProductEditor key={product.sha} csrf={session.csrf} product={toEditorProduct(product)} media={media} fileStore={fileStoreKind()} />
     </>
   )
 }

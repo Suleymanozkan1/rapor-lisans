@@ -30,8 +30,16 @@
     "instagram": "https://www.instagram.com/guvenlicalis",
     "youtube": ""
   },
-  "shop": {
-    "url": "https://www.shopier.com/guvenlicalis"
+  "seller": {
+    "legalName": "",
+    "address": "",
+    "phone": "",
+    "email": "",
+    "taxOffice": "",
+    "taxNumber": "",
+    "mersisNo": "",
+    "kep": "",
+    "chamber": ""
   },
   "seo": {
     "defaultOgImage": "/uploads/2026/guvenli-calis-paylasim.jpg"

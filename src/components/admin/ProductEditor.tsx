@@ -5,6 +5,7 @@ import { saveProductAction, type ActionState } from '@/app/admin/actions'
 import { slugify } from '@/lib/slug'
 import { Csrf } from './Csrf'
 import { FormStatus } from './FormStatus'
+import { ProductFileField, type ProductFileValue } from './ProductFileField'
 import { keepValuesOnSubmit } from './keepValues'
 
 export type EditorProduct = {
@@ -15,7 +16,7 @@ export type EditorProduct = {
   body: string
   status: 'draft' | 'published'
   price: string
-  shopierUrl: string
+  file: ProductFileValue
   format: string
   features: string
   coverSrc: string
@@ -24,9 +25,9 @@ export type EditorProduct = {
   sample: boolean
 }
 
-type Props = { csrf: string; product: EditorProduct | null; media: { src: string; alt: string }[]; shopUrl: string }
+type Props = { csrf: string; product: EditorProduct | null; media: { src: string; alt: string }[]; fileStore: 'blob' | 'local' | 'none' }
 
-export function ProductEditor({ csrf, product: p, media, shopUrl }: Props) {
+export function ProductEditor({ csrf, product: p, media, fileStore }: Props) {
   const [state, action, pending] = useActionState<ActionState, FormData>(saveProductAction, {})
   const [title, setTitle] = useState(p?.title ?? '')
   const [slug, setSlug] = useState(p?.slug ?? '')
@@ -43,7 +44,7 @@ export function ProductEditor({ csrf, product: p, media, shopUrl }: Props) {
       <FormStatus state={state} />
       {p?.sample ? (
         <div className="notice notice--warn" role="note">
-          <p>Bu bir örnek üründür. Gerçek fiyat, açıklama ve Shopier ürün adresiyle kaydettiğinizde “Örnek ürün” etiketi kalkar.</p>
+          <p>Bu bir örnek üründür ve satın alınamaz. Gerçek açıklama, fiyat ve satılacak dosyayla kaydettiğinizde “Örnek ürün” etiketi kalkar.</p>
         </div>
       ) : null}
 
@@ -86,24 +87,7 @@ export function ProductEditor({ csrf, product: p, media, shopUrl }: Props) {
             Ürün sayfası: /magaza/{slug || 'urun-adresi'}. Yalnızca küçük harf, rakam ve tire.
           </p>
         </div>
-        <div className="field">
-          <label htmlFor="shopierUrl">Shopier ürün adresi</label>
-          <input
-            id="shopierUrl"
-            name="shopierUrl"
-            type="url"
-            required
-            maxLength={500}
-            defaultValue={p?.shopierUrl ?? shopUrl}
-            placeholder="https://www.shopier.com/…"
-            aria-describedby="shopier-help"
-            aria-invalid={Boolean(err('shopierUrl'))}
-          />
-          <p id="shopier-help" className="field__help">
-            “Shopier’de satın al” düğmesi bu adresi açar. Yalnızca https://www.shopier.com/ adresleri kabul edilir. Ödeme,
-            teslimat, fatura ve iade Shopier’de yürür.
-          </p>
-        </div>
+        <ProductFileField key={p?.file?.pathname ?? 'yeni'} csrf={csrf} slug={slug} value={p?.file ?? null} storeKind={fileStore} />
         <div className="field">
           <label htmlFor="excerpt">Kısa açıklama</label>
           <textarea id="excerpt" name="excerpt" rows={3} maxLength={300} defaultValue={p?.excerpt} aria-describedby="excerpt-help" />
@@ -133,13 +117,13 @@ export function ProductEditor({ csrf, product: p, media, shopUrl }: Props) {
           <label className="choice">
             <input type="radio" name="status" value="published" defaultChecked={p?.status === 'published'} /> Yayında
           </label>
-          <p className="field__help">Taslak ürünler mağazada ve site haritasında görünmez.</p>
+          <p className="field__help">Taslak ürünler mağazada ve site haritasında görünmez. Fiyatı ve dosyası olmayan ürün yayında olsa da satışa açılmaz.</p>
         </fieldset>
         <div className="field">
           <label htmlFor="price">Fiyat (TL)</label>
           <input id="price" name="price" type="text" inputMode="decimal" maxLength={12} defaultValue={p?.price} aria-describedby="price-help" aria-invalid={Boolean(err('price'))} />
           <p id="price-help" className="field__help">
-            Örneğin 149 veya 149,90. Shopier’deki fiyatla aynı olmalı. Boş bırakılırsa “Fiyat Shopier sayfasında” yazar.
+            KDV dahil satış fiyatı, örneğin 149 veya 149,90. Ödeme sayfasında bu tutar tahsil edilir.
           </p>
         </div>
         <div className="field">

@@ -24,8 +24,16 @@
     "instagram": "https://www.instagram.com/guvenlicalis",
     "youtube": ""
   },
-  "shop": {
-    "url": "https://www.shopier.com/test-magaza"
+  "seller": {
+    "legalName": "Test Satıcı Ltd. Şti.",
+    "address": "Test Mah. Örnek Sok. No: 1, Kadıköy / İstanbul",
+    "phone": "+90 216 000 00 00",
+    "email": "satis@example.com",
+    "taxOffice": "Kadıköy",
+    "taxNumber": "1234567890",
+    "mersisNo": "0123456789000017",
+    "kep": "",
+    "chamber": "İstanbul Ticaret Odası"
   },
   "seo": {
     "defaultOgImage": ""

@@ -228,14 +228,15 @@ describe('admin content service (local store)', () => {
     ).rejects.toThrow()
   })
 
-  it('product lifecycle: create, edit with locking, drop the sample label, rename, delete, media in use', async () => {
+  it('product lifecycle: create, edit with locking, drop the sample label, refuse a public file path, rename, delete, media in use', async () => {
     const svc = await import('@/lib/admin-content')
-    const fm = { title: 'Kontrol listeleri', excerpt: 'Özet', status: 'published' as const, price: 149.9, shopierUrl: 'https://www.shopier.com/guvenlicalis/123', features: ['İskele'], order: 1 }
+    const pfile = { pathname: 'urunler/kontrol/liste-a1b2.pdf', name: 'liste.pdf', size: 1200, contentType: 'application/pdf' }
+    const fm = { title: 'Kontrol listeleri', excerpt: 'Özet', status: 'published' as const, price: 149.9, file: pfile, features: ['İskele'], order: 1 }
     await svc.saveProduct({ originalSlug: null, sha: null, slug: 'kontrol', frontmatter: fm, body: 'Gövde' }, 'ugur')
     const p = (await svc.getAdminProduct('kontrol'))!
     expect(p.price).toBe(149.9)
     expect(p.updatedAt).toBeUndefined()
-    expect(readFileSync(path.join(dir, 'content', 'products', 'kontrol.md'), 'utf8')).toContain('shopierUrl: https://www.shopier.com/guvenlicalis/123')
+    expect(readFileSync(path.join(dir, 'content', 'products', 'kontrol.md'), 'utf8')).toContain('pathname: urunler/kontrol/liste-a1b2.pdf')
 
     // A demo product loses its label once saved from the panel.
     const file = path.join(dir, 'content', 'products', 'kontrol.md')
@@ -251,7 +252,7 @@ describe('admin content service (local store)', () => {
 
     await expect(svc.saveProduct({ originalSlug: 'kontrol', sha: demo.sha, slug: 'kontrol', frontmatter: fm, body: '' }, 'ugur')).rejects.toThrow(ConflictError)
     await expect(
-      svc.saveProduct({ originalSlug: null, sha: null, slug: 'kotu', frontmatter: { ...fm, shopierUrl: 'https://shopier.com.evil.example/x' }, body: '' }, 'ugur'),
+      svc.saveProduct({ originalSlug: null, sha: null, slug: 'kotu', frontmatter: { ...fm, file: { ...pfile, pathname: '/uploads/x.pdf' } }, body: '' }, 'ugur'),
     ).rejects.toThrow()
 
     await svc.saveProduct({ originalSlug: 'kontrol', sha: edited.sha, slug: 'kontrol-listeleri', frontmatter: { ...fm, cover: { src: '/uploads/2026/k.jpg', alt: 'Kapak' } }, body: '' }, 'ugur')

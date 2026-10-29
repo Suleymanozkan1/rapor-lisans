@@ -4,7 +4,6 @@ excerpt: Yangın, deprem ve kimyasal döküntü için hazır tatbikat senaryolar
 status: published
 createdAt: 2026-10-15T09:00:00+03:00
 price: 189.9
-shopierUrl: https://www.shopier.com/guvenlicalis
 format: PDF ve Word
 features:
   - Üç farklı acil durum için adım adım senaryo

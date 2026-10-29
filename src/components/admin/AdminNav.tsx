@@ -7,6 +7,7 @@ const LINKS = [
   { href: '/admin', label: 'Özet' },
   { href: '/admin/yazilar', label: 'Yazılar' },
   { href: '/admin/urunler', label: 'Ürünler' },
+  { href: '/admin/siparisler', label: 'Siparişler' },
   { href: '/admin/kategoriler', label: 'Kategoriler' },
   { href: '/admin/etiketler', label: 'Etiketler' },
   { href: '/admin/medya', label: 'Medya' },

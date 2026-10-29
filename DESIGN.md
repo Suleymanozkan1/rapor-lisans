@@ -82,6 +82,15 @@ yayın/makale okunabilirliği. Başlıkta tek kelimeyi farklı renk/yazı tipiyl
   + "Satın alma nasıl işler?" kutusu. **Ürün sayfası:** solda 4:5 ürün görseli, sağda yapışkan
   satın alma kutusu (büyük fiyat, biçim, sarı "Shopier'de satın al" düğmesi, ödemenin Shopier'de
   yapıldığı notu), altında "Neler var?" listesi ve açıklama.
+- **Ödeme sayfası:** üç kart: fatura bilgileri (iki sütun, telefonda tek), sözleşme ve onaylar
+  (ön bilgilendirme formu ve sözleşme açılır kutularda, girdikçe alıcı bilgileriyle güncellenir;
+  en az 16 px metin, MSY m. 6/1), ardından açık sarı **sipariş özeti** (ürün, toplam, ödeme,
+  teslimat, cayma hakkı) ve hemen üstünde "ödeme yükümlülüğü" cümlesiyle tek sarı "Onayla ve öde"
+  düğmesi. Onay kutuları önceden işaretli değildir; hatalı alan kırmızı çerçeve ve altında metinle
+  gösterilir, girilen değerler kaybolmaz.
+- **Sipariş sayfası:** sayfa bandında durum başlığı ve sipariş numarası; tek kartta durum
+  ikonu ve cümlesi, ürün/tutar/tarih/indirme hakkı satırları ve büyük sarı indirme düğmesi;
+  altında onaylanan metin açılır kutuda.
 - Mobilde tüm çok sütunlu düzenler tek sütuna iner; 390 px'te yatay kaydırma yok (testli).
   Telefonda menüdeki "Ara" yalnızca büyüteç ikonu olarak görünür, erişilebilir adı korunur.
 

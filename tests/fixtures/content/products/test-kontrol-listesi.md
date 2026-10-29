@@ -4,7 +4,12 @@ excerpt: Test verisi ürün açıklaması.
 status: published
 createdAt: 2026-09-01T09:00:00+03:00
 price: 149.9
-shopierUrl: https://www.shopier.com/test-magaza/111
+file:
+  pathname: urunler/test-kontrol-listesi/ornek-7f3k.pdf
+  name: test-kontrol-listesi.pdf
+  size: 595
+  contentType: application/pdf
+  sha256: f6a70861f707f32b1540be44b05a4cc30bc11e9f7ac4678b247635485be1a04a
 format: PDF, 4 sayfa
 features:
   - Birinci madde

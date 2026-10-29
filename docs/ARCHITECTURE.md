@@ -93,27 +93,39 @@ yazılmaz; sunucu loguna yazılan `admin_audit` JSON satırı kullanıcıyı da 
 çerez loglanmaz.
 Vercel Hobby runtime logları 1 saat tutulur; kalıcı kayıt Git geçmişidir.
 
-## K11. Mağaza: Shopier vitrini, ödeme sitede değil
+## K11. Mağaza: kendi ödeme sistemi (iyzico + Postgres + özel Blob)
 
-- **Bağlam:** Dijital İSG dokümanları satılacak. Markanın zaten bir Shopier mağazası var
-  (`shopier.com/guvenlicalis`, Instagram biyografisinde). Site Vercel Pro'da çalışır.
-- **Seçim:** Ürünler `content/products/<slug>.md` dosyalarında (YAML ön bilgi + Markdown),
-  yazılarla aynı Git CMS ve panel akışıyla yönetilir. `/magaza` ve `/magaza/[slug]` statik
-  üretilir. "Shopier'de satın al" düğmesi ürünün Shopier sayfasına gider; ödeme, fatura,
-  dijital teslimat ve iade Shopier'de yürür.
-- **Gerekçe:** Site kart, sipariş veya müşteri verisi işlemez; bu yüzden veritabanı, ödeme
-  webhook'u, dosya teslim altyapısı ve bunların KVKK/PCI yükü yoktur. Mevcut Shopier mağazası ve
-  hesabı olduğu gibi kullanılır.
-- **Güvenlik:** Satın alma adresi şemada `https://shopier.com` veya `https://www.shopier.com`
-  ile sınırlı (`isShopierUrl`); başka alan adı, `http`, kimlik bilgisi veya port içeren adres
-  hem panelde hem build'de reddedilir. Örnek ürünler (`sample: true`) `noindex`, site haritası
-  dışı ve JSON-LD'siz.
-- **Bedel:** Sitedeki fiyat Shopier'deki fiyattan elle güncellenir; ikisi otomatik eşlenmez.
-  Stok/satış durumu sitede görünmez.
-- **Alternatif (seçilmedi):** iyzico ile sitede ödeme (Checkout Form), sipariş veritabanı ve
-  Vercel Blob üzerinden imzalı indirme bağlantıları. Daha fazla kontrol verir ama veritabanı,
-  webhook doğrulaması, teslim ve iade akışı, müşteri verisi saklama ve buna bağlı yasal
-  yükümlülükler getirir. Kullanıcı Shopier'i seçti.
+- **Bağlam:** Dijital İSG dokümanları sitede satılacak (önce Shopier vitrini denendi; kullanıcı
+  kendi sistemini istedi). Site Vercel Pro'da.
+- **Seçim:**
+  - Ürünler Git'te (`content/products/*.md`), satılan dosya **özel (private) Vercel Blob**
+    deposunda; ürün dosyasında yalnızca Blob yolu, boyutu, türü ve SHA-256 özeti durur.
+  - Siparişler **Postgres**'te (üretimde Neon, HTTP sürücüsü; yerelde ve testte PGlite, aynı
+    SQL). Durum makinesi `pending > paid | failed > refunded`; her geçiş tek bir
+    `UPDATE ... WHERE status IN (...) RETURNING` ile atomik, böylece tarayıcı dönüşü ve webhook
+    yarışsa da e-posta bir kez gider.
+  - Ödeme **iyzico Checkout Form** (barındırılan ödeme sayfası): kart verisi siteye hiç gelmez.
+    Sunucu kendi imzasıyla (IYZWSv2) formu başlatır, yanıt imzasını doğrular, alıcıyı iyzico'ya
+    yönlendirir. Dönüşte gelen `token` yalnızca anahtardır: sonuç, sunucudan sunucuya **imzalı
+    Retrieve** ile alınır ve imza, sipariş kimliği, sepet numarası, token, tutar, para birimi ve
+    `fraudStatus = 1` eşleşmeden sipariş ödenmiş sayılmaz. Webhook aynı Retrieve'i tetikler.
+  - Teslim: sipariş sayfası ve indirme bağlantısı `HMAC(DOWNLOAD_SECRET, sipariş:sürüm)` ile
+    imzalı; sunucuda gizli bir şey saklanmaz, yeni bağlantı sürümü artırır. İndirme **POST**'tur
+    (posta tarayıcıları hak harcamaz), atomik sayılır (7 gün, 5 indirme) ve dosya Blob'dan
+    akış olarak, `Content-Disposition: attachment` ve `nosniff` ile verilir.
+  - Hukuki metin: ön bilgilendirme formu ve sözleşme tek bir saf fonksiyonla
+    (`src/lib/legal.ts`) üretilir; ödeme sayfasında canlı önizleme, sunucuda aynı metin
+    siparişle saklanır ve e-postayla gönderilir.
+- **Gerekçe:** Ödeme sağlayıcısının barındırılan sayfası PCI kapsamını en aza indirir;
+  imzalı Retrieve dışında hiçbir girdiye güvenilmez. Postgres, sipariş gibi parasal kayıtlar
+  için kısıtlar (CHECK, UNIQUE) ve atomik güncelleme sağlar; Git yalnızca içerik için kalır.
+- **Bedel:** Neon, Blob, Resend ve iyzico hesapları ve anahtarları gerekir (eksikse satış
+  kapalı kalır ve panel eksikleri listeler). Fatura otomatik değildir (e-Arşiv elle).
+  iyzico'nun canlı ortamı bu çalışma ortamında denenemedi; protokol resmî belgeler ve SDK
+  kaynak koduyla, iki yayımlanmış test vektörüyle ve sahte bir iyzico sunucusuyla doğrulandı.
+- **Alternatifler (seçilmedi):** Shopier vitrini (ilk sürüm; kullanıcı kendi sistemini istedi),
+  iyzico iframe/JS formu (CSP'ye üçüncü taraf betik eklemek gerekir), siparişleri Git'te tutmak
+  (kişisel veri depo geçmişine girer, eşzamanlılık yok).
 
 ## K12. Bilinen sınırlar
 

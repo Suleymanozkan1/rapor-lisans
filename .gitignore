@@ -13,3 +13,5 @@ next-env.d.ts
 .DS_Store
 .admin-activity.jsonl
 .next-e2e/
+.private-files/
+.orders-db/

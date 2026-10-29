@@ -66,27 +66,42 @@ export type PostFrontmatter = z.infer<typeof postFrontmatterSchema>
 export type Post = PostFrontmatter & { slug: string; body: string }
 export type ImageRef = z.infer<typeof imageRefSchema>
 
-/** Shopier hosts a product or store page may live on. Anything else is refused. */
-export const SHOPIER_HOSTS = new Set(['shopier.com', 'www.shopier.com'])
-
-export function isShopierUrl(v: string): boolean {
-  try {
-    const u = new URL(v)
-    return u.protocol === 'https:' && SHOPIER_HOSTS.has(u.hostname) && !u.username && !u.password && !u.port && u.pathname.length > 1
-  } catch {
-    return false
-  }
+/** File types that may be sold; checked again against the stored blob's metadata. */
+export const PRODUCT_FILE_TYPES: Record<string, string> = {
+  pdf: 'application/pdf',
+  zip: 'application/zip',
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 }
+export const MAX_PRODUCT_FILE_BYTES = 100 * 1024 * 1024
 
-export const shopierUrlSchema = z
-  .string()
-  .trim()
-  .max(500)
-  .refine(isShopierUrl, 'Yalnızca https://www.shopier.com/… adresleri kabul edilir')
+/** Private file sold with a product (a Vercel Blob pathname, never a public URL). */
+export const productFileSchema = z
+  .object({
+    pathname: z
+      .string()
+      .max(300)
+      // Vercel Blob's random suffix is mixed case.
+      .regex(/^urunler\/[a-z0-9][A-Za-z0-9/_.-]*$/, 'Dosya yolu urunler/ ile başlamalı')
+      .refine((v) => !v.includes('..'), 'Geçersiz yol'),
+    /** File name the buyer sees when downloading. */
+    name: z
+      .string()
+      .trim()
+      .min(3)
+      .max(120)
+      .regex(/^[\p{L}\p{N} ._()-]+\.[a-z0-9]{2,5}$/u, 'Geçersiz dosya adı'),
+    size: z.number().int().min(1).max(MAX_PRODUCT_FILE_BYTES),
+    contentType: z.enum(Object.values(PRODUCT_FILE_TYPES) as [string, ...string[]]),
+    /** SHA-256 of the stored file, kept with every order as proof of what was delivered. */
+    sha256: z.string().regex(/^[0-9a-f]{64}$/).optional(),
+  })
+  .refine((f) => PRODUCT_FILE_TYPES[f.name.split('.').pop()!.toLowerCase()] === f.contentType, 'Dosya uzantısı ve türü uyuşmuyor')
 
 /*
- * Digital products are listed on the site as a showcase. Payment, invoice,
- * delivery and refunds happen on Shopier; the site stores no order data.
+ * Digital products sold on the site: payment through iyzico's hosted
+ * checkout form, delivery as an expiring download link (see src/lib/orders).
  */
 export const productFrontmatterSchema = z.object({
   title: z.string().trim().min(3).max(120),
@@ -94,9 +109,9 @@ export const productFrontmatterSchema = z.object({
   status: z.enum(['draft', 'published']).default('draft'),
   createdAt: isoDate,
   updatedAt: isoDate.optional(),
-  /** Turkish lira, as shown on Shopier. Omitted: "Fiyat Shopier sayfasında". */
-  price: z.number().min(0).max(1_000_000).multipleOf(0.01).optional(),
-  shopierUrl: shopierUrlSchema,
+  /** Turkish lira, VAT included. A product is for sale only with a price and a file. */
+  price: z.number().min(1).max(1_000_000).multipleOf(0.01).optional(),
+  file: productFileSchema.optional(),
   /** Short description of what is delivered, e.g. "PDF, 24 sayfa". */
   format: z.string().trim().max(80).optional(),
   features: z.array(z.string().trim().min(2).max(160)).max(12).default([]),
@@ -146,12 +161,21 @@ export const settingsSchema = z.object({
     instagram: optionalUrl,
     youtube: optionalUrl,
   }),
-  shop: z
+  /** Seller identity shown on the legal pages and in every order contract. */
+  seller: z
     .object({
-      /** The Shopier store page; products link to their own Shopier pages. */
-      url: z.union([z.literal(''), shopierUrlSchema]).default(''),
+      legalName: optionalText(160),
+      address: optionalText(300),
+      phone: optionalText(40),
+      email: z.union([z.literal(''), z.email().max(200)]).default(''),
+      taxOffice: optionalText(80),
+      taxNumber: z.union([z.literal(''), z.string().trim().regex(/^\d{10,11}$/, 'VKN 10, TCKN 11 haneli olmalı')]).default(''),
+      mersisNo: z.union([z.literal(''), z.string().trim().regex(/^\d{16}$/, 'MERSİS numarası 16 haneli olmalı')]).default(''),
+      kep: optionalText(200),
+      /** Meslek odası, if any (ETHS Yönetmeliği m. 5/1-c). */
+      chamber: optionalText(200),
     })
-    .default({ url: '' }),
+    .default({ legalName: '', address: '', phone: '', email: '', taxOffice: '', taxNumber: '', mersisNo: '', kep: '', chamber: '' }),
   seo: z.object({
     defaultOgImage: z.union([z.literal(''), localAssetPath]).default(''),
   }),
@@ -161,3 +185,12 @@ export const settingsSchema = z.object({
   }),
 })
 export type Settings = z.infer<typeof settingsSchema>
+
+/** Sales stay closed until the seller identity required on the legal pages is filled in. */
+export function sellerComplete(s: Settings['seller']): boolean {
+  return Boolean(s.legalName && s.address && s.phone && s.email && s.taxOffice && s.taxNumber)
+}
+
+export function isForSale(p: { price?: number; file?: unknown; sample?: boolean }): boolean {
+  return p.price !== undefined && p.file !== undefined && !p.sample
+}
