@@ -1,0 +1,8 @@
+[
+  { "slug": "risk-degerlendirmesi", "name": "Risk değerlendirmesi", "description": "Tehlike tanımlama, risk analizi yöntemleri ve kontrol önlemleri." },
+  { "slug": "is-kazalari", "name": "İş kazaları", "description": "Kaza ve ramak kala olaylarının incelenmesi, kök neden analizi." },
+  { "slug": "mevzuat", "name": "Mevzuat", "description": "6331 sayılı Kanun ve ilgili yönetmeliklerdeki yükümlülükler." },
+  { "slug": "egitim", "name": "Eğitim", "description": "Çalışan eğitimleri, içerik planlama ve etkinliğin ölçülmesi." },
+  { "slug": "saha-uygulamalari", "name": "Saha uygulamaları", "description": "Sahada denetim, iş izinleri ve güvenli çalışma uygulamaları." },
+  { "slug": "acil-durumlar", "name": "Acil durumlar", "description": "Acil durum planları, tatbikatlar ve ekiplerin hazırlığı." }
+]
