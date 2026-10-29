@@ -94,6 +94,15 @@ export function ArticleView({ post, rendered, settings, categories, cover, relat
             <dd>{readingMinutes(rendered.words)} dk</dd>
           </div>
         </dl>
+      {post.sample ? (
+        <div className="notice notice--warn sample-notice" role="note">
+          <p>
+            <strong>Örnek içerik.</strong> Bu yazı sitenin görünümünü göstermek için hazırlanmıştır ve henüz yazarı tarafından
+            gözden geçirilmemiştir. Mevzuatın güncel hâli için kaynakçadaki resmî metinlere başvurun.
+          </p>
+        </div>
+      ) : null}
+
       {post.cover ? (
         <figure className="cover">
           {/* eslint-disable-next-line @next/next/no-img-element */}

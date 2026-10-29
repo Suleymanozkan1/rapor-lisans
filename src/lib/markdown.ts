@@ -110,8 +110,9 @@ export function markdownWordCount(source: string): number {
   return markdownToPlainText(source).split(' ').filter(Boolean).length
 }
 
+/** Turkish words are long; ~180 words per minute, rounded up. */
 export function readingMinutes(words: number): number {
-  return Math.max(1, Math.round(words / 200))
+  return Math.max(1, Math.ceil(words / 180))
 }
 
 /** Plain text for search indexes and meta descriptions. */

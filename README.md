@@ -64,12 +64,18 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"  
 çalışma klasörüne yazar (GitHub gerekmez).
 
 ```bash
-npm run dev        # http://localhost:3000, panel: http://localhost:3000/admin
-npm run dev:demo   # test verisiyle (tests/fixtures/content) dolu bir site görmek için
+npm run dev             # http://localhost:3000, panel: http://localhost:3000/admin
+npm run dev:test-data   # otomatik testlerin kullandığı veriyle (XSS denemesi dahil)
 ```
 
-`dev:demo` panelden yapılan değişiklikleri `tests/fixtures/content` klasörüne yazar; denedikten
-sonra `git checkout tests/fixtures` ile geri alın.
+### Örnek (demo) içerik
+
+`content/posts/` altında sitenin görünümünü göstermek için hazırlanmış **9 örnek yazı ve 1 taslak**
+vardır. Her birinin ön bilgisinde `sample: true` bulunur ve yazı sayfasında "Örnek içerik" notu
+gösterilir. Yazılar genel bilgilendirme amaçlıdır; Uğur Durak tarafından gözden geçirilmemiştir.
+Yayına almadan önce her yazıyı panelden okuyun: düzeltip kaydettiğinizde not kalkar, istemediğiniz
+yazıyı silin. Kapak görselleri `public/uploads/2026/` altındadır (lisanslar:
+`public/images/CREDITS.md`).
 
 ## Komutlar
 
@@ -214,6 +220,6 @@ src/lib/                 İçerik okuma, Markdown, oturum, yükleme doğrulama, 
 src/proxy.ts             /admin için ilk kapı (Next.js 16'da middleware'in yeni adı)
 tests/unit/              Vitest testleri
 tests/e2e/               Playwright testleri
-tests/fixtures/content/  Testlerde ve dev:demo'da kullanılan örnek içerik
+tests/fixtures/content/  Otomatik testlerin verisi (dev:test-data ile de açılır)
 docs/                    Mimari notlar, test raporu, güvenlik ve tasarım denetim raporları
 ```

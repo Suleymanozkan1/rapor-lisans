@@ -36,7 +36,7 @@ export function PostCard({ post: p, categories, headingLevel, feature }: { post:
       {p.cover ? (
         <div className="post-card__media">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={p.cover.src} alt={p.cover.alt} width={cover?.width} height={cover?.height} loading="lazy" decoding="async" />
+          <img src={p.cover.src} alt={p.cover.alt} width={cover?.width} height={cover?.height} loading={feature ? "eager" : "lazy"} decoding="async" />
         </div>
       ) : feature ? (
         <span className="post-card__watermark">

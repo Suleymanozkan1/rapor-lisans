@@ -58,6 +58,8 @@ export const postFrontmatterSchema = z.object({
   seoDescription: z.string().trim().max(170).optional(),
   references: z.array(referenceSchema).max(50).default([]),
   revision: z.number().int().min(0).default(0),
+  /** Demo post shipped with the site; shows a notice until the author saves it from the panel. */
+  sample: z.boolean().optional(),
 })
 
 export type PostFrontmatter = z.infer<typeof postFrontmatterSchema>

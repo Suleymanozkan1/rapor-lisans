@@ -60,7 +60,7 @@ export default function PrivacyPage() {
         <h2>Görseller</h2>
         <p>
           Sitedeki genel fotoğraflar temsilidir ve belirli bir işyerini veya olayı göstermez. Kaynak: Unsplash (Unsplash Lisansı);
-          fotoğrafçılar Declan Sun, Tanya Paquet ve John Cardamone.
+          fotoğrafçılar Declan Sun, Tanya Paquet, John Cardamone, Pop &amp; Zebra, Ümit Yıldırım, Ronnakorn Triraganon ve Glenov Brankovic.
         </p>
       </div>
       </div>

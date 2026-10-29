@@ -662,6 +662,16 @@ main {
 .post-card--feature .post-card__body {
   padding: var(--s6);
   justify-content: flex-end;
+  flex: none;
+}
+/* With a cover, the photo takes the free height of the 2x2 feature cell. */
+.post-card--feature .post-card__media {
+  aspect-ratio: auto;
+  flex: 1;
+  min-height: 15rem;
+}
+.post-card--feature:not(:has(.post-card__media)) .post-card__body {
+  flex: 1;
 }
 .post-card--feature h2,
 .post-card--feature h3 {
@@ -1656,4 +1666,9 @@ textarea:focus-visible {
 
 .topic--tint .topic__icon {
   background: var(--surface);
+}
+
+.sample-notice {
+  margin-top: var(--s5);
+  max-width: 54rem;
 }

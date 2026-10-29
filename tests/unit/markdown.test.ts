@@ -66,7 +66,8 @@ describe('renderMarkdown', () => {
     const { words } = await renderMarkdown('bir iki üç dört')
     expect(words).toBe(4)
     expect(readingMinutes(0)).toBe(1)
-    expect(readingMinutes(1000)).toBe(5)
+    expect(readingMinutes(1000)).toBe(6)
+    expect(readingMinutes(300)).toBe(2)
   })
 
   it('extracts plain text', () => {
