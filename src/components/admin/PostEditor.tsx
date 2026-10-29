@@ -5,6 +5,7 @@ import { savePostAction, type ActionState } from '@/app/admin/actions'
 import { slugify } from '@/lib/slug'
 import { Csrf } from './Csrf'
 import { FormStatus } from './FormStatus'
+import { keepValuesOnSubmit } from './keepValues'
 
 export type EditorPost = {
   slug: string
@@ -42,7 +43,7 @@ export function PostEditor({ csrf, post, categories, media }: Props) {
   const err = (k: string) => state.fields?.[k]
 
   return (
-    <form action={action} className="admin-form admin-editor">
+    <form action={action} onSubmit={keepValuesOnSubmit(action)} className="admin-form admin-editor">
       <Csrf token={csrf} />
       <input type="hidden" name="originalSlug" value={post?.slug ?? ''} />
       <input type="hidden" name="sha" value={post?.sha ?? ''} />

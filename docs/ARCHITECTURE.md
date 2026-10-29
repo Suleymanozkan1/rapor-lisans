@@ -22,7 +22,7 @@ Her karar: bağlam, seçim, gerekçe, bedeli. Tarih: 2026-10-29.
 - **Gerekçe:** Ek servis/veritabanı yok, ücret yok; tam geçmiş = denetim kaydı + yedek; içerik
   standart biçimde, başka sisteme taşınabilir. Birden çok dosya (yazı + görsel + medya dizini)
   tek commit'te atomik değişir.
-- **Bedel:** Her kayıt bir build tetikler (Hobby: günde 100 deploy). Yayın gecikmesi ~1 dk.
+- **Bedel:** Her kayıt bir build tetikler (planın günlük deploy sınırına sayılır). Yayın gecikmesi ~1 dk.
   Depo private olmalı (taslaklar Git'te). Medya büyüdükçe depo büyür (görseller küçültülerek
   yüklenmeli).
 - **Alternatif (seçilmedi):** Barındırılan veritabanı. Ücretsiz katmanların ticari kullanım ve
@@ -93,7 +93,29 @@ yazılmaz; sunucu loguna yazılan `admin_audit` JSON satırı kullanıcıyı da 
 çerez loglanmaz.
 Vercel Hobby runtime logları 1 saat tutulur; kalıcı kayıt Git geçmişidir.
 
-## K11. Bilinen sınırlar
+## K11. Mağaza: Shopier vitrini, ödeme sitede değil
+
+- **Bağlam:** Dijital İSG dokümanları satılacak. Markanın zaten bir Shopier mağazası var
+  (`shopier.com/guvenlicalis`, Instagram biyografisinde). Site Vercel Pro'da çalışır.
+- **Seçim:** Ürünler `content/products/<slug>.md` dosyalarında (YAML ön bilgi + Markdown),
+  yazılarla aynı Git CMS ve panel akışıyla yönetilir. `/magaza` ve `/magaza/[slug]` statik
+  üretilir. "Shopier'de satın al" düğmesi ürünün Shopier sayfasına gider; ödeme, fatura,
+  dijital teslimat ve iade Shopier'de yürür.
+- **Gerekçe:** Site kart, sipariş veya müşteri verisi işlemez; bu yüzden veritabanı, ödeme
+  webhook'u, dosya teslim altyapısı ve bunların KVKK/PCI yükü yoktur. Mevcut Shopier mağazası ve
+  hesabı olduğu gibi kullanılır.
+- **Güvenlik:** Satın alma adresi şemada `https://shopier.com` veya `https://www.shopier.com`
+  ile sınırlı (`isShopierUrl`); başka alan adı, `http`, kimlik bilgisi veya port içeren adres
+  hem panelde hem build'de reddedilir. Örnek ürünler (`sample: true`) `noindex`, site haritası
+  dışı ve JSON-LD'siz.
+- **Bedel:** Sitedeki fiyat Shopier'deki fiyattan elle güncellenir; ikisi otomatik eşlenmez.
+  Stok/satış durumu sitede görünmez.
+- **Alternatif (seçilmedi):** iyzico ile sitede ödeme (Checkout Form), sipariş veritabanı ve
+  Vercel Blob üzerinden imzalı indirme bağlantıları. Daha fazla kontrol verir ama veritabanı,
+  webhook doğrulaması, teslim ve iade akışı, müşteri verisi saklama ve buna bağlı yasal
+  yükümlülükler getirir. Kullanıcı Shopier'i seçti.
+
+## K12. Bilinen sınırlar
 
 - Ölçek: tek yönetici. Çok kullanıcılı rol sistemi yok.
 - Zamanlanmış yayın için otomatik build yok.

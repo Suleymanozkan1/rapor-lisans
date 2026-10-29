@@ -6,6 +6,7 @@ import type { Settings } from '@/lib/types'
 import type { MediaItem } from '@/lib/media'
 import { Csrf } from '@/components/admin/Csrf'
 import { FormStatus } from '@/components/admin/FormStatus'
+import { keepValuesOnSubmit } from '@/components/admin/keepValues'
 
 type Props = { csrf: string; settings: Settings; sha: string | null; media: MediaItem[] }
 
@@ -42,7 +43,7 @@ function ImagePick({ id, label, media, value }: { id: string; label: string; med
 export function SettingsForm({ csrf, settings: s, sha, media }: Props) {
   const [state, action, pending] = useActionState<ActionState, FormData>(saveSettingsAction, {})
   return (
-    <form action={action} className="admin-form">
+    <form action={action} onSubmit={keepValuesOnSubmit(action)} className="admin-form">
       <Csrf token={csrf} />
       <input type="hidden" name="sha" value={sha ?? ''} />
       <FormStatus state={state} />
@@ -54,6 +55,13 @@ export function SettingsForm({ csrf, settings: s, sha, media }: Props) {
         <div className="field">
           <label htmlFor="description">Site açıklaması (SEO)</label>
           <textarea id="description" name="description" rows={2} maxLength={170} defaultValue={s.description} />
+        </div>
+        <div className="field">
+          <label htmlFor="motto">Sitenin amacı (ana sayfa, her satıra bir cümle)</label>
+          <textarea id="motto" name="motto" rows={4} defaultValue={s.motto.join('\n')} aria-describedby="motto-help" />
+          <p id="motto-help" className="field__help">
+            Kısa cümleler, en fazla 4 satır ve satır başına 80 karakter. Boşsa kısa biyografi gösterilir.
+          </p>
         </div>
         <ImagePick id="logoSrc" label="Logo" media={media} value={s.logo?.src} />
         <Text id="logoAlt" label="Logo alt metni" value={s.logo?.alt ?? ''} max={300} />
@@ -93,6 +101,18 @@ export function SettingsForm({ csrf, settings: s, sha, media }: Props) {
         <Text id="x" label="X" type="url" value={s.social.x} max={300} />
         <Text id="instagram" label="Instagram" type="url" value={s.social.instagram} max={300} />
         <Text id="youtube" label="YouTube" type="url" value={s.social.youtube} max={300} />
+      </fieldset>
+
+      <fieldset id="magaza" className="admin-fieldset">
+        <legend>Mağaza</legend>
+        <Text
+          id="shopUrl"
+          label="Shopier mağaza adresi"
+          type="url"
+          value={s.shop.url}
+          max={500}
+          help="Örneğin https://www.shopier.com/magaza-adi. Mağaza sayfasında ve site altbilgisinde bağlantı olarak görünür."
+        />
       </fieldset>
 
       <fieldset className="admin-fieldset">

@@ -1,4 +1,4 @@
-import type { AdminPost } from './admin-content'
+import type { AdminPost, AdminProduct } from './admin-content'
 import { isoDay } from './format'
 
 /** Shapes a stored post for the editor form (kept out of the client bundle's types). */
@@ -18,5 +18,24 @@ export function toEditorPost(p: AdminPost) {
     seoDescription: p.seoDescription ?? '',
     references: p.references.map((r) => (r.url ? `${r.title} | ${r.url}` : r.title)).join('\n'),
     updatedAt: isoDay(p.updatedAt),
+  }
+}
+
+export function toEditorProduct(p: AdminProduct) {
+  return {
+    slug: p.slug,
+    sha: p.sha,
+    title: p.title,
+    excerpt: p.excerpt,
+    body: p.body,
+    status: p.status,
+    price: p.price === undefined ? '' : String(p.price).replace('.', ','),
+    shopierUrl: p.shopierUrl,
+    format: p.format ?? '',
+    features: p.features.join('\n'),
+    coverSrc: p.cover?.src ?? '',
+    coverAlt: p.cover?.alt ?? '',
+    order: String(p.order),
+    sample: Boolean(p.sample),
   }
 }

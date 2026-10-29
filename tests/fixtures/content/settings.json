@@ -1,10 +1,37 @@
 {
-  "siteName": "Uğur Durak",
-  "tagline": "İş sağlığı ve güvenliği üzerine notlar",
+  "siteName": "Güvenli Çalış",
+  "tagline": "İş sağlığı ve güvenliği",
   "description": "Test verisi: bu içerik yalnızca otomatik testler ve yerel demo içindir.",
-  "author": { "name": "Uğur Durak", "jobTitle": "İş Sağlığı ve Güvenliği Uzmanı", "shortBio": "Test verisi kısa biyografi.", "bio": "Test verisi **biyografi** metni." },
-  "contact": { "email": "ornek@example.com", "phone": "", "location": "", "note": "" },
-  "social": { "linkedin": "", "x": "", "instagram": "", "youtube": "" },
-  "seo": { "defaultOgImage": "" },
-  "privacy": { "controller": "", "updatedAt": "" }
+  "motto": [
+    "Güvensiz çalışma = Risk",
+    "Güvenli çalışma = Hayat"
+  ],
+  "author": {
+    "name": "Uğur Durak",
+    "jobTitle": "İş Sağlığı ve Güvenliği Uzmanı",
+    "shortBio": "Test verisi kısa biyografi.",
+    "bio": "Test verisi **biyografi** metni."
+  },
+  "contact": {
+    "email": "ornek@example.com",
+    "phone": "",
+    "location": "",
+    "note": ""
+  },
+  "social": {
+    "linkedin": "",
+    "x": "",
+    "instagram": "https://www.instagram.com/guvenlicalis",
+    "youtube": ""
+  },
+  "shop": {
+    "url": "https://www.shopier.com/test-magaza"
+  },
+  "seo": {
+    "defaultOgImage": ""
+  },
+  "privacy": {
+    "controller": "",
+    "updatedAt": ""
+  }
 }

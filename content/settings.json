@@ -1,15 +1,43 @@
 {
-  "siteName": "Uğur Durak",
-  "tagline": "İş sağlığı ve güvenliği üzerine notlar",
-  "description": "Uğur Durak’ın iş sağlığı ve güvenliği üzerine yazıları: risk değerlendirmesi, mevzuat, eğitim ve saha uygulamaları.",
+  "siteName": "Güvenli Çalış",
+  "tagline": "İş sağlığı ve güvenliği",
+  "description": "Güvenli Çalış: Uğur Durak’ın iş sağlığı ve güvenliği yazıları, çalışan hakları, mevzuat ve sahadan notlar; dijital İSG dokümanları.",
+  "motto": [
+    "Güvensiz çalışma risktir, güvenli çalışma hayattır.",
+    "İSG mevzuatını ve çalışan haklarını sade dille anlatıyoruz.",
+    "Sahadan örnekler ve uygulanabilir öneriler paylaşıyoruz.",
+    "İşinize yarayacak dijital İSG dokümanları sunuyoruz."
+  ],
+  "logo": {
+    "src": "/uploads/2026/guvenli-calis-logo.webp",
+    "alt": "Güvenli Çalış logosu"
+  },
   "author": {
     "name": "Uğur Durak",
     "jobTitle": "İş Sağlığı ve Güvenliği Uzmanı",
     "shortBio": "",
     "bio": ""
   },
-  "contact": { "email": "", "phone": "", "location": "", "note": "" },
-  "social": { "linkedin": "", "x": "", "instagram": "", "youtube": "" },
-  "seo": { "defaultOgImage": "" },
-  "privacy": { "controller": "", "updatedAt": "" }
+  "contact": {
+    "email": "",
+    "phone": "",
+    "location": "",
+    "note": ""
+  },
+  "social": {
+    "linkedin": "",
+    "x": "",
+    "instagram": "https://www.instagram.com/guvenlicalis",
+    "youtube": ""
+  },
+  "shop": {
+    "url": "https://www.shopier.com/guvenlicalis"
+  },
+  "seo": {
+    "defaultOgImage": "/uploads/2026/guvenli-calis-paylasim.jpg"
+  },
+  "privacy": {
+    "controller": "",
+    "updatedAt": ""
+  }
 }

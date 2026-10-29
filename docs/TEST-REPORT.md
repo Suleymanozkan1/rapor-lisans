@@ -11,10 +11,10 @@ Son durum, deponun taze bir kopyasında (`git clone` + `npm ci`) README'deki kom
 | `npm ci` | Başarılı, 0 bilinen açık (`npm audit`: 0 vulnerabilities) |
 | `npm run lint` | Başarılı, 0 hata, 0 uyarı (`--max-warnings 0` ile de denendi) |
 | `npm run typecheck` | Başarılı |
-| `npm test` (Vitest) | **67/67 geçti**, 9 dosya |
+| `npm test` (Vitest) | **76/76 geçti**, 10 dosya |
 | `npm run build` | Başarılı; public rotalar statik (○/●), `/admin/*` dinamik (ƒ); uyarı yok |
-| `npm run test:e2e` (Playwright) | **37/37 geçti** (masaüstü Chrome 25, mobil Pixel 7 12) |
-| `npm run scan:design` | Bulgu yok; 15 kontrast çiftinin hepsi WCAG AA üstünde (en düşük 7.37:1) |
+| `npm run test:e2e` (Playwright) | **44/44 geçti** (masaüstü Chrome 29, mobil Pixel 7 15) |
+| `npm run scan:design` | Bulgu yok; iki temada 58 kontrast ölçümünün hepsi WCAG AA üstünde |
 
 Atlanan, silinen veya gevşetilen test yok.
 
@@ -29,13 +29,14 @@ Atlanan, silinen veya gevşetilen test yok.
 | `login.test.ts` | Doğru girişte çerez; yanlış kullanıcı adlarıyla sahibin kilitlenmemesi; eşzamanlı 20 denemeden tam 5'inin değerlendirilmesi; güvenilir IP yokken kilitlenmeme; doğru ve yanlış kullanıcı adının aynı biçimde sınırlanması; parola değişince oturumun düşmesi |
 | `upload.test.ts` | İçerik imzası; güvenli dosya adı; SVG, sahte uzantı/MIME, eksik alt metin, boş ve büyük dosya reddi |
 | `image-meta.test.ts` | Gerçek JPEG/PNG/WebP boyutları; EXIF/GPS, yorum, PNG metin/eXIf, WebP EXIF/XMP, JFXX, C2PA ve bilinmeyen parçaların silinmesi; yön bilgisinin korunması ve boyutların döndürülmesi; dosya sonu yükünün atılması; 3 MB saldırı dosyalarının 500 ms altında reddi; kesik dosyalar |
-| `store.test.ts` | Yol geçişi reddi; yerel depo iyimser kilit ve çakışmada hiçbir şey yazmama; sahte GitHub API ile atomik çok dosyalı commit, yol eşleme, token'ın yalnızca başlıkta olması, eski SHA reddi, hızlı ileri sarılamayan ref çakışması, hata mesajında token olmaması; yazı yaşam döngüsü (taslak, yayın, revizyon, slug değişimi, çakışma, etiket yeniden adlandırma, silme ve işlem kaydı) |
+| `store.test.ts` | Yol geçişi reddi; yerel depo iyimser kilit ve çakışmada hiçbir şey yazmama; sahte GitHub API ile atomik çok dosyalı commit, yol eşleme, token'ın yalnızca başlıkta olması, eski SHA reddi, hızlı ileri sarılamayan ref çakışması, hata mesajında token olmaması; yazı yaşam döngüsü (taslak, yayın, revizyon, slug değişimi, çakışma, etiket yeniden adlandırma, silme ve işlem kaydı); ürün yaşam döngüsü (oluşturma, iyimser kilit, örnek etiketinin kaydedince kalkması, yabancı bağlantı reddi, adres değişimi, kullanımdaki görselin korunması, silme) |
 | `seo.test.ts` | JSON-LD `</script>` kaçışı; metin kırpma |
+| `products.test.ts` | Shopier bağlantı izin listesi (http, benzer alan adları, `shopier.com.evil`, kullanıcı adı/parola, port, kök yol, `javascript:` reddi); eski ayar dosyalarının yeni alanlar olmadan yüklenmesi; ürün dosyası gidiş-dönüş; yabancı veya eksik satın alma bağlantısı, negatif ve kuruş altı fiyat, YAML alias reddi; fiyat girişi ayrıştırma ve TL biçimlendirme; ürün sıralaması |
 
 ## Uçtan uca testler (`tests/e2e`)
 
 Test verisiyle (`tests/fixtures/content`: 12 yayımlanmış yazı, 1 taslak, 1 gelecek tarihli,
-1 XSS denemesi) ayrı bir production build alınır ve `127.0.0.1:3100` üzerinde çalıştırılır.
+1 XSS denemesi; 3 ürün: yayında, örnek ve taslak, birinde XSS denemesi) ayrı bir production build alınır ve `127.0.0.1:3100` üzerinde çalıştırılır.
 
 **Public site** (masaüstü ve mobil):
 ana sayfa (tek h1, `lang="tr"`, konsol hatası yok), güvenlik başlıkları ve ziyaretçiye çerez
@@ -46,7 +47,11 @@ başlık seviyeleri), taslak ve gelecek tarihli yazının hiçbir public çıkt�
 site haritası, RSS, arama dizini, kategori), XSS yazısında betik çalışmaması, arama (Türkçe
 büyük harf, kategori filtresi, boş sonuç, taslak metni aranamaması), 404, robots/sitemap/RSS,
 hakkımda (Person JSON-LD), iletişim, gizlilik, tüm görsellerde alt metin, 390 px'te yatay
-kaydırma olmaması.
+kaydırma olmaması. Mağaza: yalnızca yayındaki ürünlerin listelenmesi, fiyat biçimi, satın alma
+bağlantısının Shopier ürün adresi ve `target=_blank` + `rel=noopener noreferrer` olması, sayfadaki
+tüm dış bağlantıların izinli alan adlarında olması, `Product` JSON-LD ve teklif, örnek ürünün
+etiketli, `noindex`, JSON-LD'siz ve site haritası dışında olması, taslak ürünün hiçbir public
+çıktıda görünmemesi, ürün açıklamasındaki betiğin çalışmaması.
 
 **Yönetim paneli**:
 anonim kullanıcının tüm panel rotalarından yönlendirilmesi ve taslak içeriğin sızmaması, sahte
@@ -57,9 +62,11 @@ yayından kaldır, yanlış ve doğru onayla silme, işlem kaydı); iki sekmede 
 reddedilmesi; sahte ve eksik CSRF token'ının reddi (dosya değişmiyor); yakalanan bir Server
 Action isteğinin çerezsiz ve sahte çerezle tekrarının reddi; kategori ekleme, kullanımdaki
 kategorinin silinememesi; medya: SVG, sahte PNG, uzantı uyuşmazlığı reddi, PNG yükleme, GPS ve
-HTML yükü eklenmiş JPEG'in temizlenip Chromium'da çözülebilmesi; ayarlar: `javascript:` URL
-reddi, geçerli kayıt, paylaşım görselinin ardışık kayıtlarda korunması; etiket yeniden
-adlandırma; panel sayfalarının 390 px'te kullanılabilirliği.
+HTML yükü eklenmiş JPEG'in temizlenip Chromium'da çözülebilmesi; ayarlar: `javascript:` URL ve Shopier dışı mağaza adresi
+reddi, amaç cümlelerinin temizlenerek kaydı, geçerli kayıt, paylaşım görselinin ardışık kayıtlarda korunması; etiket yeniden
+adlandırma; ürünler: anonim erişimin reddi, Shopier dışı bağlantı ve geçersiz fiyatın reddi
+(dosya yazılmadan), oluşturma, düzenleme, yanlış ve doğru onayla silme, işlem kaydı; panel
+sayfalarının 390 px'te kullanılabilirliği.
 
 ## Geliştirme sırasında testlerin yakaladığı hatalar
 
@@ -70,6 +77,7 @@ adlandırma; panel sayfalarının 390 px'te kullanılabilirliği.
 | Etiketler Türkçe karakterlerini kaybediyordu ("yuksekte calisma") | Etiket slug olarak saklanıyordu | Görünen ad saklanıyor, URL türetiliyor |
 | Ayarlar kaydı paylaşım görselini siliyordu | Form alanı adı uyuşmazlığı | Düzeltildi, e2e testi eklendi |
 | Temiz kurulumda `typecheck` başarısızdı | Next'in ürettiği `PageProps` tipleri yoktu | Betik önce `next typegen` çalıştırıyor |
+| Hata dönen bir form gönderiminden sonra paneldeki girdiler siliniyordu (ör. çakışmada yazı gövdesi) | React 19 form `action` çalıştıktan sonra formu sıfırlıyor | Panel formları `onSubmit` ile gönderiyor, değerler korunuyor; JavaScript yoksa form normal gönderilir |
 | Düz metin blokları birleştiriyordu ("Başlıkkalın") | `mdast-util-to-string` blokları ayırmıyor | Blok bazlı metin çıkarma |
 
 ## Çalıştırılamayan veya doğrulanamayan kontroller

@@ -1,7 +1,19 @@
 import 'server-only'
-import { parsePostFile, serializePost, ContentParseError } from './frontmatter'
+import { parsePostFile, parseProductFile, serializePost, serializeProduct, ContentParseError } from './frontmatter'
 import { getStore, ConflictError, type Change, type ContentStore, type LogicalPath } from './store'
-import { categoriesSchema, settingsSchema, postFrontmatterSchema, type Category, type Post, type PostFrontmatter, type Settings } from './types'
+import {
+  categoriesSchema,
+  settingsSchema,
+  postFrontmatterSchema,
+  productFrontmatterSchema,
+  type Category,
+  type Post,
+  type PostFrontmatter,
+  type Product,
+  type ProductFrontmatter,
+  type Settings,
+} from './types'
+import { sortProducts } from './products'
 import { DEFAULT_SETTINGS } from './defaults'
 import { mediaIndexSchema, type MediaItem } from './media'
 import { isValidSlug, slugify } from './slug'
@@ -14,11 +26,17 @@ import { isValidSlug, slugify } from './slug'
 
 export type Versioned<T> = { value: T; sha: string | null }
 export type AdminPost = Post & { sha: string }
+export type AdminProduct = Product & { sha: string }
 export type BrokenFile = { path: string; error: string }
 
 const postPath = (slug: string): LogicalPath => {
   if (!isValidSlug(slug)) throw new Error('Geçersiz slug')
   return `content/posts/${slug}.md`
+}
+
+const productPath = (slug: string): LogicalPath => {
+  if (!isValidSlug(slug)) throw new Error('Geçersiz slug')
+  return `content/products/${slug}.md`
 }
 
 function audit(user: string, action: string, target: string) {
@@ -121,6 +139,71 @@ export async function deletePost(slug: string, sha: string, user: string) {
   audit(user, 'yazıyı sildi', slug)
 }
 
+/* Products (Shopier showcase) */
+
+export async function listAdminProducts(): Promise<{ products: AdminProduct[]; broken: BrokenFile[] }> {
+  const store = getStore()
+  const entries = (await store.list('content/products')).filter((e) => e.path.endsWith('.md'))
+  const files = await store.readMany(entries.map((e) => e.path))
+  const products: AdminProduct[] = []
+  const broken: BrokenFile[] = []
+  for (const [p, f] of files) {
+    const slug = p.slice('content/products/'.length, -3)
+    try {
+      products.push({ ...parseProductFile(slug, f.content.toString('utf8')), sha: f.sha })
+    } catch (e) {
+      broken.push({ path: p, error: e instanceof ContentParseError ? e.message : 'Okunamadı' })
+    }
+  }
+  return { products: sortProducts(products), broken }
+}
+
+export async function getAdminProduct(slug: string): Promise<AdminProduct | null> {
+  if (!isValidSlug(slug)) return null
+  const f = await getStore().read(productPath(slug))
+  if (!f) return null
+  return { ...parseProductFile(slug, f.content.toString('utf8')), sha: f.sha }
+}
+
+export type SaveProductInput = {
+  originalSlug: string | null
+  sha: string | null
+  slug: string
+  frontmatter: Omit<ProductFrontmatter, 'createdAt' | 'updatedAt' | 'sample'>
+  body: string
+}
+
+export async function saveProduct(input: SaveProductInput, user: string): Promise<string> {
+  const store = getStore()
+  const existing = input.originalSlug ? await getAdminProduct(input.originalSlug) : null
+  if (input.originalSlug && !existing) throw new ConflictError('Ürün bulunamadı; silinmiş olabilir.')
+  if (existing && existing.sha !== input.sha) throw new ConflictError('Ürün başka bir oturumda değiştirilmiş. Sayfayı yenileyin.')
+  const now = new Date().toISOString()
+  // Saving from the panel means the author has reviewed it: the demo label is dropped.
+  const fm: ProductFrontmatter = productFrontmatterSchema.parse({
+    ...input.frontmatter,
+    createdAt: existing?.createdAt ?? now,
+    updatedAt: existing ? now : undefined,
+  })
+  const slugChanged = existing && existing.slug !== input.slug
+  const changes: Change[] =
+    !existing || slugChanged
+      ? [
+          { path: productPath(input.slug), content: serializeProduct(fm, input.body), expectedSha: null },
+          ...(slugChanged ? [{ path: productPath(existing.slug), delete: true as const, expectedSha: existing.sha }] : []),
+        ]
+      : [{ path: productPath(input.slug), content: serializeProduct(fm, input.body), expectedSha: existing.sha }]
+  const action = !existing ? 'ürün ekledi' : slugChanged ? `ürünün adresini değiştirdi (eski: ${existing.slug}), yeni:` : 'ürünü güncelledi'
+  await store.commit(changes, message(user, action, input.slug))
+  audit(user, action, input.slug)
+  return input.slug
+}
+
+export async function deleteProduct(slug: string, sha: string, user: string) {
+  await getStore().commit([{ path: productPath(slug), delete: true, expectedSha: sha }], message(user, 'ürünü sildi', slug))
+  audit(user, 'ürünü sildi', slug)
+}
+
 /* Categories */
 
 export async function getAdminCategories(): Promise<Versioned<Category[]>> {
@@ -194,8 +277,9 @@ export async function addMedia(file: { name: string; content: Buffer }, item: Me
 
 /** Lists where a media file is still referenced, so it is not deleted from under a post. */
 export async function mediaUsage(src: string): Promise<string[]> {
-  const [{ posts }, settings] = await Promise.all([listAdminPosts(), getAdminSettings()])
+  const [{ posts }, { products }, settings] = await Promise.all([listAdminPosts(), listAdminProducts(), getAdminSettings()])
   const used = posts.filter((p) => p.cover?.src === src || p.body.includes(src)).map((p) => `yazı: ${p.title}`)
+  used.push(...products.filter((p) => p.cover?.src === src || p.body.includes(src)).map((p) => `ürün: ${p.title}`))
   const s = settings.value
   if ([s.logo?.src, s.author.photo?.src, s.seo.defaultOgImage].includes(src)) used.push('site ayarları')
   return used

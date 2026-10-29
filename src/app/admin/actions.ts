@@ -9,6 +9,7 @@ import {
   addMedia,
   deleteMedia,
   deletePost,
+  deleteProduct,
   getAdminCategories,
   getAdminMedia,
   getAdminSettings,
@@ -16,6 +17,7 @@ import {
   listAdminPosts,
   rewriteTag,
   savePost,
+  saveProduct,
   saveCategories,
   saveSettings,
   setPostStatus,
@@ -24,6 +26,7 @@ import { isValidSlug, slugify } from '@/lib/slug'
 import { referenceSchema, settingsSchema, type Settings } from '@/lib/types'
 import { UploadError, validateImageUpload, MAX_UPLOAD_BYTES } from '@/lib/upload'
 import { isoDay } from '@/lib/format'
+import { parsePrice } from '@/lib/products'
 
 export type ActionState = { ok?: string; error?: string; fields?: Record<string, string> }
 
@@ -152,6 +155,73 @@ export async function deletePostAction(_prev: ActionState, fd: FormData): Promis
   redirect('/admin/yazilar?durum=silindi')
 }
 
+/* Products */
+
+export async function saveProductAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  let target: string
+  try {
+    const session = await requireAdminAction(fd)
+    const title = str(fd, 'title', 200).trim()
+    const slug = slugify(str(fd, 'slug', 200) || title)
+    if (!isValidSlug(slug)) return { error: 'Formda düzeltilmesi gereken alanlar var.', fields: { slug: 'Geçerli bir adres (slug) girin.' } }
+    const price = parsePrice(str(fd, 'price', 20))
+    if (price === null) return { error: 'Formda düzeltilmesi gereken alanlar var.', fields: { price: 'Fiyatı 149 veya 149,90 biçiminde girin.' } }
+
+    const coverSrc = str(fd, 'coverSrc', 300)
+    const coverAlt = str(fd, 'coverAlt', 300).trim()
+    if (coverSrc) {
+      const { value: media } = await getAdminMedia()
+      if (!media.some((m) => m.src === coverSrc)) return { error: 'Ürün görseli medya kütüphanesinde bulunamadı.' }
+      if (!coverAlt) return { error: 'Formda düzeltilmesi gereken alanlar var.', fields: { 'cover.alt': 'Ürün görseli için alt metin zorunlu.' } }
+    }
+    const order = Number.parseInt(str(fd, 'order', 5), 10)
+
+    await saveProduct(
+      {
+        originalSlug: str(fd, 'originalSlug', 100) || null,
+        sha: str(fd, 'sha', 64) || null,
+        slug,
+        body: str(fd, 'body', 50_000),
+        frontmatter: {
+          title,
+          excerpt: str(fd, 'excerpt', 300),
+          status: str(fd, 'status') === 'published' ? 'published' : 'draft',
+          price,
+          shopierUrl: str(fd, 'shopierUrl', 500).trim(),
+          format: str(fd, 'format', 80).trim() || undefined,
+          features: str(fd, 'features', 3000)
+            .split('\n')
+            .map((l) => l.replace(/^[-*]\s*/, '').trim())
+            .filter(Boolean),
+          cover: coverSrc ? { src: coverSrc, alt: coverAlt } : undefined,
+          order: Number.isFinite(order) ? order : 100,
+        },
+      },
+      session.sub,
+    )
+    revalidatePath('/admin', 'layout')
+    target = `/admin/urunler/${slug}?durum=urun-kaydedildi`
+  } catch (e) {
+    return describe(e)
+  }
+  redirect(target)
+}
+
+export async function deleteProductAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  try {
+    const session = await requireAdminAction(fd)
+    const slug = str(fd, 'slug', 100)
+    if (str(fd, 'confirm', 100).trim() !== slug) {
+      return { error: 'Silmeyi onaylamak için ürünün adresini (slug) aynen yazın.' }
+    }
+    await deleteProduct(slug, str(fd, 'sha', 64), session.sub)
+    revalidatePath('/admin', 'layout')
+  } catch (e) {
+    return describe(e)
+  }
+  redirect('/admin/urunler?durum=urun-silindi')
+}
+
 /* Categories */
 
 export async function saveCategoryAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
@@ -241,6 +311,10 @@ export async function saveSettingsAction(_prev: ActionState, fd: FormData): Prom
       siteName: str(fd, 'siteName', 80),
       tagline: str(fd, 'tagline', 160),
       description: str(fd, 'description', 170),
+      motto: str(fd, 'motto', 2000)
+        .split('\n')
+        .map((l) => l.replace(/\s+/g, ' ').trim())
+        .filter(Boolean),
       logo: image('logo'),
       author: {
         name: str(fd, 'authorName', 80),
@@ -261,6 +335,7 @@ export async function saveSettingsAction(_prev: ActionState, fd: FormData): Prom
         instagram: str(fd, 'instagram', 300).trim(),
         youtube: str(fd, 'youtube', 300).trim(),
       },
+      shop: { url: str(fd, 'shopUrl', 500).trim() },
       seo: { defaultOgImage: image('defaultOgImage')?.src ?? '' },
       privacy: { controller: str(fd, 'privacyController', 200), updatedAt: isoDay(new Date().toISOString()) },
     })

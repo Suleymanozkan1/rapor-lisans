@@ -3,10 +3,11 @@ import { readdirSync, readFileSync, existsSync } from 'node:fs'
 import path from 'node:path'
 import { cache } from 'react'
 import { contentDir } from './env'
-import { parsePostFile } from './frontmatter'
+import { parsePostFile, parseProductFile } from './frontmatter'
 import { isPublic, sortByDate } from './posts'
 import { isValidSlug } from './slug'
-import { categoriesSchema, settingsSchema, type Category, type Post, type Settings } from './types'
+import { categoriesSchema, settingsSchema, type Category, type Post, type Product, type Settings } from './types'
+import { sortProducts } from './products'
 import { DEFAULT_SETTINGS } from './defaults'
 import { mediaIndexSchema, type MediaItem } from './media'
 
@@ -40,6 +41,25 @@ export const getPublishedPosts = cache((): Post[] => getAllPosts().filter((p) =>
 
 export function getPublishedPost(slug: string): Post | undefined {
   return getPublishedPosts().find((p) => p.slug === slug)
+}
+
+export const getAllProducts = cache((): Product[] => {
+  const dir = path.join(contentDir(), 'products')
+  if (!existsSync(dir)) return []
+  const products = readdirSync(dir)
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => {
+      const slug = f.slice(0, -3)
+      if (!isValidSlug(slug)) throw new Error(`content/products/${f}: geçersiz dosya adı (yalnızca a-z, 0-9 ve tire)`)
+      return parseProductFile(slug, readFileSync(path.join(dir, f), 'utf8'))
+    })
+  return sortProducts(products)
+})
+
+export const getPublishedProducts = cache((): Product[] => getAllProducts().filter((p) => p.status === 'published'))
+
+export function getPublishedProduct(slug: string): Product | undefined {
+  return getPublishedProducts().find((p) => p.slug === slug)
 }
 
 export const getCategories = cache((): Category[] => {

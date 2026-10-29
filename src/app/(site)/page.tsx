@@ -1,16 +1,21 @@
 import Link from 'next/link'
-import { HardHat } from '@phosphor-icons/react/ssr'
-import { getCategories, getPublishedPosts, getSettings, mediaFor } from '@/lib/content'
+import { BookOpenText, HardHat, ShoppingBagOpen, Warning } from '@phosphor-icons/react/ssr'
+import { getCategories, getPublishedPosts, getPublishedProducts, getSettings, mediaFor } from '@/lib/content'
 import { PostList, EmptyPosts } from '@/components/site/PostList'
+import { ProductList } from '@/components/site/ProductList'
 import { CategoryIcon, SITE_PHOTOS } from '@/lib/visuals'
 
 /** Visual treatment per bento cell, in order; the grid has exactly as many cells as categories. */
 const TOPIC_STYLES = ['topic--photo', 'topic--accent', 'topic--tint', 'topic--ink', '', 'topic--tint']
 
+/** Icons for the purpose lines, in order (risk, mevzuat, saha, mağaza); decorative. */
+const MOTTO_ICONS = [Warning, BookOpenText, HardHat, ShoppingBagOpen]
+
 export default function HomePage() {
   const s = getSettings()
   const posts = getPublishedPosts()
   const categories = getCategories()
+  const products = getPublishedProducts()
   const latest = posts[0]
   const portrait = s.author.photo
   const portraitMeta = mediaFor(portrait?.src)
@@ -20,24 +25,50 @@ export default function HomePage() {
     <>
       <section className="hero" aria-labelledby="intro-title">
         <div className="wrap hero__inner">
-          <div>
-            {s.author.jobTitle ? (
-              <p className="hero__role rise">
-                <HardHat size={24} weight="fill" aria-hidden="true" />
-                {s.author.jobTitle}
-              </p>
+          <div className="hero__copy">
+            {s.logo ? (
+              // Decorative: the h1 carries the name.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className="hero__logo rise" src={s.logo.src} alt="" width={136} height={136} fetchPriority="high" />
             ) : null}
             <h1 id="intro-title" className="rise rise-2">
-              {s.author.name}
+              {s.siteName}
             </h1>
-            {s.author.shortBio || s.description ? <p className="hero__bio rise rise-3">{s.author.shortBio || s.description}</p> : null}
+            {s.motto.length > 0 ? (
+              <ul className="hero__motto rise rise-3">
+                {s.motto.map((line, i) => {
+                  const I = MOTTO_ICONS[i] ?? HardHat
+                  return (
+                    <li key={line}>
+                      <I size={28} weight="fill" aria-hidden="true" />
+                      {line}
+                    </li>
+                  )
+                })}
+              </ul>
+            ) : s.author.shortBio || s.description ? (
+              <p className="hero__bio rise rise-3">{s.author.shortBio || s.description}</p>
+            ) : null}
+            <p className="hero__byline rise rise-3">
+              <HardHat size={20} weight="fill" aria-hidden="true" />
+              <span>
+                Hazırlayan: <Link href="/hakkimda">{s.author.name}</Link>
+                {s.author.jobTitle ? `, ${s.author.jobTitle}` : ''}
+              </span>
+            </p>
             <div className="hero__actions rise rise-4">
-              <Link className="button" href="/blog">
+              <Link className="button button--black" href="/blog">
                 Yazıları oku
               </Link>
-              <Link className="button button--ghost-light" href="/hakkimda">
-                Hakkımda
-              </Link>
+              {products.length > 0 ? (
+                <Link className="button button--outline-black" href="/magaza">
+                  Mağaza
+                </Link>
+              ) : (
+                <Link className="button button--outline-black" href="/hakkimda">
+                  Hakkımda
+                </Link>
+              )}
             </div>
           </div>
           <div>
@@ -91,6 +122,18 @@ export default function HomePage() {
         )}
       </section>
 
+      {products.length > 0 ? (
+        <section className="wrap section" aria-labelledby="store-title">
+          <div className="section__head">
+            <h2 id="store-title">Mağazadan</h2>
+            <Link className="section__more" href="/magaza">
+              {products.length > 3 ? `Tüm ürünler (${products.length})` : 'Mağazaya git'}
+            </Link>
+          </div>
+          <ProductList products={products.slice(0, 3)} headingLevel={3} />
+        </section>
+      ) : null}
+
       {categories.length > 0 ? (
         <section className="wrap section" aria-labelledby="topics-title">
           <div className="section__head">
@@ -126,11 +169,11 @@ export default function HomePage() {
           </div>
           <div>
             {s.contact.email ? (
-              <a className="button button--ink" href={`mailto:${s.contact.email}`}>
+              <a className="button button--black" href={`mailto:${s.contact.email}`}>
                 E-posta gönder
               </a>
             ) : (
-              <Link className="button button--ink" href="/iletisim">
+              <Link className="button button--black" href="/iletisim">
                 İletişim
               </Link>
             )}

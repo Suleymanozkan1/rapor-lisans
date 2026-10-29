@@ -5,6 +5,7 @@ import { deleteCategoryAction, saveCategoryAction, type ActionState } from '@/ap
 import type { Category } from '@/lib/types'
 import { Csrf } from '@/components/admin/Csrf'
 import { FormStatus } from '@/components/admin/FormStatus'
+import { keepValuesOnSubmit } from '@/components/admin/keepValues'
 
 type Props = { csrf: string; categories: Category[]; sha: string | null; counts: Record<string, number> }
 
@@ -14,7 +15,7 @@ function CategoryForm({ csrf, sha, category, count }: { csrf: string; sha: strin
   const id = category?.slug ?? 'yeni'
   return (
     <div className="admin-card">
-      <form action={action} className="admin-form">
+      <form action={action} onSubmit={keepValuesOnSubmit(action)} className="admin-form">
         <Csrf token={csrf} />
         <input type="hidden" name="sha" value={sha ?? ''} />
         <input type="hidden" name="originalSlug" value={category?.slug ?? ''} />

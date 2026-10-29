@@ -227,4 +227,40 @@ describe('admin content service (local store)', () => {
       svc.savePost({ originalSlug: null, sha: null, slug: '../../x', frontmatter: { title: 'abc', excerpt: '', status: 'draft', tags: [], references: [] }, body: '' }, 'u'),
     ).rejects.toThrow()
   })
+
+  it('product lifecycle: create, edit with locking, drop the sample label, rename, delete, media in use', async () => {
+    const svc = await import('@/lib/admin-content')
+    const fm = { title: 'Kontrol listeleri', excerpt: 'Özet', status: 'published' as const, price: 149.9, shopierUrl: 'https://www.shopier.com/guvenlicalis/123', features: ['İskele'], order: 1 }
+    await svc.saveProduct({ originalSlug: null, sha: null, slug: 'kontrol', frontmatter: fm, body: 'Gövde' }, 'ugur')
+    const p = (await svc.getAdminProduct('kontrol'))!
+    expect(p.price).toBe(149.9)
+    expect(p.updatedAt).toBeUndefined()
+    expect(readFileSync(path.join(dir, 'content', 'products', 'kontrol.md'), 'utf8')).toContain('shopierUrl: https://www.shopier.com/guvenlicalis/123')
+
+    // A demo product loses its label once saved from the panel.
+    const file = path.join(dir, 'content', 'products', 'kontrol.md')
+    const { writeFileSync } = await import('node:fs')
+    writeFileSync(file, readFileSync(file, 'utf8').replace('order: 1', 'order: 1\nsample: true'))
+    const demo = (await svc.getAdminProduct('kontrol'))!
+    expect(demo.sample).toBe(true)
+    await svc.saveProduct({ originalSlug: 'kontrol', sha: demo.sha, slug: 'kontrol', frontmatter: { ...fm, price: 199 }, body: 'Gövde' }, 'ugur')
+    const edited = (await svc.getAdminProduct('kontrol'))!
+    expect(edited.sample).toBeUndefined()
+    expect(edited.updatedAt).toBeDefined()
+    expect(edited.createdAt).toBe(p.createdAt)
+
+    await expect(svc.saveProduct({ originalSlug: 'kontrol', sha: demo.sha, slug: 'kontrol', frontmatter: fm, body: '' }, 'ugur')).rejects.toThrow(ConflictError)
+    await expect(
+      svc.saveProduct({ originalSlug: null, sha: null, slug: 'kotu', frontmatter: { ...fm, shopierUrl: 'https://shopier.com.evil.example/x' }, body: '' }, 'ugur'),
+    ).rejects.toThrow()
+
+    await svc.saveProduct({ originalSlug: 'kontrol', sha: edited.sha, slug: 'kontrol-listeleri', frontmatter: { ...fm, cover: { src: '/uploads/2026/k.jpg', alt: 'Kapak' } }, body: '' }, 'ugur')
+    expect(await svc.getAdminProduct('kontrol')).toBeNull()
+    expect(await svc.mediaUsage('/uploads/2026/k.jpg')).toEqual(['ürün: Kontrol listeleri'])
+    expect((await svc.listAdminProducts()).products.map((x) => x.slug)).toEqual(['kontrol-listeleri'])
+
+    await svc.deleteProduct('kontrol-listeleri', (await svc.getAdminProduct('kontrol-listeleri'))!.sha, 'ugur')
+    expect((await svc.listAdminProducts()).products).toEqual([])
+    expect(readFileSync(path.join(dir, 'content', '.admin-activity.jsonl'), 'utf8')).toContain('panel: ürünü sildi kontrol-listeleri')
+  })
 })

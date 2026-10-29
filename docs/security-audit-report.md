@@ -191,6 +191,24 @@ Ajan düzeltmeleri kodun kopyasında çalıştırdı: 50 paralel denemeden tam 5
 Bu ikinci tur düzeltmeler ayrıca yeniden denetlenmedi; her biri kendi testiyle ve tüm test
 paketinin yeniden çalıştırılmasıyla doğrulandı.
 
+## Mağaza ve marka değişikliği denetimi (2026-10-29)
+
+Kapsam: `content/products`, `/magaza` sayfaları, panelde ürün ekleme, düzenleme ve silme,
+ayarlara eklenen `motto` ve `shop.url` alanları, panel formlarının `onSubmit` ile gönderilmesi.
+Yeni bulgu yok. Kontrol edilenler:
+
+| Konu | Sonuç |
+|---|---|
+| Satın alma bağlantısıyla zararlı adrese yönlendirme | Şema yalnızca `https:` + `shopier.com` / `www.shopier.com` ana makinesini, kimlik bilgisi ve port olmadan, boş olmayan bir yolla kabul eder. `shopier.com.evil.example`, `evilshopier.com`, `www.shopier.com.`, `//`, `javascript:` ve ters eğik çizgi denemeleri reddedilir veya Shopier'e çözülür (birim testi). Kural panelde ve build'de aynı şemadan uygulanır; elle commit edilen bozuk dosya build'i durdurur. |
+| Ürün açıklamasında saklanan XSS | Açıklama yazılarla aynı `rehype-sanitize` hattından geçer; e2e testi `<script>`, `onerror` ve `javascript:` bağlantısının çalışmadığını doğrular. Özellik maddeleri ve amaç cümleleri düz metin olarak işlenir. |
+| JSON-LD enjeksiyonu | `Product` verisi mevcut `jsonLd()` kaçışıyla yazılır. |
+| Yetkisiz yazma | `saveProductAction` ve `deleteProductAction` ilk satırda `requireAdminAction` çağırır (oturum + CSRF + Origin). Anonim istekler tüm `/admin/urunler` rotalarından yönlendirilir (e2e). |
+| Yol geçişi | Ürün yolları `isValidSlug` ile doğrulanır ve depo katmanının mantıksal yol kontrolünden geçer. |
+| Eşzamanlı düzenleme | Ürün kaydı blob SHA ile iyimser kilit kullanır; eski sekmeden kayıt reddedilir (birim testi). |
+| Kişisel veri | Site sipariş, ödeme veya müşteri verisi almaz; gizlilik sayfasına Shopier'in bu verileri işlediği bilgisi eklendi. Dış bağlantılar `rel="noopener noreferrer"` ile açılır. |
+| Sahte teklif | Örnek ürünler etiketli, `noindex`, site haritası ve JSON-LD dışında; yayına almadan önce silinmeleri README'de belirtildi. |
+| Form değerlerinin korunması | `onSubmit` yolu aynı Server Action'ı aynı FormData ile (CSRF alanı dahil) çağırır; güvenlik denetimleri değişmedi. |
+
 ## Sapmalar (yöntem uyarlaması)
 
 - Skill altı aşamalı tam denetimi ve her aday için bağımsız doğrulamayı öngörür. Bu çalışmada:

@@ -11,6 +11,8 @@ const MESSAGES: Record<string, { kind: 'ok' | 'warn' | 'danger'; text: string }>
   'ayarlar-kaydedildi': { kind: 'ok', text: 'Ayarlar kaydedildi. Değişiklikler bir sonraki dağıtımla sitede görünür.' },
   'gorsel-yuklendi': { kind: 'ok', text: 'Görsel yüklendi. Sitede bir sonraki dağıtımdan sonra görünür.' },
   'gorsel-silindi': { kind: 'ok', text: 'Görsel silindi.' },
+  'urun-kaydedildi': { kind: 'ok', text: 'Ürün kaydedildi. Mağaza sayfası bir sonraki dağıtımla güncellenir.' },
+  'urun-silindi': { kind: 'ok', text: 'Ürün silindi.' },
   cakisma: { kind: 'danger', text: 'İşlem yapılamadı: içerik başka bir oturumda değişmiş veya depoya ulaşılamadı. Sayfayı yenileyin.' },
 }
 

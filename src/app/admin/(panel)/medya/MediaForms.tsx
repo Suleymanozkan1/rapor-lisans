@@ -4,11 +4,12 @@ import { useActionState } from 'react'
 import { deleteMediaAction, uploadMediaAction, type ActionState } from '@/app/admin/actions'
 import { Csrf } from '@/components/admin/Csrf'
 import { FormStatus } from '@/components/admin/FormStatus'
+import { keepValuesOnSubmit } from '@/components/admin/keepValues'
 
 export function UploadForm({ csrf }: { csrf: string }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(uploadMediaAction, {})
   return (
-    <form action={action} className="admin-form">
+    <form action={action} onSubmit={keepValuesOnSubmit(action)} className="admin-form">
       <Csrf token={csrf} />
       <FormStatus state={state} />
       <div className="field">

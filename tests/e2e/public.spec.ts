@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 
-const SECRET_MARKERS = ['TASLAK-GIZLI', 'gizli-taslak', 'Gizli taslak', 'ILERI-TARIHLI', 'ileri-tarihli', 'taslak-etiketi', 'Taslak etiketi']
+const SECRET_MARKERS = ['TASLAK-URUN-GIZLI', 'gizli-taslak-urun', 'TASLAK-GIZLI', 'gizli-taslak', 'Gizli taslak', 'ILERI-TARIHLI', 'ileri-tarihli', 'taslak-etiketi', 'Taslak etiketi']
 
 function trackConsole(page: Page) {
   const errors: string[] = []
@@ -20,9 +20,13 @@ test('home page renders with one h1, topics and latest posts', async ({ page }) 
   expect(res?.status()).toBe(200)
   await expect(page.locator('html')).toHaveAttribute('lang', 'tr')
   await expect(page.locator('h1')).toHaveCount(1)
-  await expect(page.locator('h1')).toHaveText('Uğur Durak')
+  await expect(page.locator('h1')).toHaveText('Güvenli Çalış')
+  await expect(page.locator('.hero__motto li')).toHaveText(['Güvensiz çalışma = Risk', 'Güvenli çalışma = Hayat'])
+  await expect(page.locator('.hero').getByRole('link', { name: 'Uğur Durak' })).toHaveAttribute('href', '/hakkimda')
   await expect(page.getByRole('heading', { name: 'Konu alanları' })).toBeVisible()
   await expect(page.locator('.post-card')).toHaveCount(6)
+  await expect(page.locator('.product-card')).toHaveCount(2)
+  await expect(page.getByRole('navigation', { name: 'Ana menü' }).getByRole('link', { name: 'Mağaza' })).toBeVisible()
   await noHorizontalScroll(page)
   expect(errors).toEqual([])
 })
@@ -77,7 +81,7 @@ test('blog list paginates and filters by category and tag', async ({ page }) => 
 test('post page has metadata, document block, ToC, references and JSON-LD', async ({ page }) => {
   const errors = trackConsole(page)
   await page.goto('/blog/ornek-yazi-3')
-  await expect(page).toHaveTitle('Örnek yazı 3 | Uğur Durak')
+  await expect(page).toHaveTitle('Örnek yazı 3 | Güvenli Çalış')
   await expect(page.locator('h1')).toHaveCount(1)
   await expect(page.locator('link[rel=canonical]')).toHaveAttribute('href', 'http://localhost:3100/blog/ornek-yazi-3')
   await expect(page.locator('meta[name=description]')).toHaveAttribute('content', 'Test verisi özet 3.')
@@ -98,7 +102,8 @@ test('post page has metadata, document block, ToC, references and JSON-LD', asyn
 
 test('drafts and future posts never reach public output', async ({ request }) => {
   for (const url of ['/blog/gizli-taslak', '/blog/ileri-tarihli']) expect((await request.get(url)).status(), url).toBe(404)
-  for (const url of ['/', '/blog', '/blog/sayfa/2', '/sitemap.xml', '/rss.xml', '/search-index.json', '/kategori/mevzuat']) {
+  expect((await request.get('/magaza/gizli-taslak-urun')).status()).toBe(404)
+  for (const url of ['/', '/blog', '/blog/sayfa/2', '/sitemap.xml', '/rss.xml', '/search-index.json', '/kategori/mevzuat', '/magaza', '/magaza/test-kontrol-listesi']) {
     const body = await (await request.get(url)).text()
     for (const m of SECRET_MARKERS) expect(body, `${url} contains ${m}`).not.toContain(m)
   }
@@ -119,6 +124,57 @@ test('stored XSS in a post does not execute', async ({ page }) => {
   await prose.getByText('tıkla').click().catch(() => {})
   expect(await page.evaluate(() => (window as unknown as { __xss?: number }).__xss)).toBeUndefined()
   expect(dialogs).toEqual([])
+})
+
+test('store lists published products and links to Shopier only', async ({ page }) => {
+  const errors = trackConsole(page)
+  await page.goto('/magaza')
+  await expect(page.locator('h1')).toHaveText('Mağaza')
+  await expect(page.locator('.product-card')).toHaveCount(2)
+  await expect(page.locator('.product-card').first()).toContainText('₺149,90')
+  await expect(page.locator('.product-card').nth(1)).toContainText('Örnek ürün')
+  await expect(page.getByRole('link', { name: 'Shopier mağazasını aç' })).toHaveAttribute('href', 'https://www.shopier.com/test-magaza')
+  await noHorizontalScroll(page)
+
+  await page.locator('.product-card').first().click()
+  await expect(page).toHaveURL(/\/magaza\/test-kontrol-listesi$/)
+  await expect(page.locator('h1')).toHaveText('Test kontrol listesi')
+  const buy = page.getByRole('link', { name: /Shopier’de satın al/ })
+  await expect(buy).toHaveAttribute('href', 'https://www.shopier.com/test-magaza/111')
+  await expect(buy).toHaveAttribute('target', '_blank')
+  await expect(buy).toHaveAttribute('rel', 'noopener noreferrer')
+  await expect(page.locator('.product-features li')).toHaveText(['Birinci madde', 'İkinci madde'])
+  // Every outbound purchase link on the site goes to shopier.com.
+  const hrefs = await page.locator('a[href^="http"]').evaluateAll((as) => as.map((a) => new URL((a as HTMLAnchorElement).href).hostname))
+  for (const h of hrefs) expect(['localhost', 'www.shopier.com', 'www.instagram.com']).toContain(h)
+  const ld = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent())!)
+  expect(ld['@type']).toBe('Product')
+  expect(ld.offers).toMatchObject({ price: '149.90', priceCurrency: 'TRY', url: 'https://www.shopier.com/test-magaza/111' })
+  await expect(page.locator('meta[name="robots"]')).toHaveCount(0)
+  await noHorizontalScroll(page)
+  expect(errors).toEqual([])
+})
+
+test('sample product is labelled, noindex and kept out of the sitemap', async ({ page, request }) => {
+  await page.goto('/magaza/test-ornek-urun')
+  await expect(page.locator('.sample-notice')).toContainText('Örnek ürün')
+  await expect(page.locator('.buy-box__price')).toHaveText('Fiyat Shopier sayfasında')
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/)
+  await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(0)
+  const sitemap = await (await request.get('/sitemap.xml')).text()
+  expect(sitemap).toContain('<loc>http://localhost:3100/magaza</loc>')
+  expect(sitemap).toContain('<loc>http://localhost:3100/magaza/test-kontrol-listesi</loc>')
+  expect(sitemap).not.toContain('test-ornek-urun')
+})
+
+test('stored XSS in a product description does not execute', async ({ page }) => {
+  await page.goto('/magaza/test-kontrol-listesi')
+  const prose = page.locator('.prose')
+  await expect(prose).toContainText('Test verisi ürün gövdesi.')
+  expect(await prose.locator('script, [onerror]').count()).toBe(0)
+  expect(await prose.locator('a[href^="javascript:"]').count()).toBe(0)
+  await prose.getByText('tıkla').click().catch(() => {})
+  expect(await page.evaluate(() => (window as unknown as { __urunXss?: number }).__urunXss)).toBeUndefined()
 })
 
 test('search: Turkish-insensitive query, category filter, empty state', async ({ page }) => {
@@ -177,7 +233,7 @@ test('about, contact and privacy pages', async ({ page }) => {
 })
 
 test('all images have alt attributes', async ({ page }) => {
-  for (const url of ['/', '/blog', '/blog/ornek-yazi-1', '/hakkimda']) {
+  for (const url of ['/', '/blog', '/blog/ornek-yazi-1', '/hakkimda', '/magaza', '/magaza/test-kontrol-listesi']) {
     await page.goto(url)
     expect(await page.locator('img:not([alt])').count(), url).toBe(0)
   }

@@ -1,0 +1,51 @@
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { requireAdmin } from '@/lib/auth/guard'
+import { getAdminMedia, getAdminProduct, getAdminSettings } from '@/lib/admin-content'
+import { safeLoad } from '@/lib/safe'
+import { toEditorProduct } from '@/lib/editor'
+import { ProductEditor } from '@/components/admin/ProductEditor'
+import { LoadError } from '@/components/admin/LoadError'
+import { StatusBanner } from '@/components/admin/StatusBanner'
+
+export const metadata = { title: 'Ürünü düzenle' }
+
+export default async function EditProduct({ params, searchParams }: PageProps<'/admin/urunler/[slug]'>) {
+  const session = await requireAdmin()
+  const { slug } = await params
+  const sp = await searchParams
+  const r = await safeLoad(async () => ({
+    product: await getAdminProduct(slug),
+    media: (await getAdminMedia()).value,
+    settings: (await getAdminSettings()).value,
+  }))
+  if (r.error !== undefined) return <LoadError message={r.error} />
+  const { product, media, settings } = r.data
+  if (!product) notFound()
+  return (
+    <>
+      <div className="admin-head">
+        <h1>Ürünü düzenle</h1>
+        <div className="admin-actions">
+          <a className="button button--quiet" href={product.shopierUrl} target="_blank" rel="noopener noreferrer">
+            Shopier sayfasını aç
+          </a>
+          <Link className="button button--danger" href={`/admin/urunler/${product.slug}/sil`}>
+            Sil
+          </Link>
+        </div>
+      </div>
+      <StatusBanner code={sp.durum} />
+      <p className="admin-muted">
+        Durum: {product.status === 'published' ? 'yayında' : 'taslak'}.
+        {product.status === 'published' ? (
+          <>
+            {' '}
+            <a href={`/magaza/${product.slug}`}>Sitedeki son dağıtım hâlini açın</a>.
+          </>
+        ) : null}
+      </p>
+      <ProductEditor key={product.sha} csrf={session.csrf} product={toEditorProduct(product)} media={media} shopUrl={settings.shop.url} />
+    </>
+  )
+}

@@ -35,12 +35,21 @@ export default function PrivacyPage() {
         <h2>Ziyaretçilerden toplanan veriler</h2>
         <p>
           Site, ziyaretçiler için çerez kullanmaz; analiz, reklam veya takip amaçlı üçüncü taraf betik içermez ve iletişim
-          formu bulundurmaz. Yazı tipleri sitenin kendi sunucusundan yüklenir.
+          formu bulundurmaz. Yazı tipleri sitenin kendi sunucusundan yüklenir. Shopier veya Instagram bağlantılarına
+          tıkladığınızda o sitelerin kendi gizlilik kuralları geçerli olur.
         </p>
         <p>
           Site Vercel altyapısında barındırılır. Barındırma sağlayıcısı, güvenlik ve hizmetin işletilmesi amacıyla IP adresi,
           tarayıcı bilgisi ve istek zamanı gibi teknik kayıtları sınırlı süre tutabilir. Bu kayıtlar yurt dışındaki sunucularda
           işlenebilir.
+        </p>
+        <h2>Mağaza ve ödemeler</h2>
+        <p>
+          Mağaza sayfasındaki ürünler yalnızca tanıtılır; satın alma bu sitede gerçekleşmez. “Shopier’de satın al”
+          düğmesi sizi Shopier’deki ürün sayfasına götürür. Sipariş, ödeme, fatura ve teslimat için verdiğiniz bilgiler
+          (ad, e-posta, telefon, fatura adresi, ödeme bilgileri) Shopier tarafından ve Shopier’in gizlilik politikası ile
+          kullanım koşullarına göre işlenir. Bu site sipariş veya ödeme bilgisi almaz ve saklamaz; satıcıya iletilen
+          sipariş bilgileri yalnızca siparişin teslimi, faturalandırılması ve yasal yükümlülükler için kullanılır.
         </p>
         <h2>Çerezler</h2>
         <p>

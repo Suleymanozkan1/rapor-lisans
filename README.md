@@ -1,26 +1,33 @@
-# Uğur Durak: İSG blogu ve yönetim paneli
+# Güvenli Çalış: İSG sitesi, mağaza vitrini ve yönetim paneli
 
-İş sağlığı ve güvenliği uzmanı Uğur Durak için Türkçe kişisel blog ve yönetim paneli.
-Next.js 16 (App Router, TypeScript) ile yazıldı, Vercel Hobby (ücretsiz) planında çalışacak
-şekilde tasarlandı. Ücretli servis, abonelik veya veritabanı gerektirmez.
+Uğur Durak'ın **Güvenli Çalış** markası (Instagram: [@guvenlicalis](https://www.instagram.com/guvenlicalis))
+için Türkçe site: iş sağlığı ve güvenliği yazıları, çalışan hakları ve mevzuat notları, dijital
+İSG dokümanları için bir **mağaza vitrini** ve tarayıcıdan kullanılan bir yönetim paneli.
+Next.js 16 (App Router, TypeScript) ile yazıldı, **Vercel Pro** planında çalışacak şekilde
+ayarlandı. Veritabanı gerektirmez: içerik Git deposunda durur.
 
-> **Önce okuyun: iki uyumluluk notu**
+> **Önce okuyun: üç not**
 >
-> 1. **Vercel Hobby yalnızca kişisel ve ticari olmayan kullanım içindir.** Vercel'in
->    [Fair Use Guidelines](https://vercel.com/docs/limits/fair-use-guidelines#commercial-usage)
->    sayfası (son güncelleme 2026-09-14) "bir ürün veya hizmetin satışını reklam etmeyi" ve
->    "siteyi oluşturmak/barındırmak için ödeme almayı" açıkça ticari kullanım sayar. Site ücretli
->    İSG danışmanlığı tanıtmak, müşteri kazanmak veya iş almak için kullanılacaksa Hobby planı
->    **uygun değildir**. Bu durumda seçenekler: Vercel Pro (ücretli), ya da site tamamen statik
->    olduğu için public kısmı statik barındırmaya taşımak (yönetim paneli sunucu gerektirir, ayrı
->    değerlendirilmeli). Emin değilseniz Vercel destek ekibine sorun. Bu proje şartları aşmaya
->    yönelik hiçbir yöntem içermez.
-> 2. **İçerik deposu gizli (private) olmalı.** Taslaklar da Git'e commit edilir. Bu kod şu an
->    **public** bir GitHub deposunda (`rapor-lisans`). Public depoda taslaklar, silinen yazılar ve
->    commit geçmişi herkes tarafından okunabilir. Yayına almadan önce projeyi **private** bir
->    depoya taşıyın (Vercel Hobby private depoları destekler). Ayrıca bu depodaki `lisans.json`
->    başka bir uygulamanın kullandığı bir dosya gibi görünüyor; ona dokunulmadı, taşırken
->    kendi deposunda bırakın.
+> 1. **Ticari kullanım için Vercel Pro gerekir.** Site ürün sattığı için Hobby (ücretsiz) planı
+>    uygun değildir: Vercel'in [Fair Use Guidelines](https://vercel.com/docs/limits/fair-use-guidelines#commercial-usage)
+>    sayfası "bir ürün veya hizmetin satışını reklam etmeyi" ticari kullanım sayar. Pro planı
+>    ([plans/pro-plan](https://vercel.com/docs/plans/pro-plan), 2026-09-15 tarihli sürümden
+>    okundu): aylık **20 $** platform ücreti, buna 1 dağıtım yapabilen ekip koltuğu ve **20 $
+>    kullanım kredisi** dahil. Kredi aşılırsa kullanım ayrıca faturalanır; %75'te e-posta uyarısı
+>    gelir. Bu site statik olduğu için normal trafikte kredinin içinde kalması beklenir, ama
+>    **Settings > Billing > Spend Management** altında bir harcama sınırı koymanızı öneririm.
+> 2. **Satış Shopier'de yapılır.** Mağaza sayfası ürünleri (görsel, açıklama, fiyat) gösterir;
+>    "Shopier'de satın al" düğmesi ürünün Shopier sayfasını açar. Ödeme, fatura, dijital teslimat
+>    ve iade Shopier'de yürür; site kart, sipariş veya müşteri bilgisi almaz ve saklamaz.
+>    Mesafeli satış sözleşmesi, ön bilgilendirme formu, cayma hakkı (dijital içerikteki
+>    istisnası dahil) ve fatura gibi satıcı yükümlülükleri sizin ve Shopier hesabınızın
+>    sorumluluğundadır: Shopier ürün sayfalarınızda bu metinlerin doğru göründüğünü kontrol edin,
+>    gerekirse bir hukukçuya danışın.
+> 3. **İçerik deposu gizli (private) olmalı.** Taslaklar da Git'e commit edilir. Bu kod şu an
+>    **public** bir GitHub deposunda (`rapor-lisans`); taslaklar, silinen yazılar ve commit
+>    geçmişi herkes tarafından okunabilir. Yayına almadan önce projeyi **private** bir depoya
+>    taşıyın. Bu depodaki `lisans.json` başka bir uygulamanın kullandığı bir dosya gibi
+>    görünüyor; ona dokunulmadı, taşırken kendi deposunda bırakın.
 
 ## İçindekiler
 
@@ -30,7 +37,9 @@ Next.js 16 (App Router, TypeScript) ile yazıldı, Vercel Hobby (ücretsiz) plan
 - [Vercel'e dağıtım](#vercele-dağıtım)
 - [GitHub entegrasyonu](#github-entegrasyonu)
 - [Yayın akışı](#yayın-akışı)
-- [Ücretsiz kotalar ve aşıldığında ne olur](#ücretsiz-kotalar-ve-aşıldığında-ne-olur)
+- [Mağaza (Shopier vitrini)](#mağaza-shopier-vitrini)
+- [Marka: logo ve renkler](#marka-logo-ve-renkler)
+- [Kotalar, maliyet ve aşıldığında ne olur](#kotalar-maliyet-ve-aşıldığında-ne-olur)
 - [Yedekleme ve geri yükleme](#yedekleme-ve-geri-yükleme)
 - [İçerik taşıma](#içerik-taşıma)
 - [Güvenlik](#güvenlik)
@@ -39,7 +48,7 @@ Next.js 16 (App Router, TypeScript) ile yazıldı, Vercel Hobby (ücretsiz) plan
 ## Mimari kısaca
 
 - **Public site statik üretilir.** Yazılar `content/posts/*.md` (YAML ön bilgi + Markdown),
-  ayarlar `content/settings.json`, kategoriler `content/categories.json`, medya dizini
+  ürünler `content/products/*.md`, ayarlar `content/settings.json`, kategoriler `content/categories.json`, medya dizini
   `content/media.json`, görseller `public/uploads/`. Build sırasında yalnızca yayımlanmış ve
   yayın tarihi geçmiş yazılar sayfalara, site haritasına, RSS'e ve arama dizinine girer.
 - **Yönetim paneli** (`/admin`) sunucu tarafında çalışır. Her kayıt, GitHub API üzerinden depoya
@@ -77,6 +86,12 @@ Yayına almadan önce her yazıyı panelden okuyun: düzeltip kaydettiğinizde n
 yazıyı silin. Kapak görselleri `public/uploads/2026/` altındadır (lisanslar:
 `public/images/CREDITS.md`).
 
+`content/products/` altında da **3 örnek ürün** vardır (`sample: true`). Fiyatları ve içerikleri
+gerçek değildir; kartlarında "Örnek ürün" etiketi ve sayfalarında uyarı görünür, `noindex`
+taşırlar ve site haritasına girmezler. Satın al düğmeleri Shopier mağazasının ana sayfasını
+(`shopier.com/guvenlicalis`) açar. **Yayına almadan önce bunları silin** veya gerçek ürün
+bilgisi ve Shopier ürün adresiyle panelden kaydedin (kaydedince etiket kalkar).
+
 ## Komutlar
 
 | Komut | Ne yapar |
@@ -94,7 +109,7 @@ yazıyı silin. Kapak görselleri `public/uploads/2026/` altındadır (lisanslar
 ## Vercel'e dağıtım
 
 1. Projeyi **private** bir GitHub deposuna koyun (yukarıdaki nota bakın).
-2. Vercel'de **Add New > Project**, depoyu seçin. Framework: Next.js (otomatik algılanır).
+2. Vercel'de Pro ekibinizde **Add New > Project**, depoyu seçin. Framework: Next.js (otomatik algılanır).
    Build komutu ve çıktı ayarlarını değiştirmeyin.
 3. **Settings > Environment Variables** altında (Production ve Preview için) şunları girin:
    `NEXT_PUBLIC_SITE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `SESSION_SECRET`,
@@ -138,23 +153,58 @@ yapılandırılmamış" uyarısı çıkar, kayıt işlemleri açık bir hata mes
 Gelecek tarihli yayın tarihi olan yazı, o tarihten sonraki ilk build'de görünür; zamanlanmış
 otomatik build yoktur.
 
-## Ücretsiz kotalar ve aşıldığında ne olur
+## Mağaza (Shopier vitrini)
+
+1. Ürünü önce **Shopier**'de oluşturun (fiyat, dosya, teslimat ve iade koşulları orada).
+   Ürünün Shopier adresini kopyalayın.
+2. Panelde **Ürünler > Yeni ürün**: ad, Shopier ürün adresi, kısa açıklama, "Neler var?"
+   maddeleri, fiyat (Shopier'deki fiyatla aynı), biçim (örneğin "PDF, 24 sayfa") ve isteğe bağlı
+   görsel. Görsel seçilmezse sarı-siyah Güvenli Çalış gönderi stilinde bir kapak otomatik çizilir.
+3. **Yayında** seçip kaydedin. Mağaza bir sonraki build'de güncellenir.
+
+Güvenlik kuralları: satın alma bağlantısı yalnızca `https://shopier.com` veya
+`https://www.shopier.com` altındaki bir sayfa olabilir (başka alan adı, `http`, kullanıcı
+adı/parola veya port içeren adres reddedilir; birim ve e2e testleri var). Fiyat Shopier'de
+değişirse sitede de güncelleyin; sitedeki fiyat bilgi amaçlıdır, ödenecek tutarı Shopier
+belirler. Ürün açıklamaları yazılarla aynı Markdown temizleyicisinden geçer (HTML/betik
+çalışmaz). Gerçek ürünlerde `Product` yapılandırılmış verisi (JSON-LD) üretilir.
+
+Mağaza adresi **Site ayarları > Mağaza** altından girilir; altbilgide ve mağaza sayfasında
+"Shopier mağazasını aç" bağlantısı olarak görünür.
+
+## Marka: logo ve renkler
+
+- Logo, gönderdiğiniz Instagram ekran görüntüsünden kırpıldı
+  (`public/uploads/2026/guvenli-calis-logo.webp`, 320 px). Tarayıcı simgesi `src/app/icon.png`
+  ve `src/app/apple-icon.png`, paylaşım görseli `public/uploads/2026/guvenli-calis-paylasim.jpg`.
+  **Logonun orijinal dosyası (PNG veya SVG) varsa** panelde Medya'dan yükleyip Site ayarları >
+  Logo'dan seçin; simge dosyalarını da depoda değiştirin. Ekran görüntüsünden alınan logo küçük
+  boyutlarda iyi görünür ama baskı kalitesinde değildir.
+- Renkler logodan alındı: siyah zemin, logo sarısı `#ffd306`, baret kırmızısı `#d90102`.
+  Ana sayfadaki eğik sarı panel Instagram gönderilerindeki sarı-siyah kesimi tekrarlar.
+  Ayrıntılar: [`DESIGN.md`](DESIGN.md).
+- Ana sayfadaki dört cümle (sitenin amacı) **Site ayarları > Sitenin amacı** alanından
+  değiştirilir.
+
+## Kotalar, maliyet ve aşıldığında ne olur
 
 Değerler 2026-10-29 tarihinde resmî belgelerden okundu; değişebilir, kendiniz kontrol edin.
 
-| Hizmet | Ücretsiz kota (aylık) | Bu proje nasıl kullanır | Aşılınca |
+| Hizmet | Plan içeriği | Bu proje nasıl kullanır | Aşılınca |
 |---|---|---|---|
-| Vercel Hobby: Fast Data Transfer | 100 GB | Statik sayfalar, görseller | Hobby'de ek ücret yok; özellik 30 gün dolana kadar durdurulur ([plans/hobby](https://vercel.com/docs/plans/hobby)) |
-| Vercel Hobby: Function Invocations | 1.000.000 | Yalnızca panel sayfaları ve işlemleri | Aynı |
-| Vercel Hobby: Active CPU | 4 saat | Panel; giriş (scrypt ~0,4 s, bu ortamda ölçüldü) | Aynı |
-| Vercel Hobby: Deployments | 100 / gün | Panelde her kayıt = 1 commit = 1 build | Günlük sınırda yeni deploy başlamaz; site son hâliyle yayında kalır |
+| Vercel Pro: platform ücreti | 20 $/ay; 1 dağıtım koltuğu ve 20 $ kullanım kredisi dahil ([plans/pro-plan](https://vercel.com/docs/plans/pro-plan)) | Tek kişi yönetiyorsa ek koltuk gerekmez | Ek koltuk 20 $/ay; salt okunur izleyici koltuğu ücretsiz |
+| Vercel Pro: CDN | Aylık 1 milyon CDN isteği ve 1 TB veri aktarımı (Flat Rate CDN en düşük kademe) | Statik sayfalar, görseller | Kredi bittikten sonra kullanım faturalanır; harcama sınırı koyun |
+| Vercel Pro: fonksiyonlar | 20 $ kredinin içinden | Yalnızca panel sayfaları ve işlemleri; giriş (scrypt ~0,4 s, bu ortamda ölçüldü) | Aynı |
+| Vercel: Deployments | Plan sınırı (belgelere bakın) | Panelde her kayıt = 1 commit = 1 build | Sınırda yeni deploy başlamaz; site son hâliyle yayında kalır |
+| Shopier | Shopier'in kendi komisyon ve ücretleri | Ödeme ve teslimat | Site tarafında maliyet yok |
 | Vercel Image Optimization | 5.000 dönüşüm | **Kullanılmıyor** (görseller olduğu gibi servis edilir) | — |
 | GitHub REST API | Token başına saatlik sınır (GitHub belgelerine bakın) | Panelde sayfa başına birkaç istek | API 403/429 döner; panel "API kotası doldu" hatası gösterir, kayıt yapılmaz |
 | Upstash Redis (isteğe bağlı) | Sağlayıcının güncel ücretsiz planı | Yalnızca başarısız giriş sayaçları | İstek başarısız olursa kod bellek içi sınıra döner |
 
-Uygulama hiçbir yerde ücretli kullanıma otomatik geçmez: Hobby planında ödeme yöntemi yoktur,
-kota dolunca Vercel ilgili özelliği durdurur. Panel, GitHub veya ağ hatasında işlemi yapmaz ve
-nedenini gösterir.
+Pro planında kredi aşılınca kullanım ödeme yönteminizden tahsil edilir (Hobby'deki gibi
+durdurulmaz). Vercel yeni hesaplarda 200 $ harcamada bildirim açar; daha düşük bir sınır ve
+"sınırda projeyi durdur" eylemi için [Spend Management](https://vercel.com/docs/spend-management)
+ayarını kullanın. Panel, GitHub veya ağ hatasında işlemi yapmaz ve nedenini gösterir.
 
 İpucu: Günlük deploy sınırını zorlamamak için uzun bir yazıyı panelde parça parça kaydetmek
 yerine yerelde hazırlayıp bir kez yapıştırın.
@@ -212,9 +262,9 @@ Tüm içerik Git'tedir; deponun kendisi yedektir.
 ## Dosya haritası
 
 ```
-content/                 İçerik (Git'te). posts/*.md, settings.json, categories.json, media.json
+content/                 İçerik (Git'te). posts/*.md, products/*.md, settings.json, categories.json, media.json
 public/uploads/          Yüklenen görseller
-src/app/(site)/          Public sayfalar (statik)
+src/app/(site)/          Public sayfalar (statik), magaza/ = Shopier vitrini
 src/app/admin/           Yönetim paneli (sunucu tarafı), actions.ts = tüm kayıt işlemleri
 src/lib/                 İçerik okuma, Markdown, oturum, yükleme doğrulama, depo (GitHub/yerel)
 src/proxy.ts             /admin için ilk kapı (Next.js 16'da middleware'in yeni adı)

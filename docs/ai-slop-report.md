@@ -1,5 +1,15 @@
 # AI-slop tarama raporu
 
+> **Güncelleme (2026-10-29, üçüncü tur, marka):** Site, kullanıcının Instagram hesabı
+> @guvenlicalis'e göre "Güvenli Çalış" olarak yeniden markalandı. Palet logodan alındı (siyah,
+> logo sarısı `#ffd306`, baret kırmızısı yalnızca küçük işaretlerde); mavi tamamen kalktı. Hero,
+> sayfa bantları ve ürün kapakları Instagram gönderilerindeki eğik sarı panel kesimini kullanır.
+> Mağaza eklendi; ürün kapakları görsel yoksa CSS ile marka şablonundan çizilir (stok fotoğraf
+> veya sahte ürün görseli yok). Hero'da Instagram biyografisindeki emojiler yerine Phosphor
+> ikonları kullanıldı (I2). Sahte indirim, geri sayım veya "son ürünler" baskısı yok; örnek ürünler
+> açıkça etiketli. `scan:design`: bulgu yok, iki temada 58 kontrast ölçümü AA üstünde. Aşağıdaki
+> kayıtlar önceki turlara aittir; renk satırları (ISO 7010 mavisi) artık geçerli değil.
+
 > **Güncelleme (2026-10-29, ikinci tur):** İlk tasarım kullanıcı tarafından "fazla basic" bulundu.
 > [donatomm/taste](https://github.com/donatomm/taste) `taste-skill` talimatları baştan okunarak site
 > yeniden tasarlandı. İlk sürüm taste skill'in şu kurallarını ihlal ediyordu: hiç gerçek görsel
