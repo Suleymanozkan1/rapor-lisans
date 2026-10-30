@@ -16,8 +16,8 @@ export default function StorePage() {
     <>
       <header className="page-band">
         <div className="wrap">
-          <h1 className="rise">Mağaza</h1>
-          <p className="rise rise-2">
+          <h1>Mağaza</h1>
+          <p>
             İş sağlığı ve güvenliği için hazırlanmış dijital dokümanlar. Güvenli ödeme, ödemeden hemen sonra indirme.
           </p>
         </div>

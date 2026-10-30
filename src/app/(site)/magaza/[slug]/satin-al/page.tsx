@@ -30,8 +30,8 @@ export default async function CheckoutPage({ params }: PageProps<'/magaza/[slug]
               </li>
             </ol>
           </nav>
-          <h1 className="rise">Satın al</h1>
-          <p className="rise rise-2">
+          <h1>Satın al</h1>
+          <p>
             {p.title}, {formatPrice(p.price) ?? ''}
           </p>
         </div>

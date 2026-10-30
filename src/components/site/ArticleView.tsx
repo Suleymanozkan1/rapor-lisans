@@ -55,14 +55,14 @@ export function ArticleView({ post, rendered, settings, categories, cover, relat
               ) : null}
             </ol>
           </nav>
-          <h1 className="rise">{post.title}</h1>
-          {post.excerpt ? <p className="lede rise rise-2">{post.excerpt}</p> : null}
+          <h1>{post.title}</h1>
+          {post.excerpt ? <p className="lede">{post.excerpt}</p> : null}
           </div>
         </div>
       </header>
 
       <div className="wrap">
-        <dl className="doc-control rise rise-3" aria-label="Yazı bilgileri">
+        <dl className="doc-control" aria-label="Yazı bilgileri">
           <div>
             <UserCircle size={26} weight="duotone" aria-hidden="true" />
             <dt>Yazar</dt>

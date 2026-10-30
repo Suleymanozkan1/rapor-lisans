@@ -1,71 +1,103 @@
 import Link from 'next/link'
-import { CalendarBlank, Clock } from '@phosphor-icons/react/ssr'
 import type { Category, Post } from '@/lib/types'
 import { categoryName } from '@/lib/posts'
 import { formatDate, isoDay } from '@/lib/format'
 import { markdownWordCount, readingMinutes } from '@/lib/markdown'
-import { CategoryIcon } from '@/lib/visuals'
+import { SignMark } from '@/lib/visuals'
 import { mediaFor } from '@/lib/content'
 
-type Props = {
-  posts: Post[]
-  categories: Category[]
-  headingLevel?: 2 | 3
-  /** First post becomes a large feature card (home page). */
-  featured?: boolean
+type Props = { posts: Post[]; categories: Category[]; headingLevel?: 2 | 3 }
+
+function Meta({ post: p }: { post: Post }) {
+  return (
+    <p className="post-meta">
+      <time dateTime={isoDay(p.publishedAt)}>{formatDate(p.publishedAt)}</time>
+      <span>{readingMinutes(markdownWordCount(p.body))} dk okuma</span>
+    </p>
+  )
 }
 
-export function PostList({ posts, categories, headingLevel = 3, featured = false }: Props) {
+function Topic({ post: p, categories }: { post: Post; categories: Category[] }) {
+  const cat = categoryName(categories, p.category)
+  if (!cat) return null
   return (
-    <ul className={`post-grid${featured ? ' post-grid--featured' : ''}`}>
-      {posts.map((p, i) => (
-        <li key={p.slug} className="reveal">
-          <PostCard post={p} categories={categories} headingLevel={headingLevel} feature={featured && i === 0} />
+    <Link className="post-topic" href={`/kategori/${p.category}`}>
+      <SignMark slug={p.category} />
+      {cat}
+    </Link>
+  )
+}
+
+function Cover({ post: p, eager = false, sizes }: { post: Post; eager?: boolean; sizes?: string }) {
+  if (!p.cover) return null
+  const m = mediaFor(p.cover.src)
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={p.cover.src} alt={p.cover.alt} width={m?.width} height={m?.height} sizes={sizes} loading={eager ? 'eager' : 'lazy'} decoding="async" />
+}
+
+/** Index rows separated by rules: lists of posts on /blog, categories, tags and related posts. */
+export function PostList({ posts, categories, headingLevel = 3 }: Props) {
+  const H = headingLevel === 2 ? 'h2' : 'h3'
+  return (
+    <ul className="post-index">
+      {posts.map((p) => (
+        <li key={p.slug}>
+          <article className="post-card post-row">
+            <div className="post-row__body">
+              <Topic post={p} categories={categories} />
+              <H className="post-row__title">
+                <Link href={`/blog/${p.slug}`}>{p.title}</Link>
+              </H>
+              {p.excerpt ? <p className="post-row__excerpt">{p.excerpt}</p> : null}
+              <Meta post={p} />
+            </div>
+            {p.cover ? (
+              <div className="post-row__media">
+                <Cover post={p} />
+              </div>
+            ) : null}
+          </article>
         </li>
       ))}
     </ul>
   )
 }
 
-export function PostCard({ post: p, categories, headingLevel, feature }: { post: Post; categories: Category[]; headingLevel: 2 | 3; feature?: boolean }) {
-  const H = headingLevel === 2 ? 'h2' : 'h3'
-  const cat = categoryName(categories, p.category)
-  const cover = p.cover ? mediaFor(p.cover.src) : undefined
+/** Home "Gündem": one lead story with its photo, the next headlines as a compact list beside it. */
+export function LeadStories({ posts, categories }: { posts: Post[]; categories: Category[] }) {
+  const [lead, ...rest] = posts
+  if (!lead) return null
   return (
-    <article className={`post-card${feature ? ' post-card--feature' : ''}`}>
-      {p.cover ? (
-        <div className="post-card__media">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={p.cover.src} alt={p.cover.alt} width={cover?.width} height={cover?.height} loading={feature ? "eager" : "lazy"} decoding="async" />
-        </div>
-      ) : feature ? (
-        <span className="post-card__watermark">
-          <CategoryIcon slug={p.category} size={260} />
-        </span>
-      ) : null}
-      <div className="post-card__body">
-        {cat ? (
-          <Link className="chip post-card__cat" href={`/kategori/${p.category}`}>
-            <CategoryIcon slug={p.category} size={16} />
-            {cat}
-          </Link>
+    <div className="lead-stories">
+      <article className="post-card lead-story">
+        {lead.cover ? (
+          <div className="lead-story__media">
+            <Cover post={lead} sizes="(min-width: 60rem) 55vw, 100vw" />
+          </div>
         ) : null}
-        <H>
-          <Link href={`/blog/${p.slug}`}>{p.title}</Link>
-        </H>
-        {p.excerpt ? <p>{p.excerpt}</p> : null}
-        <div className="post-card__meta">
-          <span>
-            <CalendarBlank size={16} aria-hidden="true" />
-            <time dateTime={isoDay(p.publishedAt)}>{formatDate(p.publishedAt)}</time>
-          </span>
-          <span>
-            <Clock size={16} aria-hidden="true" />
-            {readingMinutes(markdownWordCount(p.body))} dk okuma
-          </span>
-        </div>
-      </div>
-    </article>
+        <Topic post={lead} categories={categories} />
+        <h3 className="lead-story__title">
+          <Link href={`/blog/${lead.slug}`}>{lead.title}</Link>
+        </h3>
+        {lead.excerpt ? <p className="lead-story__excerpt">{lead.excerpt}</p> : null}
+        <Meta post={lead} />
+      </article>
+      {rest.length > 0 ? (
+        <ul className="headline-list">
+          {rest.map((p) => (
+            <li key={p.slug}>
+              <article className="post-card headline">
+                <Topic post={p} categories={categories} />
+                <h3 className="headline__title">
+                  <Link href={`/blog/${p.slug}`}>{p.title}</Link>
+                </h3>
+                <Meta post={p} />
+              </article>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
   )
 }
 

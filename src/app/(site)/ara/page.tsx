@@ -15,8 +15,8 @@ export default function SearchPage() {
     <>
       <header className="page-band">
         <div className="wrap">
-          <h1 className="rise">Ara</h1>
-          <p className="rise rise-2">Yazıların başlık, özet, etiket ve metinlerinde arama yapın.</p>
+          <h1>Ara</h1>
+          <p>Yazıların başlık, özet, etiket ve metinlerinde arama yapın.</p>
         </div>
       </header>
       <div className="wrap">

@@ -1,14 +1,12 @@
 import type { Metadata, Viewport } from 'next'
 import '@fontsource/barlow/400.css'
+import '@fontsource/barlow/400-italic.css'
 import '@fontsource/barlow/500.css'
 import '@fontsource/barlow/600.css'
-import '@fontsource/barlow-semi-condensed/500.css'
-import '@fontsource/barlow-semi-condensed/600.css'
-import '@fontsource/barlow-semi-condensed/700.css'
-import '@fontsource/barlow-semi-condensed/800.css'
-import '@fontsource/source-serif-4/400.css'
-import '@fontsource/source-serif-4/400-italic.css'
-import '@fontsource/source-serif-4/600.css'
+import '@fontsource/barlow/700.css'
+import '@fontsource/big-shoulders-display/700'
+import '@fontsource/big-shoulders-display/800'
+import '@fontsource/big-shoulders-display/900'
 import './globals.css'
 import { getSettings } from '@/lib/content'
 import { siteUrl } from '@/lib/env'
@@ -27,7 +25,7 @@ export function generateMetadata(): Metadata {
 
 export const viewport: Viewport = {
   // Single dark theme.
-  themeColor: '#0f0f0e',
+  themeColor: '#121211',
   colorScheme: 'dark',
 }
 

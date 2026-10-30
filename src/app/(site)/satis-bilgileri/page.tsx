@@ -28,8 +28,8 @@ export default function SalesTermsPage() {
     <>
       <header className="page-band">
         <div className="wrap">
-          <h1 className="rise">Satış ve iade koşulları</h1>
-          <p className="rise rise-2">{siteName} mağazasında satılan dijital ürünler için geçerlidir.</p>
+          <h1>Satış ve iade koşulları</h1>
+          <p>{siteName} mağazasında satılan dijital ürünler için geçerlidir.</p>
         </div>
       </header>
       <div className="wrap plain-page">

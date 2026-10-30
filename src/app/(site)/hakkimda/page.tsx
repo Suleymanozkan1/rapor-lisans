@@ -37,8 +37,8 @@ export default async function AboutPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(ld) }} />
       <header className="page-band">
         <div className="wrap">
-          <h1 className="rise">Hakkımda</h1>
-          <p className="rise rise-2">
+          <h1>Hakkımda</h1>
+          <p>
             {s.author.name}
             {s.author.jobTitle ? `, ${s.author.jobTitle}` : ''}
           </p>

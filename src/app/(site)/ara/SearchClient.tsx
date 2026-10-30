@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarBlank, MagnifyingGlass } from '@phosphor-icons/react'
+import { MagnifyingGlass } from '@phosphor-icons/react'
 import { searchDocs, type SearchDoc } from '@/lib/search'
 import { formatDate, isoDay } from '@/lib/format'
 
@@ -103,22 +103,19 @@ export function SearchClient({ categories }: { categories: { slug: string; name:
         ) : (
           <>
             <p className="pagination__status">{results.length} sonuç bulundu.</p>
-            <ul className="post-grid">
+            <ul className="post-index">
               {shown.map((d) => (
                 <li key={d.slug}>
-                  <article className="post-card">
-                    <div className="post-card__body">
-                      {d.categoryName ? <span className="chip post-card__cat">{d.categoryName}</span> : null}
-                      <h2>
+                  <article className="post-card post-row">
+                    <div className="post-row__body">
+                      {d.categoryName ? <p className="post-topic">{d.categoryName}</p> : null}
+                      <h2 className="post-row__title">
                         <Link href={`/blog/${d.slug}`}>{d.title}</Link>
                       </h2>
-                      {d.excerpt ? <p>{d.excerpt}</p> : null}
-                      <div className="post-card__meta">
-                        <span>
-                          <CalendarBlank size={16} aria-hidden="true" />
-                          <time dateTime={isoDay(d.publishedAt)}>{formatDate(d.publishedAt)}</time>
-                        </span>
-                      </div>
+                      {d.excerpt ? <p className="post-row__excerpt">{d.excerpt}</p> : null}
+                      <p className="post-meta">
+                        <time dateTime={isoDay(d.publishedAt)}>{formatDate(d.publishedAt)}</time>
+                      </p>
                     </div>
                   </article>
                 </li>

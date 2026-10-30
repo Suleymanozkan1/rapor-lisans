@@ -71,18 +71,18 @@ export default async function ProductPage({ params }: PageProps<'/magaza/[slug]'
                 </li>
               </ol>
             </nav>
-            <h1 className="rise">{p.title}</h1>
-            {p.excerpt ? <p className="lede rise rise-2">{p.excerpt}</p> : null}
+            <h1>{p.title}</h1>
+            {p.excerpt ? <p className="lede">{p.excerpt}</p> : null}
           </div>
         </div>
       </header>
 
       <div className="wrap">
         <div className="product-layout">
-          <div className="product-layout__media rise rise-3">
+          <div className="product-layout__media">
             <ProductMedia product={p} large />
           </div>
-          <aside className="buy-box rise rise-3" aria-label="Satın alma">
+          <aside className="buy-box" aria-label="Satın alma">
             <p className="buy-box__price">
               {price ? (
                 <>
