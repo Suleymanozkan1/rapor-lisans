@@ -16,8 +16,8 @@ export default function PrivacyPage() {
     <>
       <header className="page-band">
         <div className="wrap">
-          <h1 className="rise">Gizlilik ve KVKK bilgilendirmesi</h1>
-          {s.privacy.updatedAt ? <p className="rise rise-2">Son güncelleme: {formatDate(s.privacy.updatedAt)}</p> : null}
+          <h1>Gizlilik ve KVKK bilgilendirmesi</h1>
+          {s.privacy.updatedAt ? <p>Son güncelleme: {formatDate(s.privacy.updatedAt)}</p> : null}
         </div>
       </header>
       <div className="wrap plain-page">

@@ -7,16 +7,29 @@ gerekiyorsa önce buraya ekleyin, sonra koda; tek seferlik değer kullanmayın.
 
 ## Tasarım okuması
 
-[donatomm/taste](https://github.com/donatomm/taste) skill'ine göre: **Güvenli Çalış markasının
-sitesi: İSG yazıları, çalışan hakları ve mevzuat notları, dijital doküman vitrini. Okur sahada
-çalışan, işveren veya İSG profesyoneli. Dil doğrudan ve uyarıcı; marka Instagram hesabıyla aynı:
-siyah zemin, logo sarısı, eğik sarı panel, kırmızı baret.**
+**Güvenli Çalış: sahadan konuşan bir İSG yayını ve doküman mağazası. Dil kısa cümle, açık talimat.
+Görsel dil iş güvenliği levhalarından gelir: işaret siyahı zemin, tehlike sarısı, baret kırmızısı,
+yol levhası harfleri.** Son yeniden tasarım "pro-design" sürecine göre yapıldı (marka, desen
+kütüphanesi, hareket, tarayıcıda doğrulama).
 
-Kadranlar: `DESIGN_VARIANCE 7` (eğik kesimli hero, bento), `MOTION_INTENSITY 5` (giriş
-animasyonları, kaydırmada belirme, hover fiziği, okuma çubuğu), `VISUAL_DENSITY 4`.
+**Marka sayfası**
 
-Geçmiş: ilk sürüm (çizgili dizin, görselsiz) "fazla sade", ikinci sürüm ISO 7010 sinyal mavisiyle
-yapıldı; ardından sitenin Instagram hesabına benzemesi istendi. Bu sürüm hesabın logosunu ve gönderi dilini taşır.
+| Ad | Hex | Rol |
+|---|---|---|
+| İşaret Siyahı | `#121211` | Zemin (`--paper`) |
+| Asfalt | `#1c1c1a` | Yüzeyler, paneller (`--surface`) |
+| Tebeşir | `#f2f0e8` | Metin (`--ink`) |
+| Beton | `#a8a69d` | İkincil metin (`--ink-2`) |
+| Tehlike Sarısı | `#ffd306` | İmza renk: hero, birincil düğme, bağlantılar, işaret üçgeni (`--accent`) |
+| Baret Kırmızısı | `#e2231a` | Yalnızca küçük uyarı işaretleri, metin değil (`--signal`) |
+
+- **Yazı tipleri:** Big Shoulders Display (başlıklar; endüstriyel levha harfi, logodaki kalın
+  dar yazıya yakın) ve Barlow (metin ve arayüz; yol levhası grotesk'i). Üçüncü bir aile yok.
+- **Ses:** Sahadan konuşan, açık ve uyarıcı; kısa cümle, net talimat.
+- **İmza öğe:** sarı panelin eğik kenarı (hero, iletişim şeridi, ürün kapakları) ve kategori
+  işaretleri olarak **ISO 7010 uyarı üçgeni** (sarı üçgen içinde kategori piktogramı).
+- **Cesaret tek yerde:** hero slider'ı. Sayfanın geri kalanı sessizdir: koyu zemin, ince
+  çizgiler, sarı yalnızca eylem ve işarette.
 
 ## Marka kaynağı
 
@@ -48,21 +61,21 @@ kullanılır. Kontrast `npm run scan:design` ile her renk çifti için hesaplan�
 
 ## Tipografi
 
-| Rol | Yazı tipi | Kullanım |
+| Rol | Yazı tipi | Token |
 |---|---|---|
-| Hero | Barlow Semi Condensed 800, `clamp(3rem, 2rem + 5vw, 5.8rem)`, satır 0.95 | Ana sayfa h1 |
-| Başlık | Barlow Semi Condensed 700/600 | h1, h2, h3, düğmeler, menü |
-| Arayüz | Barlow 400/500/600 | Metin, kartlar, formlar |
-| Yazı gövdesi | Source Serif 4 400/600 (68ch, satır 1.75) | Yalnızca makale metni |
+| Hero | Big Shoulders Display 900, satır 0.86 | `--fs-hero` |
+| h1 / h2 / h3 | Big Shoulders Display 900 / 800 / 800 | `--fs-h1`, `--fs-h2`, `--fs-h3` |
+| Metin, arayüz, düğmeler | Barlow 400/500/600/700 | `--fs-body`, `--fs-small` |
+| Yazı gövdesi | Barlow 400, 68ch, satır 1.7 | `.prose` |
 
-Serif yalnızca uzun okuma metninde: taste skill serifi varsayılan olarak önermez, burada gerekçe
-yayın/makale okunabilirliği. Başlıkta tek kelimeyi farklı renk/yazı tipiyle vurgulama yok.
+Başlıkta tek kelimeyi farklı renge boyama yok; her başlığın üstünde büyük harfli etiket yok.
 
 ## Şekil ve derinlik
 
-- Köşe kuralı: kartlar 16px, görseller 20px, form alanları 10px, düğmeler ve çipler tam hap.
-- Gölge yalnızca üste binen öğelerde (hero "son yazı" kartı, filtre paneli, doküman bloğu,
-  iletişim kartları) ve hover'da. Gölge rengi markaya tonlanır, saf siyah değildir.
+- Köşeler levha plakası gibi küçük: paneller ve görseller 6px, düğmeler ve alanlar 4px, yalnızca
+  etiket hapları yuvarlak.
+- Gölge yalnızca hero görsellerinde. Kartlar kutu değildir: yazı listeleri çizgili satırlar,
+  ürünler rafta duran kapaklar, konular tek bir levha tahtası.
 
 ## Düzen
 
@@ -77,15 +90,24 @@ yayın/makale okunabilirliği. Başlıkta tek kelimeyi farklı renk/yazı tipiyl
   kendiliğinden geçiş vardır. Görünmeyen slaytlar `inert`'tir. Telefonda yazı ve ürün slaytları
   haber kartı gibidir (üstte 16:9 görsel, altta başlık 3 satır ve özet 2 satırla kırpılır),
   tanıtım slaytı temsili fotoğrafı göstermez; böylece slaytlar aynı yükseklikte kalır.
-- **Ana sayfa:** hero solda eğik kenarlı sarı panel (logo, site adı, sitenin amacını anlatan
+- **Ana sayfa desenleri (neden):**
+  - *Hero (tip öncelikli afiş slider'ı):* İSG sitelerinin en iyi örnekleri tek tehlike, tek talimat,
+    tek eylemle açılır; slider her slaytta bunu yapar.
+  - *Gündem (öne çıkan yazı + başlık listesi):* yayın sitelerinin en okunur deseni; aynı kartların
+    tekrarı yerine hiyerarşi.
+  - *Doküman rafı:* ürün kapağı gözün tutunduğu nesnedir (dergi kapağı gibi); telefonda yatay kayan raf.
+  - *Konu levhaları:* kategoriler bir levha tahtası; her biri uyarı üçgeni, ad, açıklama, yazı sayısı.
+  - *İletişim şeridi:* tek bir sarı an, eğik kesimli.
+- **Ana sayfa (ayrıntı):** hero solda eğik kenarlı sarı panel (logo, site adı, sitenin amacını anlatan
   dört kısa cümle ve ikonları, "Hazırlayan: Uğur Durak", "Yazıları oku" ve "Mağaza"
   düğmeleri), sağda siyah alan üzerinde temsili fotoğraf, arkasında sarı blok, üstüne binen
   "Son yazı" kartı. Telefonda hero tamamen sarıdır, fotoğrafın arkasındaki blok siyaha döner.
   Ardından öne çıkan yazı ızgarası (2x2 büyük kart + 5 kart), "Mağazadan" (3 ürün kartı), konu
   alanları bento'su (6 kutu, boşluksuz), sarı iletişim bandı, siyah footer.
-- **Liste sayfaları:** siyah sayfa bandı (geniş ekranda sağ kenarda sarı eğik dilim, içerik
-  sütununun dışında) + üstüne binen arama/filtre paneli + kart ızgarası.
-- **Yazı sayfası:** siyah başlık bandı + üstüne binen **doküman kontrol bloğu** (yazar, tarih,
+- **Liste sayfaları:** tip öncelikli sayfa başlığı (dev başlık, altında kısa sarı çubuk) + arama
+  ve filtre paneli + çizgiyle ayrılmış yazı satırları (solda kategori üçgeni, başlık, özet, tarih;
+  sağda küçük kapak).
+- **Yazı sayfası:** tip öncelikli başlık + altında **doküman kontrol bloğu** (yazar, tarih,
   son güncelleme, revizyon, kategori, okuma süresi) + metin ve yapışkan içerik tablosu +
   kaynakça + etiket ve paylaşım hapları + ilgili yazılar.
 - **Mağaza:** sayfa bandı + ürün kartları (görsel veya marka kapağı, ad, açıklama, fiyat, biçim)
@@ -110,13 +132,15 @@ Hepsi CSS (slider'ın zamanlayıcısı da hikâye çubuğunun CSS animasyonudur)
 
 | Hareket | Ne anlatır |
 |---|---|
-| Hero ve sayfa başlıklarında kademeli yükselme (`.rise`) | Okuma sırası: unvan, ad, metin, düğmeler |
+| Yalnızca hero'da kademeli yükselme (`.rise`) | Okuma sırası: başlık, metin, düğmeler |
 | Hero fotoğrafının yukarıdan açılması (`.reveal-media`) | Sayfanın ana görselini öne çıkarır |
-| Kart ve kutuların görünür alana girince belirmesi (`animation-timeline: view()`) | İçeriğin sırayla gelmesi |
-| Ürün kartında hover'da sarı panelin eğiminin hafifçe açılması | Kartın tıklanabilir olduğu |
-| Kart, düğme ve kutularda hover'da yükselme, görselde hafif büyüme | Tıklanabilirlik geri bildirimi |
+| Hover ve odakta renk değişimi, menüde sarı çubuğun açılması, ürün kapağında sarı çerçeve (180 ms) | Tıklanabilirlik geri bildirimi |
 | Yazı sayfasında sarı okuma ilerleme çubuğu (`animation-timeline: scroll()`) | Okurun metindeki yeri |
 | Slider: eğik kenar boyunca silme, eski slaytın geri kayması, fotoğrafta yavaş yakınlaşma, hikâye çubuğunun dolması | Sıradaki habere/ürüne geçiş ve ne zaman geçileceği |
+
+Kural: tek orkestralı an hero'dur. Bölümler ve kartlar kaydırınca belirmez (içerik hiçbir zaman
+animasyon beklerken gizli kalmaz); kartlar hover'da yükselmez. Arayüz geçişleri 150-250 ms,
+hero dizisi 600-900 ms, hepsi ease-out.
 
 ## İkonlar
 
@@ -144,7 +168,7 @@ dokunma hedefleri en az 44px (testlerle denetlenir).
 ## Ürün kapağı (`.product-art`)
 
 Görseli olmayan ürün için CSS ile çizilen kapak: siyah zemin, `clip-path` ile eğik sarı panel,
-ortada logo ve Source Serif 4 ile ürün adı (Instagram gönderilerindeki serif başlıklar gibi).
+ortada logo ve Big Shoulders Display ile ürün adı.
 Boyutlar kapsayıcı birimiyle (`cqi`) ölçeklenir; kartta 4:3, ürün sayfasında 4:5. Gerçek bir
 ürün fotoğrafı veya önizleme görseli yüklenirse onun yerine o gösterilir. Kapak sahte bir ekran
 görüntüsü veya sahte ürün fotoğrafı değildir; markanın gönderi şablonudur.
@@ -153,5 +177,5 @@ görüntüsü veya sahte ürün fotoğrafı değildir; markanın gönderi şablo
 
 Mor-mavi degrade, ortalanmış hero, üç eşit ikon kartı, cam efekti, neon parıltı, büyük harfli
 eyebrow her bölümde, dekoratif 01/02/03, oklu düğme metni, em-dash, sahte istatistik, sahte
-logo/yorum/sertifika, sahte indirim veya "son 3 ürün" gibi baskı dili, uydurma takipçi sayısı, div'den sahte ekran görüntüsü, kartın içinde boş hücre. `npm run
+logo/yorum/sertifika, aynı köşe ve gölgeye sahip özdeş kart ızgaraları, her bölümde kaydırınca belirme, sahte indirim veya "son 3 ürün" gibi baskı dili, uydurma takipçi sayısı, div'den sahte ekran görüntüsü, kartın içinde boş hücre. `npm run
 scan:design` bunların koddan tespit edilebilenlerini denetler.

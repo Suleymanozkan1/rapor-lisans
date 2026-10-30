@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import { BookOpenText, CalendarBlank, Clock, HardHat, Newspaper, ShoppingBagOpen, Warning } from '@phosphor-icons/react/ssr'
 import { getCategories, getPublishedPosts, getPublishedProducts, getSettings, mediaFor } from '@/lib/content'
-import { PostList, EmptyPosts } from '@/components/site/PostList'
+import { LeadStories, EmptyPosts } from '@/components/site/PostList'
 import { ProductList } from '@/components/site/ProductList'
-import { CategoryIcon, SITE_PHOTOS } from '@/lib/visuals'
+import { CategoryIcon, SignMark, SITE_PHOTOS } from '@/lib/visuals'
 import { HeroSlider } from '@/components/site/HeroSlider'
 import { ProductMedia } from '@/components/site/ProductList'
 import { categoryName } from '@/lib/posts'
@@ -11,9 +11,6 @@ import { formatDate, isoDay } from '@/lib/format'
 import { markdownWordCount, readingMinutes } from '@/lib/markdown'
 import { formatPrice } from '@/lib/products'
 import { isForSale, type Post, type Product } from '@/lib/types'
-
-/** Visual treatment per bento cell, in order; the grid has exactly as many cells as categories. */
-const TOPIC_STYLES = ['topic--photo', 'topic--accent', 'topic--tint', 'topic--ink', '', 'topic--tint']
 
 /** Icons for the purpose lines, in order (risk, mevzuat, saha, mağaza); decorative. */
 const MOTTO_ICONS = [Warning, BookOpenText, HardHat, ShoppingBagOpen]
@@ -117,16 +114,13 @@ export default function HomePage() {
 
       <section className="wrap section" aria-labelledby="latest-title">
         <div className="section__head">
-          <h2 id="latest-title">Son yazılar</h2>
-          {posts.length > 6 ? (
-            <Link className="section__more" href="/blog">
-              Tüm yazılar ({posts.length})
-            </Link>
-          ) : null}
+          <h2 id="latest-title">Gündem</h2>
+          <Link className="section__more" href="/blog">
+            Tüm yazılar{posts.length ? ` (${posts.length})` : ''}
+          </Link>
         </div>
         {posts.length > 0 ? (
-          // Feature (2x2) + 5 cards fill a 3-column grid exactly.
-          <PostList posts={posts.slice(0, 6)} categories={categories} featured />
+          <LeadStories posts={posts.slice(0, 6)} categories={categories} />
         ) : (
           <EmptyPosts title="İlk yazılar hazırlanıyor.">
             <p>Yayımlanan yazılar burada listelenecek. Konu başlıklarına aşağıdan göz atabilirsiniz.</p>
@@ -137,9 +131,9 @@ export default function HomePage() {
       {products.length > 0 ? (
         <section className="wrap section" aria-labelledby="store-title">
           <div className="section__head">
-            <h2 id="store-title">Mağazadan</h2>
+            <h2 id="store-title">Doküman rafı</h2>
             <Link className="section__more" href="/magaza">
-              {products.length > 3 ? `Tüm ürünler (${products.length})` : 'Mağazaya git'}
+              {products.length > 3 ? `Mağazanın tamamı (${products.length})` : 'Mağazaya git'}
             </Link>
           </div>
           <ProductList products={products.slice(0, 3)} headingLevel={3} />
@@ -149,52 +143,39 @@ export default function HomePage() {
       {categories.length > 0 ? (
         <section className="wrap section" aria-labelledby="topics-title">
           <div className="section__head">
-            <h2 id="topics-title">Konu alanları</h2>
+            <h2 id="topics-title">Konu levhaları</h2>
           </div>
-          <div className="topics">
-            {categories.map((c, i) => {
-              const style = TOPIC_STYLES[i % TOPIC_STYLES.length]
-              return (
-                <Link key={c.slug} href={`/kategori/${c.slug}`} className={`topic reveal ${style}`}>
-                  {style === 'topic--photo' ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={SITE_PHOTOS.ppe.src} alt="" width={SITE_PHOTOS.ppe.width} height={SITE_PHOTOS.ppe.height} loading="lazy" />
-                  ) : null}
-                  <span className="topic__icon">
-                    <CategoryIcon slug={c.slug} size={24} />
+          <ul className="signboard">
+            {categories.map((c) => (
+              <li key={c.slug}>
+                <Link href={`/kategori/${c.slug}`} className="sign-plate">
+                  <SignMark slug={c.slug} size="lg" />
+                  <span className="sign-plate__text">
+                    <strong>{c.name}</strong>
+                    {c.description ? <span>{c.description}</span> : null}
                   </span>
-                  <h3>{c.name}</h3>
-                  {c.description ? <p>{c.description}</p> : null}
-                  <span className="topic__count">{counts[c.slug] ? `${counts[c.slug]} yazı` : 'Yakında'}</span>
+                  <span className="sign-plate__count">{counts[c.slug] ? `${counts[c.slug]} yazı` : 'Yakında'}</span>
                 </Link>
-              )
-            })}
-          </div>
+              </li>
+            ))}
+          </ul>
         </section>
       ) : null}
 
-      <section className="band" aria-labelledby="contact-title">
-        <div className="wrap band__inner">
-          <div>
-            <h2 id="contact-title">Bir sorunuz mu var?</h2>
-            <p>{s.contact.note || 'Bir yazıyla ilgili soru, düzeltme veya öneriniz varsa yazabilirsiniz.'}</p>
-          </div>
-          <div>
-            {s.contact.email ? (
-              <a className="button button--black" href={`mailto:${s.contact.email}`}>
-                E-posta gönder
-              </a>
-            ) : (
-              <Link className="button button--black" href="/iletisim">
-                İletişim
-              </Link>
-            )}
-          </div>
+      <section className="strip" aria-labelledby="contact-title">
+        <div className="wrap strip__inner">
+          <h2 id="contact-title">Sahada bir sorun mu var?</h2>
+          <p>{s.contact.note || 'Bir yazıyla ilgili soru, düzeltme veya öneriniz varsa yazın.'}</p>
+          {s.contact.email ? (
+            <a className="button button--black" href={`mailto:${s.contact.email}`}>
+              E-posta gönder
+            </a>
+          ) : (
+            <Link className="button button--black" href="/iletisim">
+              İletişim
+            </Link>
+          )}
         </div>
-        <figure className="band__photo">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={SITE_PHOTOS.caution.src} alt="" width={SITE_PHOTOS.caution.width} height={SITE_PHOTOS.caution.height} loading="lazy" />
-        </figure>
       </section>
     </>
   )

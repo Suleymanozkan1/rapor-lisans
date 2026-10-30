@@ -27,8 +27,8 @@ export function BlogIndex({ title, intro, posts, allPublished, categories, page,
     <>
       <header className="page-band">
         <div className="wrap">
-          <h1 className="rise">{title}</h1>
-          {intro ? <p className="rise rise-2">{intro}</p> : null}
+          <h1>{title}</h1>
+          {intro ? <p>{intro}</p> : null}
         </div>
       </header>
       <div className="wrap">

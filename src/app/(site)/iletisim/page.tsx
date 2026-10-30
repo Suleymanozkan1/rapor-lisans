@@ -20,15 +20,15 @@ export default function ContactPage() {
     <>
       <header className="page-band">
         <div className="wrap">
-          <h1 className="rise">İletişim</h1>
-          <p className="rise rise-2">{c.note || 'Yazılarla ilgili soru, düzeltme ve önerileriniz için aşağıdaki kanalları kullanabilirsiniz.'}</p>
+          <h1>İletişim</h1>
+          <p>{c.note || 'Yazılarla ilgili soru, düzeltme ve önerileriniz için aşağıdaki kanalları kullanabilirsiniz.'}</p>
         </div>
       </header>
       <div className="wrap">
         {items.length > 0 ? (
           <ul className="contact-cards">
             {items.map(({ key, Icon, label, href, text, external }) => (
-              <li key={key} className="reveal">
+              <li key={key}>
                 <div className="contact-card">
                   <Icon size={30} weight="duotone" aria-hidden="true" />
                   <span>{label}</span>

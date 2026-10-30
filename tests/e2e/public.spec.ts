@@ -23,7 +23,7 @@ test('home page renders with one h1, topics and latest posts', async ({ page }) 
   await expect(page.locator('h1')).toHaveText('Güvenli Çalış')
   await expect(page.locator('.hero__motto li')).toHaveText(['Güvensiz çalışma = Risk', 'Güvenli çalışma = Hayat'])
   await expect(page.locator('.hero').getByRole('link', { name: 'Uğur Durak' })).toHaveAttribute('href', '/hakkimda')
-  await expect(page.getByRole('heading', { name: 'Konu alanları' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Konu levhaları' })).toBeVisible()
   await expect(page.locator('.post-card')).toHaveCount(6)
   await expect(page.locator('.product-card')).toHaveCount(2)
   await expect(page.getByRole('navigation', { name: 'Ana menü' }).getByRole('link', { name: 'Mağaza' })).toBeVisible()
@@ -61,7 +61,7 @@ test('home slider: intro first, then posts and products; controls, pause and aut
   await expect(page.locator('.hero-slider__next')).toContainText('Sıradaki')
 
   // Auto-advance once the pointer and focus leave the slider.
-  await page.locator('h2', { hasText: 'Son yazılar' }).focus().catch(() => {})
+  await page.locator('h2', { hasText: 'Gündem' }).focus({ timeout: 2000 }).catch(() => {})
   await page.mouse.move(5, 5)
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
   await expect(slides.nth(2)).toHaveClass(/is-active/, { timeout: 10_000 })
@@ -114,7 +114,7 @@ test('blog list paginates and filters by category and tag', async ({ page }) => 
   await page.getByRole('navigation', { name: 'Kategoriler' }).getByRole('link', { name: 'Mevzuat' }).click()
   await expect(page).toHaveURL(/\/kategori\/mevzuat$/)
   await expect(page.locator('h1')).toHaveText('Mevzuat')
-  for (const row of await page.locator('.post-card__cat').allTextContents()) expect(row).toBe('Mevzuat')
+  for (const row of await page.locator('.post-card .post-topic').allTextContents()) expect(row).toBe('Mevzuat')
 
   await page.goto('/blog/ornek-yazi-1')
   await page.getByRole('link', { name: 'Yüksekte çalışma' }).click()
@@ -242,7 +242,7 @@ test('search: Turkish-insensitive query, category filter, empty state', async ({
 
   await page.goto('/ara?q=yazi&kategori=mevzuat')
   await expect(page.getByText(/sonuç bulundu/)).toBeVisible()
-  const titles = await page.locator('.post-card__cat').allTextContents()
+  const titles = await page.locator('.post-card .post-topic').allTextContents()
   expect(titles.length).toBeGreaterThan(0)
   for (const t of titles) expect(t).toBe('Mevzuat')
 

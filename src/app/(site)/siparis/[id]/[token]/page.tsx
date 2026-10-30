@@ -35,10 +35,10 @@ export default async function OrderPage({ params, searchParams }: PageProps<'/si
     <>
       <header className="page-band">
         <div className="wrap">
-          <h1 className="rise">
+          <h1>
             {order.status === 'paid' ? 'Siparişiniz tamamlandı' : order.status === 'pending' ? 'Ödemeniz doğrulanıyor' : order.status === 'refunded' ? 'Sipariş iade edildi' : 'Ödeme tamamlanmadı'}
           </h1>
-          <p className="rise rise-2">Sipariş numarası: {order.orderNo}</p>
+          <p>Sipariş numarası: {order.orderNo}</p>
         </div>
       </header>
       <div className="wrap order">

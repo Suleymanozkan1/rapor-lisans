@@ -9,8 +9,8 @@ export default function PaymentResultPage() {
     <>
       <header className="page-band">
         <div className="wrap">
-          <h1 className="rise">Ödeme sonucu bulunamadı</h1>
-          <p className="rise rise-2">Bu ödeme bir siparişle eşleştirilemedi veya oturumun süresi doldu.</p>
+          <h1>Ödeme sonucu bulunamadı</h1>
+          <p>Bu ödeme bir siparişle eşleştirilemedi veya oturumun süresi doldu.</p>
         </div>
       </header>
       <div className="wrap plain-page">

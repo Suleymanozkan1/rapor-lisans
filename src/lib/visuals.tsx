@@ -52,3 +52,15 @@ export const SITE_PHOTOS = {
     credit: 'John Cardamone, Unsplash',
   },
 } as const
+
+/**
+ * Category mark styled as an ISO 7010 warning sign: a yellow triangle with the
+ * category pictogram. Used wherever a post is labelled with its topic.
+ */
+export function SignMark({ slug, size = 'sm' }: { slug?: string; size?: 'sm' | 'lg' }) {
+  return (
+    <span className={`sign-mark sign-mark--${size}`} aria-hidden="true">
+      <CategoryIcon slug={slug} size={size === 'lg' ? 26 : 12} />
+    </span>
+  )
+}

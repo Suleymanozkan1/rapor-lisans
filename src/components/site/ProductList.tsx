@@ -33,7 +33,7 @@ export function ProductList({ products, headingLevel = 2 }: { products: Product[
   return (
     <ul className="product-grid">
       {products.map((p) => (
-        <li key={p.slug} className="reveal">
+        <li key={p.slug}>
           <article className="product-card">
             <div className="product-card__media">
               <ProductMedia product={p} />
