@@ -5,6 +5,7 @@ import { LeadStories, EmptyPosts } from '@/components/site/PostList'
 import { ProductList } from '@/components/site/ProductList'
 import { CategoryIcon, SignMark, SITE_PHOTOS } from '@/lib/visuals'
 import { HeroSlider } from '@/components/site/HeroSlider'
+import { HazardTicker } from '@/components/site/HazardTicker'
 import { ProductMedia } from '@/components/site/ProductList'
 import { categoryName } from '@/lib/posts'
 import { formatDate, isoDay } from '@/lib/format'
@@ -111,6 +112,7 @@ export default function HomePage() {
   return (
     <>
       <HeroSlider slides={slides} />
+      <HazardTicker items={posts.slice(0, 8).map((p) => ({ href: `/blog/${p.slug}`, label: p.title }))} />
 
       <section className="wrap section" aria-labelledby="latest-title">
         <div className="section__head">
@@ -136,29 +138,27 @@ export default function HomePage() {
               {products.length > 3 ? `Mağazanın tamamı (${products.length})` : 'Mağazaya git'}
             </Link>
           </div>
-          <ProductList products={products.slice(0, 3)} headingLevel={3} />
+          <ProductList products={products.slice(0, 3)} headingLevel={3} fan />
         </section>
       ) : null}
 
       {categories.length > 0 ? (
         <section className="wrap section" aria-labelledby="topics-title">
           <div className="section__head">
-            <h2 id="topics-title">Konu levhaları</h2>
+            <h2 id="topics-title">Konu dizini</h2>
           </div>
-          <ul className="signboard">
+          <ol className="topic-index">
             {categories.map((c) => (
               <li key={c.slug}>
-                <Link href={`/kategori/${c.slug}`} className="sign-plate">
+                <Link href={`/kategori/${c.slug}`} className="topic-row">
                   <SignMark slug={c.slug} size="lg" />
-                  <span className="sign-plate__text">
-                    <strong>{c.name}</strong>
-                    {c.description ? <span>{c.description}</span> : null}
-                  </span>
-                  <span className="sign-plate__count">{counts[c.slug] ? `${counts[c.slug]} yazı` : 'Yakında'}</span>
+                  <span className="topic-row__name">{c.name}</span>
+                  {c.description ? <span className="topic-row__desc">{c.description}</span> : null}
+                  <span className="topic-row__count">{counts[c.slug] ? `${counts[c.slug]} yazı` : 'Yakında'}</span>
                 </Link>
               </li>
             ))}
-          </ul>
+          </ol>
         </section>
       ) : null}
 

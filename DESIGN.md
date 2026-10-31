@@ -95,8 +95,16 @@ Başlıkta tek kelimeyi farklı renge boyama yok; her başlığın üstünde bü
     tek eylemle açılır; slider her slaytta bunu yapar.
   - *Gündem (öne çıkan yazı + başlık listesi):* yayın sitelerinin en okunur deseni; aynı kartların
     tekrarı yerine hiyerarşi.
-  - *Doküman rafı:* ürün kapağı gözün tutunduğu nesnedir (dergi kapağı gibi); telefonda yatay kayan raf.
-  - *Konu levhaları:* kategoriler bir levha tahtası; her biri uyarı üçgeni, ad, açıklama, yazı sayısı.
+  - *Doküman rafı:* ürün kapağı gözün tutunduğu nesnedir (dergi kapağı gibi). Masaüstünde sayfanın
+    tek kaydırma sahnesi: kapaklar yelpaze gibi açılmış bir doküman destesi olarak başlar, raf
+    görünür alana girdikçe sıraya dizilir (`animation-timeline: view()`; destek yoksa veya
+    reduced-motion'da doğrudan sıra). Telefonda yatay kayan raf.
+  - *Gündem başlık listesi:* her başlığın yanında soluk, gri küçük görsel; üzerine gelince renklenir.
+  - *Konu dizini:* kategoriler büyük harfli bir dizin; satırın üzerine gelince satır soldan sağa
+    tehlike sarısıyla dolar, metin siyaha döner.
+  - *Haber bandı (şerit):* hero'nun hemen altında, sarı-siyah ikaz şeridi çizgileri arasında son
+    yazı başlıkları akar. Üzerine gelince veya odaklanınca durur, kendi durdur düğmesi vardır
+    (WCAG 2.2.2); reduced-motion'da akmaz, elle kaydırılır.
   - *İletişim şeridi:* tek bir sarı an, eğik kesimli.
 - **Ana sayfa (ayrıntı):** hero solda eğik kenarlı sarı panel (logo, site adı, sitenin amacını anlatan
   dört kısa cümle ve ikonları, "Hazırlayan: Uğur Durak", "Yazıları oku" ve "Mağaza"
@@ -138,7 +146,11 @@ Hepsi CSS (slider'ın zamanlayıcısı da hikâye çubuğunun CSS animasyonudur)
 | Yazı sayfasında sarı okuma ilerleme çubuğu (`animation-timeline: scroll()`) | Okurun metindeki yeri |
 | Slider: eğik kenar boyunca silme, eski slaytın geri kayması, fotoğrafta yavaş yakınlaşma, hikâye çubuğunun dolması | Sıradaki habere/ürüne geçiş ve ne zaman geçileceği |
 
-Kural: tek orkestralı an hero'dur. Bölümler ve kartlar kaydırınca belirmez (içerik hiçbir zaman
+Esin kaynağı: scrolltide.co (haber bandı, üzerine gelince görsel açan liste, yelpaze deste,
+büyük tipografik dizin). Alınmayanlar: ortalanmış degrade hero, tek kelimesi degrade başlık,
+animasyonlu degrade (shader) arka planlar ve üçüncü yazı ailesi; markanın levha diliyle çelişir.
+
+Kural: orkestralı anlar hero ve doküman rafının yelpaze sahnesidir. Bölümler ve kartlar kaydırınca belirmez (içerik hiçbir zaman
 animasyon beklerken gizli kalmaz); kartlar hover'da yükselmez. Arayüz geçişleri 150-250 ms,
 hero dizisi 600-900 ms, hepsi ease-out.
 
