@@ -13,6 +13,7 @@ const MESSAGES: Record<string, { kind: 'ok' | 'warn' | 'danger'; text: string }>
   'gorsel-silindi': { kind: 'ok', text: 'Görsel silindi.' },
   'urun-kaydedildi': { kind: 'ok', text: 'Ürün kaydedildi. Mağaza sayfası bir sonraki dağıtımla güncellenir.' },
   'urun-silindi': { kind: 'ok', text: 'Ürün silindi.' },
+  'sayfa-silindi': { kind: 'ok', text: 'Sayfa silindi.' },
   'siparis-guncellendi': { kind: 'ok', text: 'İşlem yapıldı.' },
   'siparis-islem-yok': { kind: 'warn', text: 'Bu sipariş için bu işlem yapılamaz.' },
   'siparis-onay': { kind: 'danger', text: 'Onay için sipariş numarasını aynen yazın.' },

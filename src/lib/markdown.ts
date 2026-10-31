@@ -132,3 +132,14 @@ function plainText(tree: MdRoot): string {
   })
   return parts.join(' ').replace(/\s+/g, ' ').trim()
 }
+
+/**
+ * Markdown of a page-builder text block, rendered synchronously (blocks render
+ * both on the server and in the editor). Same allow-list and link hardening as
+ * articles; no heading ids, so blocks cannot clash with ids on the page.
+ */
+export function renderBlockMarkdown(source: string): string {
+  const processor = unified().use(remarkParse).use(remarkGfm).use(remarkRehype).use(rehypeSanitize, { ...schema, clobber: [], strip: ['script'] }).use(rehypeHardenLinks)
+  const hast = processor.runSync(processor.parse(source)) as HastRoot
+  return unified().use(rehypeStringify).stringify(hast)
+}

@@ -82,6 +82,7 @@ test('security headers are set', async ({ request }) => {
   const h = res.headers()
   expect(h['content-security-policy']).toContain("frame-ancestors 'none'")
   expect(h['content-security-policy']).toContain("object-src 'none'")
+  expect(h['content-security-policy']).toContain("frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com")
   // Vercel Blob client uploads call /api/blob/?pathname=… and /api/blob/mpu; a source without the trailing slash would block them.
   expect(h['content-security-policy']).toMatch(/connect-src [^;]*https:\/\/vercel\.com\/api\/blob\/ /)
   expect(h['x-content-type-options']).toBe('nosniff')
@@ -299,4 +300,44 @@ test('all images have alt attributes', async ({ page }) => {
     await page.goto(url)
     expect(await page.locator('img:not([alt])').count(), url).toBe(0)
   }
+})
+
+test('a page built in the editor renders its blocks, sits in the menu and the sitemap; drafts stay hidden', async ({ page, request }) => {
+  const errors: string[] = []
+  page.on('pageerror', (e) => errors.push(e.message))
+  await page.goto('/danismanlik')
+  await expect(page.locator('h1')).toHaveText('Danışmanlık hizmetleri')
+  await expect(page).toHaveTitle(/Danışmanlık/)
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', 'Test sayfası açıklaması.')
+  await expect(page.getByRole('navigation', { name: 'Ana menü' }).getByRole('link', { name: 'Hizmetler' })).toHaveAttribute('href', '/danismanlik')
+  await expect(page.locator('.bk-section--sari h2')).toContainText('Sahada güvenlik')
+  await expect(page.locator('.bk-text strong')).toHaveText('Kalın metin')
+  await expect(page.locator('.bk-iconlist li')).toHaveText(['Risk değerlendirmesi', 'Saha denetimi'])
+  await expect(page.getByRole('link', { name: 'İletişime geç' })).toHaveAttribute('href', '/iletisim')
+
+  // Accordion: native details/summary.
+  await page.getByText('Ne kadar sürer?').click()
+  await expect(page.locator('.bk-faq strong')).toHaveText('iki hafta')
+
+  // Tabs: ARIA tabs with arrow keys.
+  const first = page.getByRole('tab', { name: 'Birinci sekme' })
+  await expect(first).toHaveAttribute('aria-selected', 'true')
+  await first.focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('tab', { name: 'İkinci sekme' })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByRole('tabpanel')).toContainText('İkinci içerik.')
+
+  // Video: nothing is loaded from YouTube until the visitor clicks.
+  await expect(page.locator('iframe')).toHaveCount(0)
+  await page.getByRole('button', { name: /Tanıtım videosu/ }).click()
+  await expect(page.locator('iframe')).toHaveAttribute('src', /^https:\/\/www\.youtube-nocookie\.com\/embed\/dQw4w9WgXcQ/)
+
+  const sitemap = await (await request.get('/sitemap.xml')).text()
+  expect(sitemap).toContain('<loc>http://localhost:3100/danismanlik</loc>')
+  expect(sitemap).not.toContain('gizli-taslak')
+  expect((await request.get('/gizli-taslak')).status()).toBe(404)
+  await page.goto('/')
+  await expect(page.getByRole('navigation', { name: 'Ana menü' })).not.toContainText('TASLAK-SAYFA-GIZLI')
+  await noHorizontalScroll(page)
+  expect(errors).toEqual([])
 })

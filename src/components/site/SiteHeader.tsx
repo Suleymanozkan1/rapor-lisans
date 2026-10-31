@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getSettings } from '@/lib/content'
+import { menuPages } from '@/lib/pages/site'
 import { NavLinks } from './NavLinks'
 
 export function initials(name: string): string {
@@ -38,7 +39,7 @@ export function SiteHeader() {
           </span>
         </Link>
         <nav className="site-nav" aria-label="Ana menü">
-          <NavLinks />
+          <NavLinks extra={menuPages()} />
         </nav>
       </div>
     </header>

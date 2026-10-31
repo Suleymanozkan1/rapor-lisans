@@ -459,3 +459,61 @@ test('the preview source endpoint never serves a file without a GitHub Actions i
     expect(res.headers()['content-type']).toContain('application/json')
   }
 })
+
+test('page editor: create a page, drag a block in, edit it, save; system pages start from the default layout', async ({ page }) => {
+  await login(page)
+  await page.goto('/admin/sayfalar')
+  await expect(page.locator('table')).toContainText('Ana sayfa')
+  await expect(page.locator('table')).toContainText('Yayında (varsayılan düzen)')
+  // A path the site already uses is refused.
+  await page.getByLabel('Sayfa adı').fill('Blog')
+  await page.getByRole('button', { name: 'Oluştur ve düzenle' }).click()
+  await expect(page.locator('main').getByRole('alert')).toContainText('kullanılamaz')
+
+  await page.getByLabel('Sayfa adı').fill('Eğitim takvimi')
+  await expect(page.getByLabel('Adres')).toHaveValue('egitim-takvimi')
+  await page.getByRole('button', { name: 'Oluştur ve düzenle' }).click()
+  await page.waitForURL(/\/admin\/duzenleyici\/egitim-takvimi$/)
+  const file = path.join(work, 'content/pages/egitim-takvimi.json')
+  expect(JSON.parse(readFileSync(file, 'utf8')).meta.status).toBe('draft')
+
+  const canvas = page.frameLocator('iframe').first()
+  await expect(canvas.locator('.page-band h1')).toHaveText('Eğitim takvimi')
+
+  // Drag "Uyarı kutusu" from the block list below the page header.
+  await page.setViewportSize({ width: 1440, height: 900 })
+  const item = page.getByText('Uyarı kutusu', { exact: true }).first()
+  await item.scrollIntoViewIfNeeded()
+  const src = await item.boundingBox()
+  const dst = await canvas.locator('.page-band').boundingBox()
+  await page.mouse.move(src!.x + src!.width / 2, src!.y + src!.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(src!.x + 60, src!.y + 20, { steps: 5 })
+  await page.mouse.move(dst!.x + dst!.width / 2, dst!.y + dst!.height - 5, { steps: 20 })
+  await page.mouse.move(dst!.x + dst!.width / 2, dst!.y + dst!.height + 10, { steps: 10 })
+  await page.mouse.up()
+  await expect(canvas.locator('.bk-callout')).toHaveCount(1)
+
+  // The new block is selected: edit its title in the settings panel.
+  await page.getByRole('textbox', { name: 'Başlık' }).fill('Kayıtlar 15 Kasım’da kapanıyor')
+  await expect(canvas.locator('.bk-callout__title')).toHaveText('Kayıtlar 15 Kasım’da kapanıyor')
+
+  await page.getByRole('button', { name: 'Kaydet' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Taslak olarak kaydedildi' })).toBeVisible()
+  const saved = JSON.parse(readFileSync(file, 'utf8'))
+  expect(saved.data.content.map((b: { type: string }) => b.type)).toEqual(['SayfaBasligi', 'UyariKutusu'])
+  expect(saved.data.content[1].props.baslik).toBe('Kayıtlar 15 Kasım’da kapanıyor')
+
+  // A second save after another edit works (the editor keeps the file version).
+  await page.getByRole('textbox', { name: 'Başlık' }).fill('Kayıtlar açık')
+  await page.getByRole('button', { name: 'Kaydet' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Taslak olarak kaydedildi' })).toBeVisible()
+  await expect.poll(() => JSON.parse(readFileSync(file, 'utf8')).data.content[1].props.baslik).toBe('Kayıtlar açık')
+
+  // Delete with confirmation.
+  await page.goto('/admin/sayfalar/egitim-takvimi/sil')
+  await page.getByLabel(/Onaylamak için/).fill('egitim-takvimi')
+  await page.getByRole('button', { name: 'Kalıcı olarak sil' }).click()
+  await expect(page).toHaveURL(/\/admin\/sayfalar\?durum=sayfa-silindi$/)
+  expect(existsSync(file)).toBe(false)
+})

@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "title": "TASLAK-SAYFA-GIZLI",
+    "status": "draft",
+    "menu": true
+  },
+  "data": {
+    "root": {
+      "props": {}
+    },
+    "content": [
+      {
+        "type": "SayfaBasligi",
+        "props": {
+          "id": "S-1",
+          "baslik": "TASLAK-SAYFA-GIZLI",
+          "altyazi": ""
+        }
+      }
+    ]
+  }
+}

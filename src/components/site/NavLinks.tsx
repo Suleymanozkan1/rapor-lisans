@@ -12,11 +12,13 @@ const LINKS = [
   { href: '/ara', label: 'Ara', icon: true },
 ]
 
-export function NavLinks() {
+export function NavLinks({ extra = [] }: { extra?: { href: string; label: string }[] }) {
   const path = usePathname()
+  // Pages added in the editor sit between "Mağaza" and "Hakkımda".
+  const links = [...LINKS.slice(0, 2), ...extra, ...LINKS.slice(2)]
   return (
     <ul>
-      {LINKS.map((l) => {
+      {links.map((l: { href: string; label: string; icon?: boolean }) => {
         const active = path === l.href || (l.href === '/magaza' && path.startsWith('/magaza/')) || (l.href === '/blog' && (path.startsWith('/blog/') || path.startsWith('/kategori/') || path.startsWith('/etiket/')))
         return (
           <li key={l.href}>

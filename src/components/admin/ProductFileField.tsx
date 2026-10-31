@@ -187,7 +187,7 @@ export function ProductFileField({ csrf, slug, value, preview, previewDisabled, 
           ) : convertible ? (
             current ? null : (
               <p className="field__help" role="status">
-                Word, Excel ve PowerPoint dosyalarının sayfaları kaydettikten sonra otomatik oluşturulur (LibreOffice ile, yaklaşık 2–4 dakika). Bu
+                Word, Excel ve PowerPoint dosyalarının sayfaları kaydettikten sonra otomatik oluşturulur (LibreOffice ile, yaklaşık 2 ile 4 dakika içinde). Bu
                 sayfayı sonra yenileyerek görebilirsiniz.
               </p>
             )

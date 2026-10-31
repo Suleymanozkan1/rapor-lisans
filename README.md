@@ -36,6 +36,7 @@ ayarlandı. Veritabanı gerektirmez: içerik Git deposunda durur.
 - [Vercel'e dağıtım](#vercele-dağıtım)
 - [GitHub entegrasyonu](#github-entegrasyonu)
 - [Yayın akışı](#yayın-akışı)
+- [Sayfa düzenleyici](#sayfa-düzenleyici)
 - [Mağaza kurulumu](#mağaza-kurulumu)
 - [Mağazayı işletmek](#mağazayı-işletmek)
 - [Marka: logo ve renkler](#marka-logo-ve-renkler)
@@ -158,6 +159,46 @@ ve kayıt işlemleri açık bir hata mesajıyla reddedilir. Token geçersizse Gi
 
 Gelecek tarihli yayın tarihi olan yazı, o tarihten sonraki ilk build'de görünür; zamanlanmış
 otomatik build yoktur.
+
+## Sayfa düzenleyici
+
+**Panel › Sayfalar**: ana sayfa, Hakkımda, İletişim ve sizin açtığınız sayfalar sürükle-bırak
+düzenlenir ([Puck](https://puckeditor.com), MIT lisanslı açık kaynak düzenleyici; arayüzü
+Türkçedir).
+
+- **Ekran:** solda bloklar, ortada sayfanın canlı önizlemesi (Telefon / Tablet / Masaüstü
+  düğmeleri), sağda seçili bloğun ayarları. Hiçbir blok seçili değilken sağ panel sayfa
+  ayarlarını gösterir (ad, arama motoru açıklaması; yeni sayfalarda durum ve menü).
+  **Kaydet** sayfayı GitHub'a commit eder; site yaklaşık bir dakika sonra güncellenir.
+  Geri al / yinele, blok çoğaltma ve silme, "Yapı" sekmesinde iç içe blok ağacı vardır.
+- **Bloklar:**
+  - **Düzen:** Bölüm (arka plan, iç boşluk, genişlik, hiza), Sütunlar (2–4 sütun, oranlar,
+    telefonda sıra), Boşluk, Ayırıcı.
+  - **Temel:** Başlık (H1–H4, boyut, renk, vurgu), Metin (Markdown), Görsel (medya
+    kütüphanesinden, oran, bağlantı), Düğmeler, İkon listesi, Uyarı kutusu, Kartlar, Alıntı.
+  - **Etkileşimli ve medya:** Sık sorulanlar, Sekmeler, Video, Galeri, Sayılar, İlerleme
+    çubukları, Sosyal bağlantılar.
+  - **Site içeriği:** Sayfa başlığı bandı, Vitrin slaytı, Kayan şerit, Son yazılar, Ürünler,
+    Konu dizini, İletişim şeridi, Yazar bilgisi, İletişim bilgileri. Bunlar yazıları,
+    ürünleri ve ayarları kendiliğinden gösterir.
+- **Her blokta "Gelişmiş":** telefonda veya masaüstünde gizle, üst/alt boşluk, giriş
+  animasyonu (hareket azaltma tercihine uyar), sayfa içi bağlantı adı (#adres).
+- **Marka uyumu:** renkler, yazı boyutları ve boşluklar yalnızca Güvenli Çalış paletinden
+  seçilir (Asfalt, İşaret siyahı, Tehlike sarısı, Baret kırmızısı…). Serbest renk kodu ve
+  yazı tipi yoktur; böylece her sayfa okunaklı ve kontrastı denetlenmiş kalır.
+- **Varsayılan düzen:** ana sayfa, Hakkımda ve İletişim düzenleyicide ilk kez kaydedilene
+  kadar bugünkü tasarımı bloklarla aynen üretir (`src/lib/pages/defaults.ts`).
+- **Değiştirilemeyenler:** İletişim sayfasındaki satıcı bilgileri ve KVKK notu yasal
+  zorunluluktur, blokların altında sabit durur. Yazılar ve ürünler kendi bölümlerinden
+  düzenlenir; üst menü ve alt bilgi sabittir (yeni sayfalar "Ana menüde göster" ile menüye
+  eklenir).
+- **Güvenlik:** kaydedilen sayfa sunucuda blok tanımlarına göre yeniden denetlenir:
+  yalnızca bilinen bloklar ve alanlar, yalnızca `/…`, `#…`, `https://`, `mailto:`, `tel:`
+  bağlantıları, yalnızca medya kütüphanesindeki görseller, yalnızca YouTube/Vimeo videosu.
+  Metinler Markdown'dır ve yazılardaki temizleyiciden geçer; HTML/kod bloğu yoktur. Video,
+  ziyaretçi tıklayana kadar YouTube/Vimeo'dan hiçbir şey yüklemez (youtube-nocookie).
+- **Dosyalar:** `content/pages/<adres>.json`. Sayfa adresi sitenin mevcut yollarıyla
+  (`/blog`, `/magaza` …) çakışamaz.
 
 ## Mağaza kurulumu
 

@@ -1,0 +1,233 @@
+{
+  "meta": {
+    "title": "Danışmanlık",
+    "description": "Test sayfası açıklaması.",
+    "status": "published",
+    "menu": true,
+    "menuLabel": "Hizmetler",
+    "menuOrder": 10
+  },
+  "data": {
+    "root": {
+      "props": {
+        "title": "Danışmanlık"
+      }
+    },
+    "content": [
+      {
+        "type": "SayfaBasligi",
+        "props": {
+          "id": "SayfaBasligi-1",
+          "baslik": "Danışmanlık hizmetleri",
+          "altyazi": "Test alt yazısı",
+          "_adv": {
+            "gizle": "yok",
+            "ust": "yok",
+            "alt": "l",
+            "animasyon": "yok",
+            "baglanti": ""
+          }
+        }
+      },
+      {
+        "type": "Bolum",
+        "props": {
+          "id": "Bolum-1",
+          "arkaplan": "sari",
+          "gorsel": "",
+          "ic": "m",
+          "genislik": "normal",
+          "hiza": "sol",
+          "_adv": {
+            "gizle": "yok",
+            "ust": "yok",
+            "alt": "m",
+            "animasyon": "yok",
+            "baglanti": ""
+          },
+          "icerik": [
+            {
+              "type": "Baslik",
+              "props": {
+                "id": "Baslik-1",
+                "ust": "Neden biz?",
+                "metin": "Sahada güvenlik",
+                "seviye": "h2",
+                "boyut": "buyuk",
+                "hiza": "sol",
+                "renk": "metin",
+                "vurgu": "cizgi",
+                "_adv": {
+                  "gizle": "yok",
+                  "ust": "yok",
+                  "alt": "m",
+                  "animasyon": "yok",
+                  "baglanti": ""
+                }
+              }
+            },
+            {
+              "type": "Sutunlar",
+              "props": {
+                "id": "Sutunlar-1",
+                "duzen": "1-1",
+                "aralik": "l",
+                "dikey": "ust",
+                "telefon": "alt-alta",
+                "_adv": {
+                  "gizle": "yok",
+                  "ust": "yok",
+                  "alt": "m",
+                  "animasyon": "yok",
+                  "baglanti": ""
+                },
+                "s1": [
+                  {
+                    "type": "Metin",
+                    "props": {
+                      "id": "Metin-1",
+                      "icerik": "**Kalın metin** ve [blog bağlantısı](/blog).",
+                      "boyut": "giris",
+                      "hiza": "sol",
+                      "genislik": "okuma",
+                      "_adv": {
+                        "gizle": "yok",
+                        "ust": "yok",
+                        "alt": "m",
+                        "animasyon": "yok",
+                        "baglanti": ""
+                      }
+                    }
+                  }
+                ],
+                "s2": [
+                  {
+                    "type": "IkonListesi",
+                    "props": {
+                      "id": "Ikon-1",
+                      "duzen": "dikey",
+                      "_adv": {
+                        "gizle": "yok",
+                        "ust": "yok",
+                        "alt": "m",
+                        "animasyon": "yok",
+                        "baglanti": ""
+                      },
+                      "maddeler": [
+                        {
+                          "ikon": "onay",
+                          "metin": "Risk değerlendirmesi"
+                        },
+                        {
+                          "ikon": "baret",
+                          "metin": "Saha denetimi"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "s3": [],
+                "s4": []
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "Dugmeler",
+        "props": {
+          "id": "Dugmeler-1",
+          "hiza": "sol",
+          "_adv": {
+            "gizle": "yok",
+            "ust": "yok",
+            "alt": "m",
+            "animasyon": "yok",
+            "baglanti": ""
+          },
+          "dugmeler": [
+            {
+              "etiket": "İletişime geç",
+              "adres": "/iletisim",
+              "stil": "birincil"
+            }
+          ]
+        }
+      },
+      {
+        "type": "SSS",
+        "props": {
+          "id": "SSS-1",
+          "ilkAcik": "kapali",
+          "_adv": {
+            "gizle": "yok",
+            "ust": "yok",
+            "alt": "m",
+            "animasyon": "yok",
+            "baglanti": ""
+          },
+          "sorular": [
+            {
+              "soru": "Ne kadar sürer?",
+              "cevap": "Genellikle **iki hafta**."
+            }
+          ]
+        }
+      },
+      {
+        "type": "Sekmeler",
+        "props": {
+          "id": "Sekmeler-1",
+          "_adv": {
+            "gizle": "yok",
+            "ust": "yok",
+            "alt": "m",
+            "animasyon": "yok",
+            "baglanti": ""
+          },
+          "sekmeler": [
+            {
+              "baslik": "Birinci sekme",
+              "metin": "Birinci içerik."
+            },
+            {
+              "baslik": "İkinci sekme",
+              "metin": "İkinci içerik."
+            }
+          ]
+        }
+      },
+      {
+        "type": "Video",
+        "props": {
+          "id": "Video-1",
+          "adres": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          "baslik": "Tanıtım videosu",
+          "_adv": {
+            "gizle": "yok",
+            "ust": "yok",
+            "alt": "m",
+            "animasyon": "yok",
+            "baglanti": ""
+          }
+        }
+      },
+      {
+        "type": "UyariKutusu",
+        "props": {
+          "id": "Uyari-1",
+          "tur": "tehlike",
+          "baslik": "Dikkat",
+          "metin": "Yüksekte çalışırken emniyet kemeri takın.",
+          "_adv": {
+            "gizle": "masaustu",
+            "ust": "yok",
+            "alt": "m",
+            "animasyon": "yok",
+            "baglanti": ""
+          }
+        }
+      }
+    ]
+  }
+}

@@ -11,7 +11,7 @@ const mockIyzico = /^http:\/\/127\.0\.0\.1:\d+$/.test(process.env.IYZICO_BASE_UR
  * Pages are statically generated, so a per-request nonce is not possible
  * for public pages; Next.js' inline bootstrap scripts need 'unsafe-inline'.
  * Article HTML is sanitized server-side, and no third-party origin is
- * allowed for scripts or frames. Forms may lead to iyzico's payment page,
+ * allowed for scripts; frames only for the YouTube/Vimeo players of video blocks. Forms may lead to iyzico's payment page,
  * and the admin browser may upload product files to Vercel Blob.
  */
 const csp = [
@@ -23,6 +23,8 @@ const csp = [
   // Admin product-file uploads go from the browser straight to Vercel Blob. The trailing slash
   // matters: the client calls /api/blob/?pathname=…, and a CSP path without one matches exactly.
   `connect-src 'self' https://vercel.com/api/blob/ https://*.blob.vercel-storage.com${isDev ? ' ws:' : ''}`,
+  // Video blocks load the player only after a click, and only from these two privacy-mode hosts.
+  "frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com",
   "frame-ancestors 'none'",
   `form-action 'self' https://*.iyzipay.com${mockIyzico}`,
   "base-uri 'self'",

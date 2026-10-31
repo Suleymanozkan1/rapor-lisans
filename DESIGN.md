@@ -185,6 +185,23 @@ Boyutlar kapsayıcı birimiyle (`cqi`) ölçeklenir; kartta 4:3, ürün sayfası
 ürün fotoğrafı veya önizleme görseli yüklenirse onun yerine o gösterilir. Kapak sahte bir ekran
 görüntüsü veya sahte ürün fotoğrafı değildir; markanın gönderi şablonudur.
 
+## Sayfa düzenleyici blokları (`src/app/builder.css`)
+
+Düzenleyici tasarım sistemini aşmaz, onu seçenek olarak sunar:
+
+- **Renk:** arka planlar ve metin tonları adlı seçeneklerdir (Asfalt `--surface`, İşaret siyahı
+  `--brand-deep`, Tehlike sarısı `--accent`, Baret kırmızısı `--signal`, tehlike şeridi
+  kenarlı). Sarı ve kırmızı zeminde metin ve ikonlar zeminin karşıt rengine döner. Serbest
+  renk kodu yoktur.
+- **Ölçek:** başlık boyutları `--fs-hero / --fs-h1 / --fs-h2 / --fs-h3`, boşluklar `--s3…--s9`
+  adımlarıdır (Yok, Küçük, Orta, Büyük, Çok büyük).
+- **Köşeler ve şerit:** kartlar ve görseller 6 px, düğmeler 4 px; tehlike şeridi kayan
+  şeritteki SVG desenin aynısıdır (gradyan kullanılmaz).
+- **Sayfa sütunu:** sayfaya doğrudan bırakılan bloklar `--page` genişliğinde ortalanır; bölüm,
+  slayt, şerit ve bant blokları tam genişliktir.
+- **Hareket:** "Belirerek" ve "Aşağıdan yükselerek" yalnızca `animation-timeline: view()`
+  destekleyen tarayıcılarda ve hareket azaltma tercihi yokken çalışır.
+
 ## Yapılmayacaklar
 
 Mor-mavi degrade, ortalanmış hero, üç eşit ikon kartı, cam efekti, neon parıltı, büyük harfli

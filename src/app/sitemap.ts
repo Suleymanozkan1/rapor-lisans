@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next'
 import { getCategories, getPublishedPosts, getPublishedProducts } from '@/lib/content'
 import { allTags } from '@/lib/posts'
 import { siteUrl } from '@/lib/env'
+import { listCustomPages } from '@/lib/pages/site'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteUrl()
@@ -22,5 +23,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...products.map((p) => ({ url: `${base}/magaza/${p.slug}`, lastModified: p.updatedAt ?? p.createdAt })),
     ...usedCats.map((c) => ({ url: `${base}/kategori/${c.slug}` })),
     ...allTags(posts).map((t) => ({ url: `${base}/etiket/${t.slug}` })),
+    ...listCustomPages().map((p) => ({ url: `${base}/${p.slug}`, lastModified: p.meta.updatedAt })),
   ]
 }
