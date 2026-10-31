@@ -35,7 +35,11 @@ async function authorise(csrf: unknown): Promise<string | null> {
   return null
 }
 
-const deny = (message: string, status = 403) => NextResponse.json({ error: message }, { status, headers: { 'Cache-Control': 'no-store' } })
+const deny = (message: string, status = 403) => {
+  // Why an upload was refused, for the runtime logs (no tokens, no file contents).
+  console.warn(JSON.stringify({ type: 'product_upload_refused', at: new Date().toISOString(), status, reason: message }))
+  return NextResponse.json({ error: message }, { status, headers: { 'Cache-Control': 'no-store' } })
+}
 
 export async function POST(request: Request) {
   const kind = fileStoreKind()

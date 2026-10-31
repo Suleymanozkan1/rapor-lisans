@@ -29,6 +29,9 @@ const SOFTWARE: Record<string, string> = {
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'Excel (.xlsx) dosyası; Microsoft Excel, LibreOffice Calc veya uyumlu bir tablo programıyla açılır.',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word (.docx) dosyası; Microsoft Word, LibreOffice Writer veya uyumlu bir kelime işlemciyle açılır.',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'PowerPoint (.pptx) dosyası; Microsoft PowerPoint, LibreOffice Impress veya uyumlu bir sunum programıyla açılır.',
+  'application/msword': 'Word 97-2003 (.doc) dosyası; Microsoft Word, LibreOffice Writer veya uyumlu bir kelime işlemciyle açılır.',
+  'application/vnd.ms-excel': 'Excel 97-2003 (.xls) dosyası; Microsoft Excel, LibreOffice Calc veya uyumlu bir tablo programıyla açılır.',
+  'application/vnd.ms-powerpoint': 'PowerPoint 97-2003 (.ppt) dosyası; Microsoft PowerPoint, LibreOffice Impress veya uyumlu bir sunum programıyla açılır.',
 }
 
 // Formatted by hand (not Intl) so the server and the browser preview produce identical text.

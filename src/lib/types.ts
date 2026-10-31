@@ -73,6 +73,10 @@ export const PRODUCT_FILE_TYPES: Record<string, string> = {
   xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  // Older Office formats (Word/Excel/PowerPoint 97-2003), still common for templates.
+  doc: 'application/msword',
+  xls: 'application/vnd.ms-excel',
+  ppt: 'application/vnd.ms-powerpoint',
 }
 export const MAX_PRODUCT_FILE_BYTES = 100 * 1024 * 1024
 

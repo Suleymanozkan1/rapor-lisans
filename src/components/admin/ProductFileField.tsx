@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { slugify } from '@/lib/slug'
-import type { ProductPreview } from '@/lib/types'
+import { fileBaseName, isValidSlug } from '@/lib/slug'
+import { MAX_PRODUCT_FILE_BYTES, PRODUCT_FILE_TYPES, type ProductPreview } from '@/lib/types'
 
 export type ProductFileValue = { pathname: string; name: string; size: number; contentType: string } | null
 
@@ -16,7 +16,9 @@ type Props = {
   storeKind: StoreKind
 }
 
-const ACCEPT = '.pdf,.xlsx,.docx,.pptx,.zip'
+const ACCEPT = Object.keys(PRODUCT_FILE_TYPES)
+  .map((e) => `.${e}`)
+  .join(',')
 const PDF = 'application/pdf'
 const fmtSize = (n: number) => (n >= 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1).replace('.', ',')} MB` : `${Math.ceil(n / 1024)} KB`)
 
@@ -32,23 +34,59 @@ function displayName(name: string): string {
   return `${base.length >= 2 ? base : 'dosya'}.${ext}`
 }
 
+const extOf = (name: string) => (/\.([a-z0-9]{2,5})$/i.exec(name)?.[1] ?? '').toLowerCase()
+
+/** Problems the server would refuse anyway, explained before anything is sent. */
+function checkBeforeUpload(f: File, slug: string, only?: string): string | null {
+  if (!isValidSlug(slug)) return 'Önce geçerli bir ürün adresi (slug) girin: yalnızca küçük harf, rakam ve tire.'
+  const ext = extOf(f.name)
+  if (only && ext !== only) return `Bu alana yalnızca .${only} dosyası yüklenebilir.`
+  if (!PRODUCT_FILE_TYPES[ext]) {
+    if (['docm', 'xlsm', 'pptm', 'dotx', 'xltx', 'dot', 'xlt'].includes(ext)) {
+      return `.${ext} biçimi desteklenmiyor. Dosyayı programda “Farklı Kaydet” ile .docx, .xlsx veya .pptx olarak kaydedip yükleyin.`
+    }
+    return `İzin verilen dosya türleri: ${Object.keys(PRODUCT_FILE_TYPES).join(', ')}. Seçilen dosya: ${f.name}`
+  }
+  if (f.size === 0) return 'Dosya boş görünüyor.'
+  if (f.size > MAX_PRODUCT_FILE_BYTES) return 'Dosya 100 MB’tan büyük. Küçültün veya ZIP içinde parçalara bölün.'
+  return null
+}
+
 /** Uploads to the private file store (Vercel Blob, or the local folder in development). */
 async function uploadPrivate(
   f: File,
   opts: { csrf: string; slug: string; storeKind: StoreKind; prefix?: string; onProgress: (p: number) => void },
 ): Promise<{ pathname: string; size: number; contentType: string }> {
-  const ext = (/\.([a-z0-9]{2,5})$/i.exec(f.name)?.[1] ?? '').toLowerCase()
-  const base = `${opts.prefix ?? ''}${slugify(f.name.replace(/\.[^.]+$/, '')).slice(0, 50) || 'dosya'}`
+  const ext = extOf(f.name)
+  const base = `${opts.prefix ?? ''}${fileBaseName(f.name)}`
   if (opts.storeKind === 'blob') {
+    const pathname = `urunler/${opts.slug}/${base}.${ext}`
+    const clientPayload = JSON.stringify({ csrf: opts.csrf })
     const { upload } = await import('@vercel/blob/client')
-    const r = await upload(`urunler/${opts.slug}/${base}.${ext}`, f, {
-      access: 'private',
-      handleUploadUrl: '/admin/api/urun-dosyasi',
-      clientPayload: JSON.stringify({ csrf: opts.csrf }),
-      multipart: f.size > 20 * 1024 * 1024,
-      onUploadProgress: (p) => opts.onProgress(Math.round(p.percentage)),
-    })
-    return { pathname: r.pathname, size: f.size, contentType: r.contentType }
+    try {
+      const r = await upload(pathname, f, {
+        access: 'private',
+        handleUploadUrl: '/admin/api/urun-dosyasi',
+        clientPayload,
+        multipart: f.size > 20 * 1024 * 1024,
+        onUploadProgress: (p) => opts.onProgress(Math.round(p.percentage)),
+      })
+      return { pathname: r.pathname, size: f.size, contentType: r.contentType }
+    } catch (e) {
+      // The Blob client hides the server's reason behind "Failed to retrieve the client token"; ask for it.
+      if (e instanceof Error && /client token/i.test(e.message)) {
+        const res = await fetch('/admin/api/urun-dosyasi', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'blob.generate-client-token', payload: { pathname, clientPayload, multipart: false } }),
+        }).catch(() => null)
+        const reason = res && !res.ok ? ((await res.json().catch(() => null)) as { error?: string } | null)?.error : null
+        if (res?.status === 403) throw new Error(`${reason ?? 'Oturum geçersiz.'} Sayfayı yenileyin; gerekirse çıkış yapıp yeniden girin.`)
+        if (reason) throw new Error(reason)
+        throw new Error('Yükleme izni alınamadı. Sayfayı yenileyip tekrar deneyin.')
+      }
+      throw e
+    }
   }
   const body = new FormData()
   body.set('csrf', opts.csrf)
@@ -75,8 +113,9 @@ export function ProductFileField({ csrf, slug, value, preview, storeKind }: Prop
   async function onPick(f: File | undefined) {
     if (!f) return
     setError('')
-    if (!slug) {
-      setError('Önce ürün adını ve adresini girin.')
+    const problem = checkBeforeUpload(f, slug)
+    if (problem) {
+      setError(problem)
       return
     }
     setBusy(true)
@@ -95,12 +134,9 @@ export function ProductFileField({ csrf, slug, value, preview, storeKind }: Prop
   async function onPickPreviewPdf(f: File | undefined) {
     if (!f) return
     setPreviewError('')
-    if (!/\.pdf$/i.test(f.name)) {
-      setPreviewError('Önizleme için PDF dosyası seçin.')
-      return
-    }
-    if (!slug) {
-      setPreviewError('Önce ürün adını ve adresini girin.')
+    const problem = checkBeforeUpload(f, slug, 'pdf')
+    if (problem) {
+      setPreviewError(problem)
       return
     }
     setPreviewBusy(true)
@@ -137,7 +173,7 @@ export function ProductFileField({ csrf, slug, value, preview, storeKind }: Prop
             <label htmlFor="productFile">{file ? 'Dosyayı değiştir' : 'Dosya seç'}</label>
             <input id="productFile" type="file" accept={ACCEPT} disabled={busy} onChange={(e) => onPick(e.target.files?.[0])} aria-describedby="productFile-help" />
             <p id="productFile-help" className="field__help">
-              PDF, Excel (.xlsx), Word (.docx), PowerPoint (.pptx) veya ZIP; en fazla 100 MB. Dosya herkese açık değildir.
+              PDF, Word (.docx, .doc), Excel (.xlsx, .xls), PowerPoint (.pptx, .ppt) veya ZIP; en fazla 100 MB. Dosya herkese açık değildir.
             </p>
           </>
         )}

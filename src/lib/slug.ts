@@ -24,3 +24,15 @@ export function slugify(input: string): string {
 export function isValidSlug(slug: string): boolean {
   return slug.length > 0 && slug.length <= SLUG_MAX && SLUG_PATTERN.test(slug) && !RESERVED_SLUGS.has(slug)
 }
+
+/**
+ * File-name part of a storage path: a slug, shortened without leaving a
+ * trailing hyphen (an upload path ending in "-.pdf" is rejected).
+ */
+export function fileBaseName(name: string, max = 50): string {
+  return (
+    slugify(name.replace(/\.[^.]+$/, ''))
+      .slice(0, max)
+      .replace(/-+$/g, '') || 'dosya'
+  )
+}
