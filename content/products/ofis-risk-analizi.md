@@ -1,7 +1,8 @@
 ---
 title: Ofis Risk Analizi
-status: draft
+status: published
 createdAt: 2026-10-31T17:54:13.414Z
+updatedAt: 2026-10-31T17:55:28.431Z
 price: 1000
 file:
   pathname: urunler/ofis-risk-analizi/ofis-risk-analizi-guncel-SXzti1hd5L1zPm7Og0xch1SoJeXGQH.xls
