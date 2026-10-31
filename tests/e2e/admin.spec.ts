@@ -170,6 +170,11 @@ test('product lifecycle: upload the sold file (signature checked), create, edit,
   expect(saved).toContain('contentType: application/pdf')
   expect(saved).toMatch(/sha256: [0-9a-f]{64}/)
   expect(saved).toMatch(/features:\n {2}- Günlük kontrol\n {2}- Haftalık kontrol/)
+  // A PDF product gets its preview rendered from the sold file (one page: only page 1).
+  expect(saved).toMatch(/preview:\n {2}source:\n {4}pathname: urunler\/iskele-kontrol-formu\/ornek-7f3k-[0-9a-f]{8}\.pdf/)
+  expect(saved).toMatch(/pages: 1\n/)
+  const previews = () => (existsSync(path.join(work, 'uploads/urunler/iskele-kontrol-formu')) ? readdirSync(path.join(work, 'uploads/urunler/iskele-kontrol-formu')) : [])
+  expect(previews()).toEqual([expect.stringMatching(/^onizleme-1-[0-9a-f]{10}\.jpg$/)])
   await expect(page.getByLabel('Fiyat (TL)')).toHaveValue('89,9')
 
   await page.getByLabel('Kısa açıklama').fill('Güncellenmiş açıklama')
@@ -189,6 +194,7 @@ test('product lifecycle: upload the sold file (signature checked), create, edit,
 
   await page.goto('/admin/kayitlar')
   await expect(page.locator('table')).toContainText('panel: ürünü sildi iskele-kontrol-formu')
+  expect(previews()).toEqual([])
 })
 
 test('stale edits are rejected instead of overwriting (optimistic locking)', async ({ browser }) => {
@@ -380,4 +386,46 @@ test('admin pages are usable at phone width', async ({ browser }) => {
     expect(overflow, url).toBeLessThanOrEqual(0)
   }
   await ctx.close()
+})
+
+test('Word product: preview pages come from an uploaded PDF copy; first page plus one middle page', async ({ page }) => {
+  await login(page)
+  await page.goto('/admin/urunler/yeni')
+  await page.getByLabel('Ürün adı').fill('Acil durum plani sablonu')
+  // A .docx is a ZIP container; only the signature is checked on upload.
+  await page.getByLabel('Dosya seç').setInputFiles({ name: 'acil-durum.docx', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', buffer: Buffer.concat([Buffer.from('PK\x03\x04'), Buffer.alloc(64)]) })
+  await expect(page.getByRole('status').filter({ hasText: 'acil-durum.docx' })).toBeVisible()
+  await expect(page.locator('main')).toContainText('Farklı Kaydet › PDF')
+  await page.getByLabel('Önizleme için PDF seç').setInputFiles(path.resolve(import.meta.dirname, '../fixtures/onizleme-12-sayfa.pdf'))
+  await expect(page.getByRole('status').filter({ hasText: 'onizleme-12-sayfa.pdf' })).toBeVisible()
+  await page.getByLabel('Fiyat (TL)').fill('59')
+  await page.getByRole('button', { name: 'Kaydet', exact: true }).click()
+  await expect(page).toHaveURL(/\/admin\/urunler\/acil-durum-plani-sablonu\?durum=urun-kaydedildi$/)
+
+  const file = path.join(work, 'content/products/acil-durum-plani-sablonu.md')
+  const saved = readFileSync(file, 'utf8')
+  expect(saved).toMatch(/source:\n {4}pathname: urunler\/acil-durum-plani-sablonu\/onizleme-onizleme-12-sayfa-[0-9a-f]{8}\.pdf/)
+  expect(saved).toContain('pages: 12')
+  const pages = [...saved.matchAll(/page: (\d+)/g)].map((m) => Number(m[1]))
+  expect(pages[0]).toBe(1)
+  expect(pages[1]).toBeGreaterThanOrEqual(3)
+  expect(pages[1]).toBeLessThanOrEqual(9)
+  const dir = path.join(work, 'uploads/urunler/acil-durum-plani-sablonu')
+  expect(readdirSync(dir)).toHaveLength(2)
+  const jpg = readFileSync(path.join(dir, readdirSync(dir)[0]))
+  expect(jpg.subarray(0, 3)).toEqual(Buffer.from([0xff, 0xd8, 0xff]))
+
+  // Saving again keeps the same pages; the PDF copy stays attached.
+  await expect(page.locator('main')).toContainText('Gösterilen sayfalar: 1 ve')
+  await page.getByLabel('Kısa açıklama').fill('Şablon')
+  await page.getByRole('button', { name: 'Kaydet', exact: true }).click()
+  await expect(page.locator('main').getByRole('status').filter({ hasText: 'Ürün kaydedildi' })).toBeVisible()
+  expect([...readFileSync(file, 'utf8').matchAll(/page: (\d+)/g)].map((m) => Number(m[1]))).toEqual(pages)
+
+  // Turning the preview off removes its images.
+  await page.getByLabel('Önizleme gösterme').check()
+  await page.getByRole('button', { name: 'Kaydet', exact: true }).click()
+  await expect(page.locator('main').getByRole('status').filter({ hasText: 'Ürün kaydedildi' })).toBeVisible()
+  expect(readFileSync(file, 'utf8')).not.toContain('preview:')
+  expect(readdirSync(dir)).toEqual([])
 })

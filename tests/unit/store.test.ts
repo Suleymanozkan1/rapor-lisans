@@ -144,6 +144,35 @@ function fakeGithub() {
 const cfg = { token: 'ghp_SECRETTOKEN', owner: 'o', repo: 'r', branch: 'main', contentPath: 'content', uploadsPath: 'public/uploads' }
 
 describe('GithubStore', () => {
+  // The fake reuses tree ids across tests; real SHAs never collide.
+  beforeEach(() => {
+    delete (globalThis as { __githubStoreCache?: unknown }).__githubStoreCache
+  })
+
+  it('serves a page of reads from one head lookup and caches blobs', async () => {
+    const gh = fakeGithub()
+    const s = new GithubStore(cfg, gh.impl)
+    await s.commit(
+      [
+        { path: 'content/posts/a.md', content: 'A', expectedSha: null },
+        { path: 'content/posts/b.md', content: 'B', expectedSha: null },
+      ],
+      'seed',
+    )
+    const before = gh.calls.length
+    const list = await s.list('content/posts')
+    const files = await s.readMany(list.map((e) => e.path))
+    expect([...files.values()].map((f) => f.content.toString())).toEqual(['A', 'B'])
+    await s.read('content/posts/a.md')
+    const reads = gh.calls.slice(before)
+    expect(reads.filter((c) => c.url === '/git/ref/heads/main')).toHaveLength(1)
+    expect(reads.filter((c) => c.url.startsWith('/git/blobs/'))).toHaveLength(2)
+
+    // A write is visible to the very next read.
+    await s.commit([{ path: 'content/posts/a.md', content: 'A2' }], 'edit')
+    expect((await s.read('content/posts/a.md'))?.content.toString()).toBe('A2')
+  })
+
   it('commits several files atomically and maps logical paths to repo paths', async () => {
     const gh = fakeGithub()
     const s = new GithubStore(cfg, gh.impl)

@@ -8,7 +8,10 @@ export const metadata = { title: 'Yeni yazı' }
 
 export default async function NewPost() {
   const session = await requireAdmin()
-  const r = await safeLoad(async () => ({ categories: (await getAdminCategories()).value, media: (await getAdminMedia()).value }))
+  const r = await safeLoad(async () => {
+    const [categories, media] = await Promise.all([getAdminCategories(), getAdminMedia()])
+    return { categories: categories.value, media: media.value }
+  })
   if (r.error !== undefined) return <LoadError message={r.error} />
   return (
     <>

@@ -187,6 +187,11 @@ test('store lists published products; a product for sale links to its own checko
   await expect(page.locator('h1')).toHaveText('Test kontrol listesi')
   await expect(page.getByRole('link', { name: 'Satın al' })).toHaveAttribute('href', '/magaza/test-kontrol-listesi/satin-al')
   await expect(page.locator('.product-features li')).toHaveText(['Birinci madde', 'İkinci madde'])
+  // Preview: the first page and one middle page, chosen when the product was saved.
+  const preview = page.getByRole('region', { name: 'İçinden sayfalar' })
+  await expect(preview).toContainText('4 sayfalık belgenin ilk sayfası ve ortasından bir sayfa.')
+  await expect(preview.locator('figcaption')).toHaveText(['Sayfa 1 / 4', 'Sayfa 3 / 4'])
+  await expect(preview.locator('img').first()).toHaveAttribute('alt', 'Test kontrol listesi: 4 sayfanın 1. sayfası (önizleme)')
   // No third-party purchase links any more: outbound links are only the social profiles.
   const hrefs = await page.locator('a[href^="http"]').evaluateAll((as) => as.map((a) => new URL((a as HTMLAnchorElement).href).hostname))
   for (const h of hrefs) expect(['localhost', 'www.instagram.com']).toContain(h)

@@ -15,6 +15,30 @@ import {
 
 type TreeEntry = { path: string; type: 'blob' | 'tree' | 'commit'; sha: string; size?: number }
 
+/** How long reads reuse the branch head they looked up (one page render, roughly). */
+const SNAPSHOT_TTL_MS = 2000
+const BLOB_CACHE_BYTES = 32 * 1024 * 1024
+
+type GithubCache = {
+  heads: Map<string, { at: number; tree: Promise<TreeEntry[]> }>
+  commits: Map<string, string>
+  trees: Map<string, TreeEntry[]>
+  blobs: Map<string, Buffer>
+  blobBytes: number
+}
+
+// On globalThis: Next.js bundles routes separately, and this should be shared by all of them in one process.
+const g = globalThis as typeof globalThis & { __githubStoreCache?: GithubCache }
+function cache(): GithubCache {
+  g.__githubStoreCache ??= { heads: new Map(), commits: new Map(), trees: new Map(), blobs: new Map(), blobBytes: 0 }
+  return g.__githubStoreCache
+}
+
+function remember<V>(m: Map<string, V>, k: string, v: V, max: number) {
+  m.set(k, v)
+  while (m.size > max) m.delete(m.keys().next().value!)
+}
+
 /**
  * Writes content as Git commits through the GitHub REST API (Git Data API),
  * so several files change atomically and Vercel redeploys from the commit.
@@ -90,31 +114,81 @@ export class GithubStore implements ContentStore {
     return (await res.json()) as T
   }
 
+  /** Always asks GitHub; used before writing, where a stale view would be wrong. */
   private async headCommit(): Promise<{ commitSha: string; treeSha: string }> {
     const ref = await this.api<{ object: { sha: string } }>('GET', `/git/ref/heads/${encodeURIComponent(this.cfg.branch)}`)
-    const commit = await this.api<{ tree: { sha: string } }>('GET', `/git/commits/${ref!.object.sha}`)
-    return { commitSha: ref!.object.sha, treeSha: commit!.tree.sha }
+    const commitSha = ref!.object.sha
+    return { commitSha, treeSha: await this.treeShaOf(commitSha) }
+  }
+
+  /** Commits are immutable, so their tree is cached by commit SHA. */
+  private async treeShaOf(commitSha: string): Promise<string> {
+    const hit = cache().commits.get(commitSha)
+    if (hit) return hit
+    const commit = await this.api<{ tree: { sha: string } }>('GET', `/git/commits/${commitSha}`)
+    remember(cache().commits, commitSha, commit!.tree.sha, 50)
+    return commit!.tree.sha
   }
 
   private async tree(treeSha: string): Promise<TreeEntry[]> {
+    const hit = cache().trees.get(treeSha)
+    if (hit) return hit
     const t = await this.api<{ tree: TreeEntry[]; truncated: boolean }>('GET', `/git/trees/${treeSha}?recursive=1`)
     if (t!.truncated) throw new StoreUnavailableError('Depo ağacı çok büyük (GitHub listeyi kesti)')
+    remember(cache().trees, treeSha, t!.tree, 8)
     return t!.tree
   }
 
+  /**
+   * The branch's current tree for reads. A panel page reads several files;
+   * they share one lookup made within the last few seconds instead of three
+   * round trips each. Writes never use this (see commit()).
+   */
+  private snapshot(): Promise<TreeEntry[]> {
+    const key = `${this.cfg.owner}/${this.cfg.repo}@${this.cfg.branch}`
+    const c = cache()
+    const hit = c.heads.get(key)
+    if (hit && Date.now() - hit.at < SNAPSHOT_TTL_MS) return hit.tree
+    const tree = this.headCommit().then(({ treeSha }) => this.tree(treeSha))
+    c.heads.set(key, { at: Date.now(), tree })
+    tree.catch(() => {
+      if (c.heads.get(key)?.tree === tree) c.heads.delete(key)
+    })
+    return tree
+  }
+
+  /** Blobs are content-addressed (the SHA is a hash of the bytes), so a cached copy can never be stale. */
+  private async blob(sha: string): Promise<Buffer> {
+    const c = cache()
+    const hit = c.blobs.get(sha)
+    if (hit) {
+      // Refresh its position: Map keeps insertion order, the oldest entry is evicted first.
+      c.blobs.delete(sha)
+      c.blobs.set(sha, hit)
+      return hit
+    }
+    const b = await this.api<{ content: string }>('GET', `/git/blobs/${sha}`)
+    const buf = Buffer.from(b!.content, 'base64')
+    c.blobs.set(sha, buf)
+    c.blobBytes += buf.length
+    for (const [k, v] of c.blobs) {
+      if (c.blobBytes <= BLOB_CACHE_BYTES) break
+      c.blobs.delete(k)
+      c.blobBytes -= v.length
+    }
+    return buf
+  }
+
   async read(p: LogicalPath): Promise<StoredFile | null> {
-    const { treeSha } = await this.headCommit()
-    const entry = (await this.tree(treeSha)).find((e) => e.type === 'blob' && e.path === this.repoPath(p))
+    const entry = (await this.snapshot()).find((e) => e.type === 'blob' && e.path === this.repoPath(p))
     if (!entry) return null
-    const blob = await this.api<{ content: string; encoding: string }>('GET', `/git/blobs/${entry.sha}`)
-    return { path: p, content: Buffer.from(blob!.content, 'base64'), sha: entry.sha }
+    return { path: p, content: await this.blob(entry.sha), sha: entry.sha }
   }
 
   async list(dir: LogicalPath): Promise<FileEntry[]> {
-    const { treeSha } = await this.headCommit()
     const prefix = `${this.repoPath(dir)}/`
     const out: FileEntry[] = []
-    for (const e of await this.tree(treeSha)) {
+    for (const e of await this.snapshot()) {
       if (e.type !== 'blob' || !e.path.startsWith(prefix)) continue
       const path = this.logical(e.path)
       if (path) out.push({ path, sha: e.sha, size: e.size })
@@ -124,8 +198,7 @@ export class GithubStore implements ContentStore {
 
   /** Reads several files from one tree snapshot. */
   async readMany(paths: LogicalPath[]): Promise<Map<LogicalPath, StoredFile>> {
-    const { treeSha } = await this.headCommit()
-    const tree = await this.tree(treeSha)
+    const tree = await this.snapshot()
     const out = new Map<LogicalPath, StoredFile>()
     // A few requests at a time keeps clear of GitHub's secondary rate limits.
     const queue = [...paths]
@@ -133,11 +206,10 @@ export class GithubStore implements ContentStore {
       for (let p = queue.shift(); p !== undefined; p = queue.shift()) {
         const entry = tree.find((e) => e.type === 'blob' && e.path === this.repoPath(p!))
         if (!entry) continue
-        const blob = await this.api<{ content: string }>('GET', `/git/blobs/${entry.sha}`)
-        out.set(p, { path: p, content: Buffer.from(blob!.content, 'base64'), sha: entry.sha })
+        out.set(p, { path: p, content: await this.blob(entry.sha), sha: entry.sha })
       }
     }
-    await Promise.all(Array.from({ length: Math.min(6, paths.length) }, worker))
+    await Promise.all(Array.from({ length: Math.min(8, paths.length) }, worker))
     return out
   }
 
@@ -152,8 +224,10 @@ export class GithubStore implements ContentStore {
       }
     }
 
+    // Deleting a path that is not in the tree is a no-op (as in the local store).
+    const effective = changes.filter((c) => !('delete' in c) || shaOf(c.path) !== null)
     const entries = await Promise.all(
-      changes.map(async (c) => {
+      effective.map(async (c) => {
         const path = this.repoPath(c.path)
         if ('delete' in c) return { path, mode: '100644', type: 'blob', sha: null }
         const buf = typeof c.content === 'string' ? Buffer.from(c.content, 'utf8') : c.content
@@ -172,6 +246,8 @@ export class GithubStore implements ContentStore {
     })
     // force:false makes GitHub reject the update if the branch moved meanwhile.
     await this.api('PATCH', `/git/refs/heads/${encodeURIComponent(this.cfg.branch)}`, { sha: commit!.sha, force: false })
+    // The next read must see this commit.
+    cache().heads.delete(`${this.cfg.owner}/${this.cfg.repo}@${this.cfg.branch}`)
     return { sha: commit!.sha, url: commit!.html_url }
   }
 

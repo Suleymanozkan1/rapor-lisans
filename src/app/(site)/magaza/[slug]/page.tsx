@@ -126,6 +126,47 @@ export default async function ProductPage({ params }: PageProps<'/magaza/[slug]'
           </div>
         ) : null}
 
+        {p.preview ? (
+          <section className="page-preview" aria-labelledby="preview-title">
+            <div className="page-preview__head">
+              <h2 id="preview-title">İçinden sayfalar</h2>
+              <p>
+                {p.preview.images.length > 1
+                  ? `${p.preview.pages} sayfalık belgenin ilk sayfası ve ortasından bir sayfa.`
+                  : p.preview.pages > 1
+                    ? `${p.preview.pages} sayfalık belgenin ilk sayfası.`
+                    : 'Belgenin tek sayfası.'}{' '}
+                Satın aldığınızda belgenin tamamını{p.file && p.file.contentType !== 'application/pdf' ? ' düzenlenebilir dosya olarak' : ''} indirirsiniz.
+              </p>
+            </div>
+            <ul className="page-preview__pages">
+              {p.preview.images.map((img) => (
+                <li key={img.src}>
+                  <figure>
+                    <a href={img.src} className="page-preview__sheet" aria-label={`Sayfa ${img.page} görselini büyük boyutta aç`}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={img.src}
+                        width={img.width}
+                        height={img.height}
+                        alt={`${p.title}: ${p.preview!.pages} sayfanın ${img.page}. sayfası (önizleme)`}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <span className="page-preview__badge" aria-hidden="true">
+                        Önizleme
+                      </span>
+                    </a>
+                    <figcaption>
+                      Sayfa {img.page} / {p.preview!.pages}
+                    </figcaption>
+                  </figure>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
         <div className="product-detail">
           {p.features.length > 0 ? (
             <section className="product-features" aria-labelledby="features-title">

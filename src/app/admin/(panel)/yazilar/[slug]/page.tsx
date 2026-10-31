@@ -16,11 +16,10 @@ export default async function EditPost({ params, searchParams }: PageProps<'/adm
   const session = await requireAdmin()
   const { slug } = await params
   const sp = await searchParams
-  const r = await safeLoad(async () => ({
-    post: await getAdminPost(slug),
-    categories: (await getAdminCategories()).value,
-    media: (await getAdminMedia()).value,
-  }))
+  const r = await safeLoad(async () => {
+    const [post, categories, media] = await Promise.all([getAdminPost(slug), getAdminCategories(), getAdminMedia()])
+    return { post, categories: categories.value, media: media.value }
+  })
   if (r.error !== undefined) return <LoadError message={r.error} />
   const { post, categories, media } = r.data
   if (!post) notFound()

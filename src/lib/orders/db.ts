@@ -9,6 +9,8 @@ import 'server-only'
  */
 export interface Db {
   query<T = Record<string, unknown>>(text: string, params?: unknown[]): Promise<T[]>
+  /** Runs statements in one transaction; over Neon's HTTP driver that is a single round trip. */
+  batch?(statements: string[]): Promise<void>
 }
 
 export type OrderDbKind = 'postgres' | 'pglite' | 'none'
@@ -77,6 +79,7 @@ const MIGRATIONS = [
 ]
 
 export async function migrate(db: Db) {
+  if (db.batch) return db.batch(MIGRATIONS)
   for (const statement of MIGRATIONS) await db.query(statement)
 }
 
@@ -84,7 +87,12 @@ async function connect(kind: OrderDbKind): Promise<Db> {
   if (kind === 'postgres') {
     const { neon } = await import('@neondatabase/serverless')
     const sql = neon(process.env.DATABASE_URL!)
-    return { query: async (text, params = []) => (await sql.query(text, params)) as never }
+    return {
+      query: async (text, params = []) => (await sql.query(text, params)) as never,
+      batch: async (statements) => {
+        await sql.transaction(statements.map((q) => sql.query(q)))
+      },
+    }
   }
   if (kind === 'pglite') {
     const { PGlite } = await import('@electric-sql/pglite')

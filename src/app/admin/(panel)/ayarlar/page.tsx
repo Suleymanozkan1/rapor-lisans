@@ -10,7 +10,10 @@ export const metadata = { title: 'Site ayarları' }
 export default async function SettingsPage({ searchParams }: PageProps<'/admin/ayarlar'>) {
   const session = await requireAdmin()
   const { durum } = await searchParams
-  const r = await safeLoad(async () => ({ settings: await getAdminSettings(), media: (await getAdminMedia()).value }))
+  const r = await safeLoad(async () => {
+    const [settings, media] = await Promise.all([getAdminSettings(), getAdminMedia()])
+    return { settings, media: media.value }
+  })
   if (r.error !== undefined) return <LoadError message={r.error} />
   return (
     <>

@@ -45,7 +45,11 @@ const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || '.next',
   poweredByHeader: false,
   // PGlite (local/e2e order database) ships WebAssembly and must not be bundled.
-  serverExternalPackages: ['@electric-sql/pglite'],
+  serverExternalPackages: ['@electric-sql/pglite', 'pdfjs-dist', '@napi-rs/canvas'],
+  // Product preview rendering (admin only) reads pdf.js font, CMap and wasm data from disk.
+  outputFileTracingIncludes: {
+    '/admin/**': ['./node_modules/pdfjs-dist/standard_fonts/**', './node_modules/pdfjs-dist/cmaps/**', './node_modules/pdfjs-dist/wasm/**'],
+  },
   reactStrictMode: true,
   experimental: {
     // Uploads are limited to 3 MB in code; Vercel rejects bodies over 4.5 MB.

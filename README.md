@@ -208,6 +208,15 @@ Satış ancak aşağıdakilerin hepsi tamamlanınca açılır; eksikler panelde 
   Dosya tarayıcıdan doğrudan özel Blob deposuna yüklenir; kaydederken sunucu boyutu, türü ve
   dosya imzasını (ör. gerçekten PDF mi) yeniden kontrol eder ve SHA-256 özetini kaydeder.
   Görsel seçilmezse sarı-siyah marka kapağı çizilir.
+- **Önizleme sayfaları:** ürün sayfasında belgenin **1. sayfası** ve **ortadan rastgele bir
+  sayfası** görsel olarak gösterilir (3 sayfa veya daha kısa belgelerde yalnızca 1. sayfa). Sayfa
+  ürün kaydedilirken bir kez seçilir ve saklanır; ziyaretçi sayfayı yenileyerek belgenin geri
+  kalanını göremez. PDF ürünlerde görseller satılan dosyadan otomatik çizilir. Word, Excel,
+  PowerPoint ve ZIP ürünlerde sayfa düzenini programın kendisi belirlediği için belgenin PDF
+  hâlini de yükleyin (Dosya › Farklı Kaydet › PDF); bu PDF yayınlanmaz, yalnızca seçilen
+  sayfaların görseli `public/uploads/urunler/<ürün>/` altına commit edilir. "Kaydederken ortadan
+  başka bir sayfa seç" yeni bir sayfa seçer; "Önizleme gösterme" görselleri kaldırır.
+  Çizim sunucuda pdf.js ve Skia (`@napi-rs/canvas`) ile yapılır.
 - **Sipariş akışı:** alıcı bilgileri ve üç onay (ön bilgilendirme, sözleşme, anında teslim ve
   cayma hakkı istisnası) > iyzico ödeme sayfası > site, iyzico'dan **imzalı** sonucu sorgular;
   yalnızca imzası doğru, tutarı ve sipariş numarası eşleşen ve risk kontrolünden geçmiş

@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { ZodError } from 'zod'
 import { AuthError, requireAdminAction } from '@/lib/auth/guard'
-import { ConflictError, StoreUnavailableError } from '@/lib/store'
+import { ConflictError, StoreUnavailableError, type Change } from '@/lib/store'
 import {
   addMedia,
   deleteMedia,
@@ -12,6 +12,7 @@ import {
   deleteProduct,
   getAdminCategories,
   getAdminMedia,
+  getAdminProduct,
   getAdminSettings,
   mediaUsage,
   listAdminPosts,
@@ -29,7 +30,8 @@ import { isoDay } from '@/lib/format'
 import { parsePrice } from '@/lib/products'
 import { hashFile, headFile, readFileHead } from '@/lib/files'
 import { extensionOf, matchesSignature } from '@/lib/product-files'
-import { productFileSchema, PRODUCT_FILE_TYPES } from '@/lib/types'
+import { productFileSchema, PRODUCT_FILE_TYPES, type ProductPreview } from '@/lib/types'
+import { buildPreview, previewFileChanges, PreviewError } from '@/lib/product-preview'
 
 export type ActionState = { ok?: string; error?: string; fields?: Record<string, string> }
 
@@ -39,7 +41,7 @@ function str(fd: FormData, key: string, max = 10_000): string {
 }
 
 function describe(e: unknown): ActionState {
-  if (e instanceof AuthError || e instanceof ConflictError || e instanceof StoreUnavailableError || e instanceof UploadError) {
+  if (e instanceof AuthError || e instanceof ConflictError || e instanceof StoreUnavailableError || e instanceof UploadError || e instanceof PreviewError) {
     return { error: e.message }
   }
   if (e instanceof ZodError) {
@@ -194,18 +196,49 @@ export async function saveProductAction(_prev: ActionState, fd: FormData): Promi
       file = productFileSchema.parse({ pathname: filePathname, name: fileName, size: meta.size, contentType: meta.contentType, sha256 })
     }
 
+    // Preview pages: rendered from the sold PDF, or from a PDF copy for Word/Excel/PowerPoint/ZIP.
+    const originalSlug = str(fd, 'originalSlug', 100) || null
+    const previous = originalSlug ? (await getAdminProduct(originalSlug))?.preview : undefined
+    let source: ProductPreview['source'] | null = null
+    if (file && str(fd, 'previewOff') !== '1') {
+      if (file.contentType === PRODUCT_FILE_TYPES.pdf) {
+        source = { pathname: file.pathname, sha256: file.sha256! }
+      } else {
+        const pdfPathname = str(fd, 'previewPdfPathname', 300)
+        if (pdfPathname && pdfPathname === previous?.source.pathname) {
+          source = previous.source
+        } else if (pdfPathname) {
+          const meta = await headFile(pdfPathname)
+          const head = meta && extensionOf(pdfPathname) === 'pdf' ? await readFileHead(pdfPathname) : null
+          if (!head || !matchesSignature(head, 'pdf')) return { error: 'Önizleme dosyası bulunamadı ya da PDF değil. Önizleme PDF’ini yeniden yükleyin.' }
+          source = { pathname: pdfPathname, sha256: (await hashFile(pdfPathname))! }
+        }
+      }
+    }
+    let preview: ProductPreview | undefined
+    let previewChanges: Change[] = []
+    if (!source) {
+      previewChanges = previewFileChanges(previous)
+    } else if (previous && previous.source.sha256 === source.sha256 && str(fd, 'previewRegen') !== '1') {
+      preview = { ...previous, source }
+    } else {
+      ;({ preview, changes: previewChanges } = await buildPreview({ slug, source, previous }))
+    }
+
     await saveProduct(
       {
-        originalSlug: str(fd, 'originalSlug', 100) || null,
+        originalSlug,
         sha: str(fd, 'sha', 64) || null,
         slug,
         body: str(fd, 'body', 50_000),
+        extraChanges: previewChanges,
         frontmatter: {
           title,
           excerpt: str(fd, 'excerpt', 300),
           status: str(fd, 'status') === 'published' ? 'published' : 'draft',
           price,
           file,
+          preview,
           format: str(fd, 'format', 80).trim() || undefined,
           features: str(fd, 'features', 3000)
             .split('\n')

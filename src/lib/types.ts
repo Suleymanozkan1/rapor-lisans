@@ -99,6 +99,34 @@ export const productFileSchema = z
   })
   .refine((f) => PRODUCT_FILE_TYPES[f.name.split('.').pop()!.toLowerCase()] === f.contentType, 'Dosya uzantısı ve türü uyuşmuyor')
 
+/**
+ * Page images shown on the product page before purchase (first page plus one
+ * random middle page), rendered from a PDF when the product is saved. For
+ * Word, Excel, PowerPoint and ZIP products the admin uploads a PDF copy that
+ * is used only for this and never published.
+ */
+export const productPreviewSchema = z.object({
+  /** The private PDF the images were rendered from (the sold file itself when it is a PDF). */
+  source: z.object({
+    pathname: productFileSchema.shape.pathname,
+    sha256: z.string().regex(/^[0-9a-f]{64}$/),
+  }),
+  /** Page count of the source PDF. */
+  pages: z.number().int().min(1).max(100_000),
+  images: z
+    .array(
+      z.object({
+        src: localAssetPath,
+        page: z.number().int().min(1),
+        width: z.number().int().min(1).max(4000),
+        height: z.number().int().min(1).max(8000),
+      }),
+    )
+    .min(1)
+    .max(2),
+})
+export type ProductPreview = z.infer<typeof productPreviewSchema>
+
 /*
  * Digital products sold on the site: payment through iyzico's hosted
  * checkout form, delivery as an expiring download link (see src/lib/orders).
@@ -112,6 +140,7 @@ export const productFrontmatterSchema = z.object({
   /** Turkish lira, VAT included. A product is for sale only with a price and a file. */
   price: z.number().min(1).max(1_000_000).multipleOf(0.01).optional(),
   file: productFileSchema.optional(),
+  preview: productPreviewSchema.optional(),
   /** Short description of what is delivered, e.g. "PDF, 24 sayfa". */
   format: z.string().trim().max(80).optional(),
   features: z.array(z.string().trim().min(2).max(160)).max(12).default([]),
