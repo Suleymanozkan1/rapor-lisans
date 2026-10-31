@@ -1,5 +1,6 @@
 import { test, expect, type Page, type APIRequestContext } from '@playwright/test'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
 import path from 'node:path'
 
 const work = path.resolve(import.meta.dirname, '../../.e2e')
@@ -388,44 +389,131 @@ test('admin pages are usable at phone width', async ({ browser }) => {
   await ctx.close()
 })
 
-test('Word product: preview pages come from an uploaded PDF copy; first page plus one middle page', async ({ page }) => {
+test('Word product: pages are rendered from the file itself by the preview job; first page plus one middle page', async ({ page }) => {
   await login(page)
   await page.goto('/admin/urunler/yeni')
   await page.getByLabel('Ürün adı').fill('Acil durum plani sablonu')
-  // A .docx is a ZIP container; only the signature is checked on upload.
-  await page.getByLabel('Dosya seç').setInputFiles({ name: 'acil-durum.docx', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', buffer: Buffer.concat([Buffer.from('PK\x03\x04'), Buffer.alloc(64)]) })
-  await expect(page.getByRole('status').filter({ hasText: 'acil-durum.docx' })).toBeVisible()
-  await expect(page.locator('main')).toContainText('Farklı Kaydet › PDF')
-  await page.getByLabel('Önizleme için PDF seç').setInputFiles(path.resolve(import.meta.dirname, '../fixtures/onizleme-12-sayfa.pdf'))
-  await expect(page.getByRole('status').filter({ hasText: 'onizleme-12-sayfa.pdf' })).toBeVisible()
+  await page.getByLabel('Dosya seç').setInputFiles(path.resolve(import.meta.dirname, '../fixtures/liste-14-sayfa.docx'))
+  await expect(page.getByRole('status').filter({ hasText: 'liste-14-sayfa.docx' })).toBeVisible()
+  // No PDF copy is asked for any more.
+  await expect(page.getByLabel('Önizleme için PDF seç')).toHaveCount(0)
+  await expect(page.locator('main')).toContainText('kaydettikten sonra otomatik oluşturulur')
   await page.getByLabel('Fiyat (TL)').fill('59')
   await page.getByRole('button', { name: 'Kaydet', exact: true }).click()
   await expect(page).toHaveURL(/\/admin\/urunler\/acil-durum-plani-sablonu\?durum=urun-kaydedildi$/)
 
   const file = path.join(work, 'content/products/acil-durum-plani-sablonu.md')
+  expect(readFileSync(file, 'utf8')).not.toContain('preview')
+
+  // What the GitHub Actions job does after the commit (LibreOffice + pdf.js), against the e2e folders.
+  const job = spawnSync('npx', ['tsx', 'scripts/urun-onizleme.ts'], {
+    cwd: path.resolve(import.meta.dirname, '../..'),
+    env: { ...process.env, CONTENT_DIR: path.join(work, 'content'), UPLOADS_DIR: path.join(work, 'uploads'), PREVIEW_SOURCE_DIR: path.join(work, 'private') },
+    encoding: 'utf8',
+    timeout: 120_000,
+  })
+  expect(job.status, job.stderr).toBe(0)
+  expect(job.stdout).toContain('acil-durum-plani-sablonu: 14 sayfa')
   const saved = readFileSync(file, 'utf8')
-  expect(saved).toMatch(/source:\n {4}pathname: urunler\/acil-durum-plani-sablonu\/onizleme-onizleme-12-sayfa-[0-9a-f]{8}\.pdf/)
-  expect(saved).toContain('pages: 12')
+  expect(saved).toMatch(/source:\n {4}pathname: urunler\/acil-durum-plani-sablonu\/liste-14-sayfa-[0-9a-f]{8}\.docx/)
+  expect(saved).toContain('pages: 14')
   const pages = [...saved.matchAll(/page: (\d+)/g)].map((m) => Number(m[1]))
   expect(pages[0]).toBe(1)
-  expect(pages[1]).toBeGreaterThanOrEqual(3)
-  expect(pages[1]).toBeLessThanOrEqual(9)
+  expect(pages[1]).toBeGreaterThanOrEqual(4)
+  expect(pages[1]).toBeLessThanOrEqual(10)
   const dir = path.join(work, 'uploads/urunler/acil-durum-plani-sablonu')
   expect(readdirSync(dir)).toHaveLength(2)
-  const jpg = readFileSync(path.join(dir, readdirSync(dir)[0]))
-  expect(jpg.subarray(0, 3)).toEqual(Buffer.from([0xff, 0xd8, 0xff]))
+  expect(readFileSync(path.join(dir, readdirSync(dir)[0])).subarray(0, 3)).toEqual(Buffer.from([0xff, 0xd8, 0xff]))
 
-  // Saving again keeps the same pages; the PDF copy stays attached.
+  // A second run has nothing to do; saving again keeps the same pages.
+  const again = spawnSync('npx', ['tsx', 'scripts/urun-onizleme.ts'], {
+    cwd: path.resolve(import.meta.dirname, '../..'),
+    env: { ...process.env, CONTENT_DIR: path.join(work, 'content'), UPLOADS_DIR: path.join(work, 'uploads'), PREVIEW_SOURCE_DIR: path.join(work, 'private') },
+    encoding: 'utf8',
+  })
+  expect(again.stdout).toContain('Önizlemesi eksik ürün yok.')
+  // A clean URL: the "saved" banner of the previous save must not satisfy the next wait.
+  const editUrl = '/admin/urunler/acil-durum-plani-sablonu'
+  await page.goto(editUrl)
   await expect(page.locator('main')).toContainText('Gösterilen sayfalar: 1 ve')
   await page.getByLabel('Kısa açıklama').fill('Şablon')
   await page.getByRole('button', { name: 'Kaydet', exact: true }).click()
   await expect(page.locator('main').getByRole('status').filter({ hasText: 'Ürün kaydedildi' })).toBeVisible()
   expect([...readFileSync(file, 'utf8').matchAll(/page: (\d+)/g)].map((m) => Number(m[1]))).toEqual(pages)
 
-  // Turning the preview off removes its images.
+  // Turning the preview off removes its images, and the job leaves the product alone.
+  await page.goto(editUrl)
   await page.getByLabel('Önizleme gösterme').check()
   await page.getByRole('button', { name: 'Kaydet', exact: true }).click()
   await expect(page.locator('main').getByRole('status').filter({ hasText: 'Ürün kaydedildi' })).toBeVisible()
   expect(readFileSync(file, 'utf8')).not.toContain('preview:')
+  expect(readFileSync(file, 'utf8')).toContain('previewDisabled: true')
   expect(readdirSync(dir)).toEqual([])
+  await expect(page.getByLabel('Önizleme gösterme')).toBeChecked()
+})
+
+test('the preview source endpoint never serves a file without a GitHub Actions identity', async ({ request }) => {
+  for (const headers of [{} as Record<string, string>, { Authorization: 'Bearer abc.def.ghi' }]) {
+    const res = await request.get('/api/onizleme-kaynagi/test-kontrol-listesi', { headers })
+    expect([401, 403, 503]).toContain(res.status())
+    expect(res.headers()['content-type']).toContain('application/json')
+  }
+})
+
+test('page editor: create a page, drag a block in, edit it, save; system pages start from the default layout', async ({ page }) => {
+  await login(page)
+  await page.goto('/admin/sayfalar')
+  await expect(page.locator('table')).toContainText('Ana sayfa')
+  await expect(page.locator('table')).toContainText('Yayında (varsayılan düzen)')
+  // A path the site already uses is refused.
+  await page.getByLabel('Sayfa adı').fill('Blog')
+  await page.getByRole('button', { name: 'Oluştur ve düzenle' }).click()
+  await expect(page.locator('main').getByRole('alert')).toContainText('kullanılamaz')
+
+  await page.getByLabel('Sayfa adı').fill('Eğitim takvimi')
+  await expect(page.getByLabel('Adres')).toHaveValue('egitim-takvimi')
+  await page.getByRole('button', { name: 'Oluştur ve düzenle' }).click()
+  await page.waitForURL(/\/admin\/duzenleyici\/egitim-takvimi$/)
+  const file = path.join(work, 'content/pages/egitim-takvimi.json')
+  expect(JSON.parse(readFileSync(file, 'utf8')).meta.status).toBe('draft')
+
+  const canvas = page.frameLocator('iframe').first()
+  await expect(canvas.locator('.page-band h1')).toHaveText('Eğitim takvimi')
+
+  // Drag "Uyarı kutusu" from the block list below the page header.
+  await page.setViewportSize({ width: 1440, height: 900 })
+  const item = page.getByText('Uyarı kutusu', { exact: true }).first()
+  await item.scrollIntoViewIfNeeded()
+  const src = await item.boundingBox()
+  const dst = await canvas.locator('.page-band').boundingBox()
+  await page.mouse.move(src!.x + src!.width / 2, src!.y + src!.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(src!.x + 60, src!.y + 20, { steps: 5 })
+  await page.mouse.move(dst!.x + dst!.width / 2, dst!.y + dst!.height - 5, { steps: 20 })
+  await page.mouse.move(dst!.x + dst!.width / 2, dst!.y + dst!.height + 10, { steps: 10 })
+  await page.mouse.up()
+  await expect(canvas.locator('.bk-callout')).toHaveCount(1)
+
+  // The new block is selected: edit its title in the settings panel.
+  await page.getByRole('textbox', { name: 'Başlık' }).fill('Kayıtlar 15 Kasım’da kapanıyor')
+  await expect(canvas.locator('.bk-callout__title')).toHaveText('Kayıtlar 15 Kasım’da kapanıyor')
+
+  await page.getByRole('button', { name: 'Kaydet' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Taslak olarak kaydedildi' })).toBeVisible()
+  const saved = JSON.parse(readFileSync(file, 'utf8'))
+  expect(saved.data.content.map((b: { type: string }) => b.type)).toEqual(['SayfaBasligi', 'UyariKutusu'])
+  expect(saved.data.content[1].props.baslik).toBe('Kayıtlar 15 Kasım’da kapanıyor')
+
+  // A second save after another edit works (the editor keeps the file version).
+  await page.getByRole('textbox', { name: 'Başlık' }).fill('Kayıtlar açık')
+  await page.getByRole('button', { name: 'Kaydet' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Taslak olarak kaydedildi' })).toBeVisible()
+  await expect.poll(() => JSON.parse(readFileSync(file, 'utf8')).data.content[1].props.baslik).toBe('Kayıtlar açık')
+
+  // Delete with confirmation.
+  await page.goto('/admin/sayfalar/egitim-takvimi/sil')
+  await page.getByLabel(/Onaylamak için/).fill('egitim-takvimi')
+  await page.getByRole('button', { name: 'Kalıcı olarak sil' }).click()
+  await expect(page).toHaveURL(/\/admin\/sayfalar\?durum=sayfa-silindi$/)
+  expect(existsSync(file)).toBe(false)
 })

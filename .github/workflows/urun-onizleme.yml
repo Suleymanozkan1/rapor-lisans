@@ -1,0 +1,79 @@
+# Product previews for Word, Excel and PowerPoint files.
+# After a product is saved in the admin panel (a commit under content/products),
+# this job converts the sold file to PDF with LibreOffice, renders the first page
+# and one random middle page, and commits the images. PDFs are rendered by the
+# site itself when they are saved; this job only fills in what is missing.
+# See scripts/urun-onizleme.ts and src/app/api/onizleme-kaynagi.
+name: Ürün önizlemeleri
+
+on:
+  push:
+    branches: [main]
+    paths: ['content/products/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write # commit the preview images
+  id-token: write # prove to the site that this workflow asks for the file (no stored secret)
+
+concurrency:
+  group: urun-onizleme
+  cancel-in-progress: false
+
+jobs:
+  onizleme:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SITE_URL: ${{ vars.SITE_URL || 'https://guvenli-calis.vercel.app' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Önizlemesi eksik ürün var mı?
+        id: check
+        run: |
+          if grep -L '^preview:' content/products/*.md | xargs -r grep -lE 'contentType: application/(vnd\.openxmlformats|msword|vnd\.ms-)' | grep -q .; then
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needed=$( [ "${{ github.event_name }}" = workflow_dispatch ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.needed == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: LibreOffice ve yazı tipleri
+        if: steps.check.outputs.needed == 'true'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends \
+            libreoffice-writer-nogui libreoffice-calc-nogui libreoffice-impress-nogui \
+            fonts-liberation fonts-crosextra-carlito fonts-crosextra-caladea fonts-dejavu-core
+
+      - name: Bağımlılıklar
+        if: steps.check.outputs.needed == 'true'
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Önizlemeleri oluştur
+        if: steps.check.outputs.needed == 'true'
+        run: npx tsx scripts/urun-onizleme.ts
+
+      - name: Commit
+        if: steps.check.outputs.needed == 'true'
+        run: |
+          if [ -z "$(git status --porcelain content/products public/uploads/urunler)" ]; then
+            echo "Değişiklik yok."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/products public/uploads/urunler
+          git commit -m "önizleme: Word/Excel/PowerPoint ürün sayfaları"
+          for i in 1 2 3; do
+            git pull --rebase -q origin main && git push -q origin HEAD:main && exit 0
+            sleep 5
+          done
+          echo "Gönderilemedi; bir sonraki çalıştırma tekrar deneyecek." >&2
+          exit 1

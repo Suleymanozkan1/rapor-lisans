@@ -24,6 +24,7 @@
     "@napi-rs/canvas": "1.0.11",
     "@neondatabase/serverless": "^1.2.0",
     "@phosphor-icons/react": "^2.1.10",
+    "@puckeditor/core": "0.23.0",
     "@vercel/blob": "^2.8.2",
     "mdast-util-to-string": "^4.0.0",
     "next": "^16.4.3",
@@ -50,12 +51,14 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.3",
+    "tsx": "4.23.15",
     "typescript": "^6.0.3",
     "vitest": "^5.0.5"
   },
   "overrides": {
     "@vercel/cli-config": {
       "zod": "$zod"
-    }
+    },
+    "happy-dom": "21.0.4"
   }
 }

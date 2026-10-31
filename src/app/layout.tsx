@@ -8,6 +8,7 @@ import '@fontsource/big-shoulders-display/700'
 import '@fontsource/big-shoulders-display/800'
 import '@fontsource/big-shoulders-display/900'
 import './globals.css'
+import './builder.css'
 import { getSettings } from '@/lib/content'
 import { siteUrl } from '@/lib/env'
 

@@ -36,6 +36,7 @@ ayarlandı. Veritabanı gerektirmez: içerik Git deposunda durur.
 - [Vercel'e dağıtım](#vercele-dağıtım)
 - [GitHub entegrasyonu](#github-entegrasyonu)
 - [Yayın akışı](#yayın-akışı)
+- [Sayfa düzenleyici](#sayfa-düzenleyici)
 - [Mağaza kurulumu](#mağaza-kurulumu)
 - [Mağazayı işletmek](#mağazayı-işletmek)
 - [Marka: logo ve renkler](#marka-logo-ve-renkler)
@@ -159,6 +160,46 @@ ve kayıt işlemleri açık bir hata mesajıyla reddedilir. Token geçersizse Gi
 Gelecek tarihli yayın tarihi olan yazı, o tarihten sonraki ilk build'de görünür; zamanlanmış
 otomatik build yoktur.
 
+## Sayfa düzenleyici
+
+**Panel › Sayfalar**: ana sayfa, Hakkımda, İletişim ve sizin açtığınız sayfalar sürükle-bırak
+düzenlenir ([Puck](https://puckeditor.com), MIT lisanslı açık kaynak düzenleyici; arayüzü
+Türkçedir).
+
+- **Ekran:** solda bloklar, ortada sayfanın canlı önizlemesi (Telefon / Tablet / Masaüstü
+  düğmeleri), sağda seçili bloğun ayarları. Hiçbir blok seçili değilken sağ panel sayfa
+  ayarlarını gösterir (ad, arama motoru açıklaması; yeni sayfalarda durum ve menü).
+  **Kaydet** sayfayı GitHub'a commit eder; site yaklaşık bir dakika sonra güncellenir.
+  Geri al / yinele, blok çoğaltma ve silme, "Yapı" sekmesinde iç içe blok ağacı vardır.
+- **Bloklar:**
+  - **Düzen:** Bölüm (arka plan, iç boşluk, genişlik, hiza), Sütunlar (2–4 sütun, oranlar,
+    telefonda sıra), Boşluk, Ayırıcı.
+  - **Temel:** Başlık (H1–H4, boyut, renk, vurgu), Metin (Markdown), Görsel (medya
+    kütüphanesinden, oran, bağlantı), Düğmeler, İkon listesi, Uyarı kutusu, Kartlar, Alıntı.
+  - **Etkileşimli ve medya:** Sık sorulanlar, Sekmeler, Video, Galeri, Sayılar, İlerleme
+    çubukları, Sosyal bağlantılar.
+  - **Site içeriği:** Sayfa başlığı bandı, Vitrin slaytı, Kayan şerit, Son yazılar, Ürünler,
+    Konu dizini, İletişim şeridi, Yazar bilgisi, İletişim bilgileri. Bunlar yazıları,
+    ürünleri ve ayarları kendiliğinden gösterir.
+- **Her blokta "Gelişmiş":** telefonda veya masaüstünde gizle, üst/alt boşluk, giriş
+  animasyonu (hareket azaltma tercihine uyar), sayfa içi bağlantı adı (#adres).
+- **Marka uyumu:** renkler, yazı boyutları ve boşluklar yalnızca Güvenli Çalış paletinden
+  seçilir (Asfalt, İşaret siyahı, Tehlike sarısı, Baret kırmızısı…). Serbest renk kodu ve
+  yazı tipi yoktur; böylece her sayfa okunaklı ve kontrastı denetlenmiş kalır.
+- **Varsayılan düzen:** ana sayfa, Hakkımda ve İletişim düzenleyicide ilk kez kaydedilene
+  kadar bugünkü tasarımı bloklarla aynen üretir (`src/lib/pages/defaults.ts`).
+- **Değiştirilemeyenler:** İletişim sayfasındaki satıcı bilgileri ve KVKK notu yasal
+  zorunluluktur, blokların altında sabit durur. Yazılar ve ürünler kendi bölümlerinden
+  düzenlenir; üst menü ve alt bilgi sabittir (yeni sayfalar "Ana menüde göster" ile menüye
+  eklenir).
+- **Güvenlik:** kaydedilen sayfa sunucuda blok tanımlarına göre yeniden denetlenir:
+  yalnızca bilinen bloklar ve alanlar, yalnızca `/…`, `#…`, `https://`, `mailto:`, `tel:`
+  bağlantıları, yalnızca medya kütüphanesindeki görseller, yalnızca YouTube/Vimeo videosu.
+  Metinler Markdown'dır ve yazılardaki temizleyiciden geçer; HTML/kod bloğu yoktur. Video,
+  ziyaretçi tıklayana kadar YouTube/Vimeo'dan hiçbir şey yüklemez (youtube-nocookie).
+- **Dosyalar:** `content/pages/<adres>.json`. Sayfa adresi sitenin mevcut yollarıyla
+  (`/blog`, `/magaza` …) çakışamaz.
+
 ## Mağaza kurulumu
 
 Satış ancak aşağıdakilerin hepsi tamamlanınca açılır; eksikler panelde **Siparişler** ve
@@ -210,13 +251,20 @@ Satış ancak aşağıdakilerin hepsi tamamlanınca açılır; eksikler panelde 
   Görsel seçilmezse sarı-siyah marka kapağı çizilir.
 - **Önizleme sayfaları:** ürün sayfasında belgenin **1. sayfası** ve **ortadan rastgele bir
   sayfası** görsel olarak gösterilir (3 sayfa veya daha kısa belgelerde yalnızca 1. sayfa). Sayfa
-  ürün kaydedilirken bir kez seçilir ve saklanır; ziyaretçi sayfayı yenileyerek belgenin geri
-  kalanını göremez. PDF ürünlerde görseller satılan dosyadan otomatik çizilir. Word, Excel,
-  PowerPoint ve ZIP ürünlerde sayfa düzenini programın kendisi belirlediği için belgenin PDF
-  hâlini de yükleyin (Dosya › Farklı Kaydet › PDF); bu PDF yayınlanmaz, yalnızca seçilen
-  sayfaların görseli `public/uploads/urunler/<ürün>/` altına commit edilir. "Kaydederken ortadan
-  başka bir sayfa seç" yeni bir sayfa seçer; "Önizleme gösterme" görselleri kaldırır.
-  Çizim sunucuda pdf.js ve Skia (`@napi-rs/canvas`) ile yapılır.
+  bir kez seçilir ve saklanır; ziyaretçi sayfayı yenileyerek belgenin geri kalanını göremez.
+  - **PDF:** görseller ürün kaydedilirken sunucuda çizilir (pdf.js + `@napi-rs/canvas`).
+  - **Word, Excel, PowerPoint (.docx/.doc, .xlsx/.xls, .pptx/.ppt):** ek bir şey yüklemeniz
+    gerekmez. Kayıt GitHub'a commit edilince **Ürün önizlemeleri** iş akışı
+    (`.github/workflows/urun-onizleme.yml`) dosyayı LibreOffice ile PDF'e çevirir, sayfaları
+    çizer ve görselleri commit eder; önizleme yaklaşık 2–4 dakika sonra sitede görünür. İş akışı
+    dosyayı sitenin `/api/onizleme-kaynagi/<ürün>` adresinden alır; kim olduğunu GitHub'ın
+    verdiği OpenID Connect belirteciyle kanıtlar (yalnızca bu deponun `main` dalındaki bu iş
+    akışı kabul edilir), GitHub'da saklanan bir anahtar yoktur. Alan adı değişirse GitHub'da
+    depo değişkeni `SITE_URL` tanımlayın (Settings › Secrets and variables › Actions ›
+    Variables).
+  - **ZIP:** sayfası olmadığı için önizleme yok.
+  - "Kaydederken ortadan başka bir sayfa seç" yeni bir sayfa seçer; "Önizleme gösterme"
+    görselleri kaldırır. Görseller `public/uploads/urunler/<ürün>/` altındadır.
 - **Sipariş akışı:** alıcı bilgileri ve üç onay (ön bilgilendirme, sözleşme, anında teslim ve
   cayma hakkı istisnası) > iyzico ödeme sayfası > site, iyzico'dan **imzalı** sonucu sorgular;
   yalnızca imzası doğru, tutarı ve sipariş numarası eşleşen ve risk kontrolünden geçmiş

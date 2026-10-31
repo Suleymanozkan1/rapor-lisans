@@ -17,6 +17,9 @@ import { sortProducts } from './products'
 import { DEFAULT_SETTINGS } from './defaults'
 import { mediaIndexSchema, type MediaItem } from './media'
 import { isValidSlug, slugify } from './slug'
+import { defaultPage } from './pages/defaults'
+import { gitBlobSha } from './store/sha'
+import { SYSTEM_PAGES, isSystemPage, isValidPageSlug, pageFileSchema, pageMetaSchema, type BuilderData, type PageMeta } from './pages/model'
 
 /*
  * Admin-side content access. Always reads the current state from the
@@ -311,4 +314,63 @@ export async function deleteMedia(src: string, sha: string | null, user: string)
 
 export async function recentActivity(limit = 30) {
   return getStore().activity(limit)
+}
+
+/* Pages (page editor) */
+
+const pageFilePath = (key: string): LogicalPath => {
+  if (!isSystemPage(key) && !isValidPageSlug(key)) throw new Error('Geçersiz sayfa adresi')
+  return `content/pages/${key}.json`
+}
+
+export type AdminPage = { key: string; system: boolean; meta: PageMeta; data: BuilderData; sha: string | null }
+
+/** A page as stored; a system page without a file comes back with its default layout (sha null). */
+export async function getAdminPage(key: string): Promise<AdminPage | null> {
+  if (!isSystemPage(key) && !isValidPageSlug(key)) return null
+  const f = await getStore().read(pageFilePath(key))
+  if (f) {
+    const raw = pageFileSchema.parse(JSON.parse(f.content.toString('utf8')))
+    return { key, system: isSystemPage(key), meta: raw.meta, data: raw.data as BuilderData, sha: f.sha }
+  }
+  if (!isSystemPage(key)) return null
+  const { value: settings } = await getAdminSettings()
+  return { key, system: true, ...defaultPage(key, settings), sha: null }
+}
+
+export async function listAdminPages(): Promise<{ key: string; system: boolean; meta: PageMeta; saved: boolean }[]> {
+  const store = getStore()
+  const entries = (await store.list('content/pages')).filter((e) => e.path.endsWith('.json'))
+  const files = await store.readMany(entries.map((e) => e.path))
+  const out = new Map<string, { key: string; system: boolean; meta: PageMeta; saved: boolean }>()
+  for (const key of Object.keys(SYSTEM_PAGES)) {
+    out.set(key, { key, system: true, meta: pageMetaSchema.parse({ title: SYSTEM_PAGES[key as keyof typeof SYSTEM_PAGES].title, status: 'published' }), saved: false })
+  }
+  for (const [p, f] of files) {
+    const key = p.slice('content/pages/'.length, -'.json'.length)
+    try {
+      const raw = pageFileSchema.parse(JSON.parse(f.content.toString('utf8')))
+      out.set(key, { key, system: isSystemPage(key), meta: raw.meta, saved: true })
+    } catch {
+      // A broken file is listed by key so it can be opened and fixed.
+      out.set(key, { key, system: isSystemPage(key), meta: pageMetaSchema.parse({ title: key }), saved: true })
+    }
+  }
+  return [...out.values()].sort((a, b) => Number(b.system) - Number(a.system) || a.meta.title.localeCompare(b.meta.title, 'tr'))
+}
+
+export async function saveAdminPage(input: { key: string; sha: string | null; meta: PageMeta; data: BuilderData }, user: string): Promise<string> {
+  const meta = pageMetaSchema.parse({ ...input.meta, ...(isSystemPage(input.key) ? { status: 'published', menu: false } : {}), updatedAt: new Date().toISOString() })
+  const json = JSON.stringify({ meta, data: input.data }, null, 2) + '\n'
+  const action = input.sha ? 'sayfayı güncelledi' : 'sayfa ekledi'
+  await getStore().commit([{ path: pageFilePath(input.key), content: json, expectedSha: input.sha }], message(user, action, input.key))
+  audit(user, action, input.key)
+  // Both stores identify a file by its Git blob SHA, so the editor can keep saving without re-reading.
+  return gitBlobSha(Buffer.from(json, 'utf8'))
+}
+
+export async function deleteAdminPage(key: string, sha: string, user: string) {
+  if (isSystemPage(key)) throw new Error('Sistem sayfaları silinemez; içeriğini düzenleyebilirsiniz.')
+  await getStore().commit([{ path: pageFilePath(key), delete: true, expectedSha: sha }], message(user, 'sayfayı sildi', key))
+  audit(user, 'sayfayı sildi', key)
 }
