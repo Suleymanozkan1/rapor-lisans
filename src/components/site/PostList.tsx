@@ -86,7 +86,12 @@ export function LeadStories({ posts, categories }: { posts: Post[]; categories: 
         <ul className="headline-list">
           {rest.map((p) => (
             <li key={p.slug}>
-              <article className="post-card headline">
+              <article className={`post-card headline${p.cover ? ' headline--thumb' : ''}`}>
+                {p.cover ? (
+                  <span className="headline__thumb">
+                    <Cover post={p} />
+                  </span>
+                ) : null}
                 <Topic post={p} categories={categories} />
                 <h3 className="headline__title">
                   <Link href={`/blog/${p.slug}`}>{p.title}</Link>

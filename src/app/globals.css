@@ -1246,6 +1246,42 @@ main {
 .headline__title {
   margin-bottom: var(--s3);
 }
+/* Hover list: a quiet thumbnail beside each headline comes to full colour and size on hover. */
+.headline--thumb {
+  position: relative;
+  padding-right: 7.5rem;
+}
+.headline__thumb {
+  position: absolute;
+  top: var(--s5);
+  right: 0;
+  width: 6.5rem;
+  border-radius: var(--r-media);
+  overflow: hidden;
+  opacity: 0.45;
+  filter: grayscale(1);
+  transform: scale(0.92);
+  transform-origin: right top;
+  transition:
+    opacity var(--t-ui) var(--ease-out),
+    filter var(--t-ui) var(--ease-out),
+    transform 240ms var(--ease-out);
+}
+.headline-list li:first-child .headline__thumb {
+  top: 0;
+}
+.headline__thumb img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+.headline--thumb:hover .headline__thumb,
+.headline--thumb:focus-within .headline__thumb {
+  opacity: 1;
+  filter: none;
+  transform: scale(1);
+}
 
 /* Lists (blog, topics, tags, related): ruled index rows. */
 .post-index {
@@ -1312,71 +1348,198 @@ main {
   margin: 0;
 }
 
-/* ---------- Signboard (topics) ---------- */
+/* ---------- Hazard-tape news band ---------- */
 
-.signboard {
+/* Caution tape: yellow and black stripes above and below a black band of headlines. */
+.ticker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-block: 10px;
+  background: #141414;
+}
+.ticker::before,
+.ticker::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Crect width='22' height='22' fill='%23ffd306'/%3E%3Cpath d='M0 11L11 0H22L0 22ZM22 11V22H11Z' fill='%23141414'/%3E%3C/svg%3E") repeat;
+}
+.ticker::before {
+  top: 0;
+}
+.ticker::after {
+  bottom: 0;
+}
+.ticker__viewport {
+  flex: 1;
+  overflow: hidden;
+  /* Without motion the band scrolls by hand. */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ticker__viewport::-webkit-scrollbar {
+  display: none;
+}
+.ticker__track {
+  display: flex;
+  width: max-content;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ticker__viewport {
+    overflow-x: hidden;
+  }
+  .ticker__track {
+    animation: ticker 60s linear infinite;
+  }
+  .ticker:hover .ticker__track,
+  .ticker:focus-within .ticker__track,
+  .ticker.is-paused .ticker__track {
+    animation-play-state: paused;
+  }
+}
+@keyframes ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.ticker__list {
+  display: flex;
   list-style: none;
   margin: 0;
   padding: 0;
+}
+.ticker__list li {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.ticker__list li::before {
+  content: '';
+  width: 1.05rem;
+  height: 0.92rem;
+  margin: 0 var(--s5);
+  background: var(--accent);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.ticker__list a {
+  display: inline-block;
+  padding: 0.85rem 0;
+  color: #f2f0e8;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.35rem;
+  line-height: 1;
+  text-decoration: none;
+  transition: color var(--t-ui) var(--ease-out);
+}
+.ticker__list a:hover {
+  color: var(--accent);
+}
+.ticker__toggle {
+  flex: none;
   display: grid;
-  gap: 1px;
-  background: var(--rule);
-  border: 1px solid var(--rule);
-  border-radius: var(--r-card);
-  overflow: hidden;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: 0 var(--s3);
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #141414;
+  cursor: pointer;
 }
-@media (min-width: 44rem) {
-  .signboard {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+@media (prefers-reduced-motion: reduce) {
+  .ticker__toggle {
+    display: none;
   }
 }
-@media (min-width: 64rem) {
-  .signboard {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+
+/* ---------- Topic index ---------- */
+
+/* A big type index: hovering a row floods it with hazard yellow. */
+.topic-index {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: none;
 }
-.sign-plate {
+.topic-row {
+  position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  grid-template-rows: auto auto;
   gap: var(--s2) var(--s5);
-  align-items: start;
-  height: 100%;
-  padding: var(--s6) var(--s5);
-  background: var(--paper);
+  align-items: center;
+  padding: var(--s5) var(--s3);
+  border-bottom: 1px solid var(--rule);
   color: var(--ink);
   text-decoration: none;
-  transition: background-color var(--t-ui) var(--ease-out);
 }
-.sign-plate:hover {
-  background: var(--surface);
-  color: var(--ink);
+.topic-row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 240ms var(--ease-out);
 }
-.sign-plate .sign-mark {
-  grid-row: span 2;
+.topic-row:hover,
+.topic-row:focus-visible {
+  color: #141414;
 }
-.sign-plate__text strong {
-  display: block;
+.topic-row:hover::before,
+.topic-row:focus-visible::before {
+  transform: scaleX(1);
+}
+.topic-row:focus-visible {
+  outline-offset: -3px;
+  outline-color: #141414;
+}
+.topic-row__name {
   font-family: var(--font-display);
-  font-size: 1.75rem;
-  font-weight: 800;
-  line-height: 1;
-  margin-bottom: var(--s2);
+  font-weight: 900;
+  font-size: clamp(2.2rem, 1.4rem + 3.2vw, 4.6rem);
+  line-height: 0.95;
 }
-.sign-plate:hover .sign-plate__text strong {
-  color: var(--accent);
-}
-.sign-plate__text span {
-  display: block;
-  color: var(--ink-2);
-  font-size: var(--fs-small);
-  line-height: 1.45;
-}
-.sign-plate__count {
+.topic-row__desc,
+.topic-row__count {
   grid-column: 2;
   font-size: var(--fs-small);
+  color: var(--ink-2);
+  transition: color var(--t-ui) var(--ease-out);
+}
+.topic-row__count {
   font-weight: 700;
   color: var(--accent);
+}
+.topic-row:hover .topic-row__desc,
+.topic-row:hover .topic-row__count,
+.topic-row:focus-visible .topic-row__desc,
+.topic-row:focus-visible .topic-row__count {
+  color: #141414;
+}
+.topic-row:hover .sign-mark,
+.topic-row:focus-visible .sign-mark {
+  background: #141414;
+  color: var(--accent);
+}
+@media (min-width: 60rem) {
+  .topic-row {
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 22rem) 6rem;
+    gap: var(--s6);
+  }
+  .topic-row__desc,
+  .topic-row__count {
+    grid-column: auto;
+  }
+  .topic-row__count {
+    text-align: right;
+  }
 }
 
 /* ---------- Contact strip ---------- */
@@ -2095,6 +2258,43 @@ textarea:focus-visible {
   outline-offset: -1px;
   transition: outline-color var(--t-ui) var(--ease-out);
 }
+/*
+ * Home shelf, the page's one scroll scene: the covers start as a fanned deck of
+ * documents and spread into the row as the shelf scrolls into view. Only the
+ * covers move (labels stay put); without scroll timelines or with reduced
+ * motion the row is simply shown as it is.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 44rem) {
+    .product-grid--fan > li .product-card__media {
+      animation: fan-out linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+    }
+    .product-grid--fan > li:nth-child(1) .product-card__media {
+      --fan: translateX(calc(100% + var(--s6))) rotate(-9deg);
+    }
+    .product-grid--fan > li:nth-child(2) {
+      position: relative;
+      z-index: 2;
+    }
+    .product-grid--fan > li:nth-child(2) .product-card__media {
+      --fan: translateY(-4%) scale(1.04);
+    }
+    .product-grid--fan > li:nth-child(3) .product-card__media {
+      --fan: translateX(calc(-100% - var(--s6))) rotate(9deg);
+    }
+  }
+}
+@keyframes fan-out {
+  from {
+    transform: var(--fan, none);
+  }
+  to {
+    transform: none;
+  }
+}
+
 /* Phones: the shelf scrolls sideways, the next cover peeking in. */
 @media (max-width: 43.99rem) {
   .product-grid {

@@ -28,10 +28,11 @@ export function ProductMedia({ product: p, large = false }: { product: Product; 
   return <img src={p.cover.src} alt={p.cover.alt} width={meta?.width} height={meta?.height} loading={large ? 'eager' : 'lazy'} decoding="async" />
 }
 
-export function ProductList({ products, headingLevel = 2 }: { products: Product[]; headingLevel?: 2 | 3 }) {
+/** `fan`: on the home page the covers start as a fanned deck and spread into the row as the shelf scrolls into view. */
+export function ProductList({ products, headingLevel = 2, fan = false }: { products: Product[]; headingLevel?: 2 | 3; fan?: boolean }) {
   const H = headingLevel === 2 ? 'h2' : 'h3'
   return (
-    <ul className="product-grid">
+    <ul className={`product-grid${fan ? ' product-grid--fan' : ''}`}>
       {products.map((p) => (
         <li key={p.slug}>
           <article className="product-card">
