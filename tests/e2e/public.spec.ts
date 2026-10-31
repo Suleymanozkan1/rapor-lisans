@@ -82,6 +82,8 @@ test('security headers are set', async ({ request }) => {
   const h = res.headers()
   expect(h['content-security-policy']).toContain("frame-ancestors 'none'")
   expect(h['content-security-policy']).toContain("object-src 'none'")
+  // Vercel Blob client uploads call /api/blob/?pathname=… and /api/blob/mpu; a source without the trailing slash would block them.
+  expect(h['content-security-policy']).toMatch(/connect-src [^;]*https:\/\/vercel\.com\/api\/blob\/ /)
   expect(h['x-content-type-options']).toBe('nosniff')
   expect(h['x-frame-options']).toBe('DENY')
   expect(h['referrer-policy']).toBe('strict-origin-when-cross-origin')
