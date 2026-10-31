@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { LocalStore } from '@/lib/store/local'
 import { GithubStore } from '@/lib/store/github'
+import { getStore } from '@/lib/store'
 import { ConflictError, StoreUnavailableError, assertLogicalPath } from '@/lib/store/types'
 import { gitBlobSha } from '@/lib/store/sha'
 
@@ -24,6 +25,25 @@ describe('logical paths', () => {
       expect(() => assertLogicalPath(bad), bad).toThrow()
     }
     expect(() => assertLogicalPath('content/posts/a-b.md')).not.toThrow()
+  })
+})
+
+describe('read-only fallback', () => {
+  it('reads deployed content but refuses commits when GitHub is not configured', async () => {
+    const local = new LocalStore()
+    await local.commit([{ path: 'content/settings.json', content: Buffer.from('{}\n') }], 'seed')
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubEnv('CONTENT_STORE', 'github')
+    vi.stubEnv('GITHUB_TOKEN', '')
+    vi.stubEnv('GITHUB_OWNER', 'o')
+    vi.stubEnv('GITHUB_REPO', 'r')
+    const store = getStore()
+    expect(store.kind).toBe('readonly')
+    expect((await store.read('content/settings.json'))?.content.toString()).toBe('{}\n')
+    const err = await store.commit([{ path: 'content/settings.json', content: Buffer.from('x') }], 'm').catch((e) => e)
+    expect(err).toBeInstanceOf(StoreUnavailableError)
+    expect(err.message).toContain('GITHUB_TOKEN')
+    expect(err.message).not.toContain('GITHUB_OWNER')
   })
 })
 

@@ -57,6 +57,11 @@ export type GithubConfig = {
   uploadsPath: string
 }
 
+/** Names of the GitHub variables that are still empty, so the panel can say exactly what to add. */
+export function missingGithubVars(): string[] {
+  return (['GITHUB_TOKEN', 'GITHUB_OWNER', 'GITHUB_REPO'] as const).filter((k) => !process.env[k])
+}
+
 export function githubConfig(): GithubConfig | null {
   const { GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO } = process.env
   if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) return null

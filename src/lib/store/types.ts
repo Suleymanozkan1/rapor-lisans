@@ -24,7 +24,7 @@ export type ActivityEntry = {
 }
 
 export interface ContentStore {
-  readonly kind: 'github' | 'local'
+  readonly kind: 'github' | 'local' | 'readonly'
   read(path: LogicalPath): Promise<StoredFile | null>
   list(dir: LogicalPath): Promise<FileEntry[]>
   /** Reads several files from one consistent snapshot. Missing files are omitted. */

@@ -34,7 +34,7 @@ export const SITE_PHOTOS = {
     srcSet: '/images/baretler-sira-900.jpg 900w, /images/baretler-sira.jpg 1800w',
     width: 1800,
     height: 1200,
-    alt: 'Bir masanın üzerinde sıra hâlinde dizilmiş sarı baretler',
+    alt: 'Karton üzerinde sıra hâlinde dizilmiş kırmızı baretler',
     credit: 'Declan Sun, Unsplash',
   },
   ppe: {
