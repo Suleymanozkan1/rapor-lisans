@@ -171,6 +171,8 @@ export type SaveProductInput = {
   slug: string
   frontmatter: Omit<ProductFrontmatter, 'createdAt' | 'updatedAt' | 'sample'>
   body: string
+  /** Files committed together with the product, e.g. preview images. */
+  extraChanges?: Change[]
 }
 
 export async function saveProduct(input: SaveProductInput, user: string): Promise<string> {
@@ -193,6 +195,7 @@ export async function saveProduct(input: SaveProductInput, user: string): Promis
           ...(slugChanged ? [{ path: productPath(existing.slug), delete: true as const, expectedSha: existing.sha }] : []),
         ]
       : [{ path: productPath(input.slug), content: serializeProduct(fm, input.body), expectedSha: existing.sha }]
+  changes.push(...(input.extraChanges ?? []))
   const action = !existing ? 'ürün ekledi' : slugChanged ? `ürünün adresini değiştirdi (eski: ${existing.slug}), yeni:` : 'ürünü güncelledi'
   await store.commit(changes, message(user, action, input.slug))
   audit(user, action, input.slug)
@@ -200,7 +203,10 @@ export async function saveProduct(input: SaveProductInput, user: string): Promis
 }
 
 export async function deleteProduct(slug: string, sha: string, user: string) {
-  await getStore().commit([{ path: productPath(slug), delete: true, expectedSha: sha }], message(user, 'ürünü sildi', slug))
+  const existing = await getAdminProduct(slug)
+  // Preview images belong to the product and go with it.
+  const previews: Change[] = (existing?.preview?.images ?? []).map((i) => ({ path: i.src.replace(/^\/uploads\//, 'uploads/') as LogicalPath, delete: true }))
+  await getStore().commit([{ path: productPath(slug), delete: true, expectedSha: sha }, ...previews], message(user, 'ürünü sildi', slug))
   audit(user, 'ürünü sildi', slug)
 }
 

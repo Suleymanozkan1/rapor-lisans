@@ -13,12 +13,10 @@ export const metadata = { title: 'Önizleme' }
 export default async function Preview({ params }: PageProps<'/admin/yazilar/[slug]/onizleme'>) {
   await requireAdmin()
   const { slug } = await params
-  const r = await safeLoad(async () => ({
-    post: await getAdminPost(slug),
-    settings: (await getAdminSettings()).value,
-    categories: (await getAdminCategories()).value,
-    media: (await getAdminMedia()).value,
-  }))
+  const r = await safeLoad(async () => {
+    const [post, settings, categories, media] = await Promise.all([getAdminPost(slug), getAdminSettings(), getAdminCategories(), getAdminMedia()])
+    return { post, settings: settings.value, categories: categories.value, media: media.value }
+  })
   if (r.error !== undefined) return <LoadError message={r.error} />
   const { post, settings, categories, media } = r.data
   if (!post) notFound()

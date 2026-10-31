@@ -14,7 +14,10 @@ export const metadata = { title: 'Ürünler' }
 export default async function AdminProducts({ searchParams }: PageProps<'/admin/urunler'>) {
   await requireAdmin()
   const sp = await searchParams
-  const r = await safeLoad(async () => ({ list: await listAdminProducts(), settings: (await getAdminSettings()).value }))
+  const r = await safeLoad(async () => {
+    const [list, settings] = await Promise.all([listAdminProducts(), getAdminSettings()])
+    return { list, settings: settings.value }
+  })
   if (r.error !== undefined) return <LoadError message={r.error} />
   const { products, broken } = r.data.list
   const status = shopStatus(r.data.settings)

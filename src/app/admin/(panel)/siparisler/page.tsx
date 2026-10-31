@@ -39,7 +39,8 @@ export default async function AdminOrders({ searchParams }: PageProps<'/admin/si
   }
   const r = await safeLoad(async () => {
     const db = await getDb()
-    return { orders: await listOrders(db, { status: filter.status, limit: 100 }), stats: await orderStats(db) }
+    const [orders, stats] = await Promise.all([listOrders(db, { status: filter.status, limit: 100 }), orderStats(db)])
+    return { orders, stats }
   })
   if (r.error !== undefined) return <LoadError message={r.error} />
   const { orders, stats } = r.data

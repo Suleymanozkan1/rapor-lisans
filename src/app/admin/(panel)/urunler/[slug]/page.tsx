@@ -15,10 +15,10 @@ export default async function EditProduct({ params, searchParams }: PageProps<'/
   const session = await requireAdmin()
   const { slug } = await params
   const sp = await searchParams
-  const r = await safeLoad(async () => ({
-    product: await getAdminProduct(slug),
-    media: (await getAdminMedia()).value,
-  }))
+  const r = await safeLoad(async () => {
+    const [product, media] = await Promise.all([getAdminProduct(slug), getAdminMedia()])
+    return { product, media: media.value }
+  })
   if (r.error !== undefined) return <LoadError message={r.error} />
   const { product, media } = r.data
   if (!product) notFound()

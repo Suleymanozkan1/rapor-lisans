@@ -2502,6 +2502,72 @@ textarea:focus-visible {
   min-height: 3.5rem;
   font-size: 1.25rem;
 }
+/* Product page previews: real pages of the document, shown as paper sheets. */
+.page-preview {
+  margin-top: var(--s7);
+}
+.page-preview__head {
+  max-width: 44rem;
+  margin-bottom: var(--s4);
+}
+.page-preview__head h2 {
+  margin-bottom: var(--s2);
+}
+.page-preview__head p {
+  margin: 0;
+  color: var(--ink-2);
+}
+.page-preview__pages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s5);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 26rem));
+}
+.page-preview figure {
+  margin: 0;
+}
+.page-preview__sheet {
+  position: relative;
+  display: block;
+  border-radius: var(--r-card);
+  overflow: hidden;
+  background: #fff;
+  box-shadow: var(--shadow-md);
+  outline-offset: 4px;
+}
+.page-preview__sheet img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.page-preview__badge {
+  position: absolute;
+  top: var(--s2);
+  left: var(--s2);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--r-btn);
+  background: var(--brand);
+  color: var(--ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.page-preview figcaption {
+  margin-top: var(--s2);
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .page-preview__sheet {
+    transition: transform var(--t-ui) var(--ease-out);
+  }
+  .page-preview__sheet:hover {
+    transform: translateY(-3px);
+  }
+}
+
 .product-detail {
   display: grid;
   gap: var(--s6);

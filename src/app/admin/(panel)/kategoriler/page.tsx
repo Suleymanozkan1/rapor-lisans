@@ -10,7 +10,10 @@ export const metadata = { title: 'Kategoriler' }
 export default async function CategoriesPage({ searchParams }: PageProps<'/admin/kategoriler'>) {
   const session = await requireAdmin()
   const { durum } = await searchParams
-  const r = await safeLoad(async () => ({ cats: await getAdminCategories(), posts: (await listAdminPosts()).posts }))
+  const r = await safeLoad(async () => {
+    const [cats, posts] = await Promise.all([getAdminCategories(), listAdminPosts()])
+    return { cats, posts: posts.posts }
+  })
   if (r.error !== undefined) return <LoadError message={r.error} />
   const counts = Object.fromEntries(r.data.cats.value.map((c) => [c.slug, r.data.posts.filter((p) => p.category === c.slug).length]))
   return (

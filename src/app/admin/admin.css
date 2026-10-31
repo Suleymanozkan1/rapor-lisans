@@ -424,3 +424,60 @@
 .admin-main > form.admin-form + form.admin-form {
   margin-top: var(--s7);
 }
+
+/* Loading state while a panel page fetches its content. */
+.admin-loading {
+  display: grid;
+  gap: 0.75rem;
+  padding-block: 2rem;
+  color: var(--ink-2);
+}
+.admin-loading p {
+  margin: 0;
+}
+.admin-loading__bar {
+  position: relative;
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 28rem;
+  block-size: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--rule);
+}
+.admin-loading__bar::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 40%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .admin-loading__bar::after {
+    animation: admin-loading 1.1s ease-in-out infinite;
+  }
+}
+@keyframes admin-loading {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+/* Product editor: rendered preview pages. */
+.preview-field__pages {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.preview-field__pages img {
+  inline-size: 8rem;
+  block-size: auto;
+  border-radius: 4px;
+  background: #fff;
+  border: 1px solid var(--rule);
+}

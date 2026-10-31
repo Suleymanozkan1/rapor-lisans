@@ -13,7 +13,10 @@ export default async function AdminPosts({ searchParams }: PageProps<'/admin/yaz
   await requireAdmin()
   const sp = await searchParams
   const filter = sp.durum === 'taslak' ? 'draft' : sp.durum === 'yayinda' ? 'published' : null
-  const r = await safeLoad(async () => ({ posts: await listAdminPosts(), categories: (await getAdminCategories()).value }))
+  const r = await safeLoad(async () => {
+    const [posts, categories] = await Promise.all([listAdminPosts(), getAdminCategories()])
+    return { posts, categories: categories.value }
+  })
   if (r.error !== undefined) return <LoadError message={r.error} />
   const posts = r.data.posts.posts.filter((p) => !filter || p.status === filter)
   return (
