@@ -1,8 +1,11 @@
 ---
 title: Kolej Okul Risk Analizi
-excerpt: Excel formatındaki bu çalışma, kurumun fiziksel koşullarına, faaliyetlerine, çalışan profiline ve mevcut tehlikelerine göre uyarlanarak kullanılabilir. Mevcut risk değerlendirmesinin yerine doğrudan geçmez; saha incelemesi, yetkili değerlendirme ekibi ve güncel mevzuat doğrultusunda incelenmelidir.
+excerpt: "Okullar ve eğitim kurumları\r
+
+  Özel öğretim kurumları ve kolejler için risk analiz çalışması"
 status: published
 createdAt: 2026-10-31T18:10:08.575Z
+updatedAt: 2026-10-31T18:12:34.388Z
 price: 899
 file:
   pathname: urunler/kolej-okul-risk-analizi/eras-eral-risk-analizi-vpjoJQ4bvX5v6N6vwEFrx2dOyBYA29.xls
@@ -34,3 +37,5 @@ Okullar ve eğitim kurumları
 İş sağlığı ve güvenliği risk değerlendirmesi hazırlayan İSG uzmanları
 
 Mevcut risk analizlerini takip etmek, güncellemek ve aksiyon süreçlerini yönetmek isteyen kurumlar
+
+Excel formatındaki bu çalışma, kurumun fiziksel koşullarına, faaliyetlerine, çalışan profiline ve mevcut tehlikelerine göre uyarlanarak kullanılabilir. Mevcut risk değerlendirmesinin yerine doğrudan geçmez; saha incelemesi, yetkili değerlendirme ekibi ve güncel mevzuat doğrultusunda incelenmelidir.
