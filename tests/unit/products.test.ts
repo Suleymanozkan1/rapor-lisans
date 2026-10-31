@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { isForSale, productFileSchema, productFrontmatterSchema, sellerComplete, settingsSchema } from '@/lib/types'
 import { checkUploadPathname, matchesSignature, productFilePathname } from '@/lib/product-files'
+import { fileBaseName } from '@/lib/slug'
 import { parseProductFile, serializeProduct, ContentParseError } from '@/lib/frontmatter'
 import { formatPrice, parsePrice, sortProducts } from '@/lib/products'
 import { DEFAULT_SETTINGS } from '@/lib/defaults'
@@ -67,6 +68,10 @@ describe('upload paths and signatures', () => {
     expect(matchesSignature(Buffer.from('<html>'), 'pdf')).toBe(false)
     expect(matchesSignature(Buffer.from([0x50, 0x4b, 0x03, 0x04, 0x14]), 'xlsx')).toBe(true)
     expect(matchesSignature(Buffer.from('%PDF-1.7'), 'docx')).toBe(false)
+    const ole = Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1, 0])
+    for (const ext of ['doc', 'xls', 'ppt']) expect(matchesSignature(ole, ext)).toBe(true)
+    expect(matchesSignature(Buffer.from([0x50, 0x4b, 0x03, 0x04, 0, 0, 0, 0]), 'doc')).toBe(false)
+    expect(matchesSignature(ole, 'docx')).toBe(false)
   })
 })
 
@@ -134,5 +139,23 @@ describe('prices', () => {
       { slug: 'c', order: 100, createdAt: '2026-05-01' },
     ]
     expect(sortProducts(items).map((x) => x.slug)).toEqual(['b', 'c', 'a'])
+  })
+})
+
+describe('upload file names', () => {
+  it('never leave a trailing hyphen when a long name is shortened', () => {
+    const long = `${'a'.repeat(59)} b.pdf`
+    expect(fileBaseName(long, 60)).toBe('a'.repeat(59))
+    expect(() => checkUploadPathname(`urunler/urun/${fileBaseName(long)}.pdf`)).not.toThrow()
+    expect(() => checkUploadPathname(productFilePathname('urun', long))).not.toThrow()
+  })
+
+  it('accept Turkish names and old Office formats', () => {
+    expect(fileBaseName('Risk Değerlendirmesi – Şablon v2.1 (son).docx')).toBe('risk-degerlendirmesi-sablon-v2-1-son')
+    expect(fileBaseName('___.pdf')).toBe('dosya')
+    expect(checkUploadPathname('urunler/urun/belge1.doc').contentType).toBe('application/msword')
+    expect(checkUploadPathname('urunler/urun/kitap1.xls').contentType).toBe('application/vnd.ms-excel')
+    expect(checkUploadPathname('urunler/urun/sunum.ppt').contentType).toBe('application/vnd.ms-powerpoint')
+    expect(() => checkUploadPathname('urunler/urun/makro.xlsm')).toThrow(/İzin verilen dosya türleri/)
   })
 })
