@@ -20,8 +20,9 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self'",
-  // Admin product-file uploads go from the browser straight to Vercel Blob.
-  `connect-src 'self' https://vercel.com/api/blob https://*.blob.vercel-storage.com${isDev ? ' ws:' : ''}`,
+  // Admin product-file uploads go from the browser straight to Vercel Blob. The trailing slash
+  // matters: the client calls /api/blob/?pathname=…, and a CSP path without one matches exactly.
+  `connect-src 'self' https://vercel.com/api/blob/ https://*.blob.vercel-storage.com${isDev ? ' ws:' : ''}`,
   "frame-ancestors 'none'",
   `form-action 'self' https://*.iyzipay.com${mockIyzico}`,
   "base-uri 'self'",
