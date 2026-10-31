@@ -21,6 +21,20 @@ features:
   - Tedbir sonrası yeniden değerlendirme alanı
   - Ekip oluşturma ve imza sayfası örneği
 order: 1
+preview:
+  source:
+    pathname: urunler/ofis-risk-analizi/ofis-risk-analizi-guncel-SXzti1hd5L1zPm7Og0xch1SoJeXGQH.xls
+    sha256: 5b668ffb51f888c5859593f326094347200cd7a0c1d262f559755ab0eb161c4f
+  pages: 14
+  images:
+    - src: /uploads/urunler/ofis-risk-analizi/onizleme-1-c667b8b5e8.jpg
+      page: 1
+      width: 1100
+      height: 778
+    - src: /uploads/urunler/ofis-risk-analizi/onizleme-9-cbc5f1831a.jpg
+      page: 9
+      width: 1100
+      height: 778
 ---
 
 Ofis Sektörü (Plazalar, Bankalar vb.) ve Şantiyeler İçin İSG Risk Değerlendirme Şablon Seti

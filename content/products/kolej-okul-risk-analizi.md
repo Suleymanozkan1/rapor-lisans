@@ -24,6 +24,20 @@ features:
   - Acil durum organizasyonları, ilk yardım, servis araçları, spor salonu ve yüzme havuzu gibi özel kullanım alanlarına yönelik risk analizleri
   - İşveren, iş güvenliği uzmanı, işyeri hekimi ve çalışan temsilcilerinin yer aldığı değerlendirme ve imza bölümü
 order: 2
+preview:
+  source:
+    pathname: urunler/kolej-okul-risk-analizi/eras-eral-risk-analizi-vpjoJQ4bvX5v6N6vwEFrx2dOyBYA29.xls
+    sha256: 4b17b9853da4226c774c9695907158f7b506f91284711c841fbf30ee84b30de3
+  pages: 19
+  images:
+    - src: /uploads/urunler/kolej-okul-risk-analizi/onizleme-1-51258ccd40.jpg
+      page: 1
+      width: 1100
+      height: 778
+    - src: /uploads/urunler/kolej-okul-risk-analizi/onizleme-14-aea156c68c.jpg
+      page: 14
+      width: 1100
+      height: 778
 ---
 
 Kimler için?
