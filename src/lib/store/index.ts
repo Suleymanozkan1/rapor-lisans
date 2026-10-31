@@ -1,15 +1,18 @@
 import 'server-only'
-import { githubConfig, storeKind } from '../env'
+import { githubConfig, missingGithubVars, storeKind } from '../env'
 import { GithubStore } from './github'
 import { LocalStore } from './local'
-import { StoreUnavailableError, type ContentStore } from './types'
+import { ReadOnlyStore } from './readonly'
+import type { ContentStore } from './types'
 
 export function getStore(): ContentStore {
   const kind = storeKind()
   if (kind === 'local') return new LocalStore()
   if (kind === 'github') return new GithubStore(githubConfig()!)
-  throw new StoreUnavailableError(
-    'İçerik deposu yapılandırılmamış. GITHUB_TOKEN, GITHUB_OWNER ve GITHUB_REPO ortam değişkenlerini ayarlayın (README: "GitHub entegrasyonu").',
+  // No writable store: show the content shipped with this deployment, refuse saves.
+  const missing = missingGithubVars()
+  return new ReadOnlyStore(
+    `Kaydedilemedi: içerik deposu yapılandırılmamış. Eksik ortam değişkeni: ${missing.length ? missing.join(', ') : 'CONTENT_STORE=github'} (README: "GitHub entegrasyonu").`,
   )
 }
 

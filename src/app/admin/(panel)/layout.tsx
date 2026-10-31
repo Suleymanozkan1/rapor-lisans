@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { requireAdmin } from '@/lib/auth/guard'
-import { storeKind } from '@/lib/env'
+import { missingGithubVars, storeKind } from '@/lib/env'
 import { AdminNav } from '@/components/admin/AdminNav'
 import { Csrf } from '@/components/admin/Csrf'
 import { logout } from '../login-actions'
@@ -18,7 +18,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           Yönetim paneli
         </Link>
         <span className="admin-muted">
-          {kind === 'github' ? 'Depo: GitHub' : kind === 'local' ? 'Depo: yerel dosyalar (geliştirme)' : 'Depo yapılandırılmamış'}
+          {kind === 'github' ? 'Depo: GitHub' : kind === 'local' ? 'Depo: yerel dosyalar (geliştirme)' : 'Depo: salt okunur'}
         </span>
         <div className="admin-bar__end">
           <Link href="/" target="_blank">
@@ -40,8 +40,14 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           {kind === 'none' ? (
             <div className="notice notice--warn" role="alert">
               <p>
-                İçerik deposu yapılandırılmamış: değişiklikler kaydedilemez. Vercel ortam değişkenlerine <code>GITHUB_TOKEN</code>,{' '}
-                <code>GITHUB_OWNER</code>, <code>GITHUB_REPO</code> ekleyin (README: “GitHub entegrasyonu”).
+                İçerik deposu yapılandırılmamış. Panel yayındaki içeriği salt okunur gösteriyor; değişiklikler kaydedilemez. Kaydetmek için Vercel ortam değişkenlerine eksik olanları ekleyin:{' '}
+                {missingGithubVars().map((v, i) => (
+                  <span key={v}>
+                    {i > 0 ? ', ' : ''}
+                    <code>{v}</code>
+                  </span>
+                ))}{' '}
+                (README: “GitHub entegrasyonu”).
               </p>
             </div>
           ) : null}

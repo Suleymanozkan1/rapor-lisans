@@ -141,8 +141,9 @@ Panel, içeriği GitHub'ın Git Data API'siyle (blob, tree, commit, ref) tek com
 5. Token'ı yalnızca Vercel ortam değişkeni `GITHUB_TOKEN` olarak girin. Repoya, `.env.example`'a
    veya bir sohbete yazmayın. Token tarayıcıya gönderilmez ve loglanmaz.
 
-Token yoksa veya geçersizse panel çalışıyormuş gibi davranmaz: üstte "İçerik deposu
-yapılandırılmamış" uyarısı çıkar, kayıt işlemleri açık bir hata mesajıyla reddedilir.
+Token yoksa panel çalışıyormuş gibi davranmaz: üstte "İçerik deposu yapılandırılmamış" uyarısı
+eksik değişkenleri adıyla sayar, panel yayındaki (deploy edilmiş) içeriği **salt okunur** gösterir
+ve kayıt işlemleri açık bir hata mesajıyla reddedilir. Token geçersizse GitHub'ın hatası gösterilir.
 
 ## Yayın akışı
 
