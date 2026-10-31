@@ -19,6 +19,7 @@ export type EditorProduct = {
   price: string
   file: ProductFileValue
   preview: ProductPreview | null
+  previewDisabled: boolean
   format: string
   features: string
   coverSrc: string
@@ -89,7 +90,7 @@ export function ProductEditor({ csrf, product: p, media, fileStore }: Props) {
             Ürün sayfası: /magaza/{slug || 'urun-adresi'}. Yalnızca küçük harf, rakam ve tire.
           </p>
         </div>
-        <ProductFileField key={p?.file?.pathname ?? 'yeni'} csrf={csrf} slug={slug} value={p?.file ?? null} preview={p?.preview ?? null} storeKind={fileStore} />
+        <ProductFileField key={p?.file?.pathname ?? 'yeni'} csrf={csrf} slug={slug} value={p?.file ?? null} preview={p?.preview ?? null} previewDisabled={Boolean(p?.previewDisabled)} storeKind={fileStore} />
         <div className="field">
           <label htmlFor="excerpt">Kısa açıklama</label>
           <textarea id="excerpt" name="excerpt" rows={3} maxLength={300} defaultValue={p?.excerpt} aria-describedby="excerpt-help" />

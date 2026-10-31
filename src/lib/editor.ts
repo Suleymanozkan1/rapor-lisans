@@ -32,6 +32,7 @@ export function toEditorProduct(p: AdminProduct) {
     price: p.price === undefined ? '' : String(p.price).replace('.', ','),
     file: p.file ?? null,
     preview: p.preview ?? null,
+    previewDisabled: Boolean(p.previewDisabled),
     format: p.format ?? '',
     features: p.features.join('\n'),
     coverSrc: p.cover?.src ?? '',

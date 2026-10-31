@@ -53,3 +53,22 @@ describe('renderPdfPages', () => {
     await expect(renderPdfPages(Buffer.from('PK\x03\x04 not a pdf'))).rejects.toBeInstanceOf(PreviewError)
   })
 })
+
+describe('preview job: which products need pages', async () => {
+  const { needsPreview } = await import('../../scripts/urun-onizleme')
+  const base = { slug: 'x', body: '', title: 'X', excerpt: '', status: 'published' as const, createdAt: '2026-10-31', features: [], order: 1 }
+  const file = (ext: string, sha = 'a'.repeat(64)) => ({ pathname: `urunler/x/dosya.${ext}`, name: `dosya.${ext}`, size: 10, contentType: 'x', sha256: sha })
+  const preview = (sha: string) => ({ source: { pathname: 'urunler/x/dosya.docx', sha256: sha }, pages: 3, images: [{ src: '/uploads/urunler/x/a.jpg', page: 1, width: 10, height: 10 }] })
+
+  it('converts Word, Excel and PowerPoint files without a preview of the current file', () => {
+    for (const ext of ['docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt', 'pdf']) expect(needsPreview({ ...base, file: file(ext) }), ext).toBe(true)
+    expect(needsPreview({ ...base, file: file('docx'), preview: preview('b'.repeat(64)) })).toBe(true)
+  })
+
+  it('skips ZIPs, products without a file, current previews and disabled previews', () => {
+    expect(needsPreview({ ...base, file: file('zip') })).toBe(false)
+    expect(needsPreview({ ...base })).toBe(false)
+    expect(needsPreview({ ...base, file: file('docx'), preview: preview('a'.repeat(64)) })).toBe(false)
+    expect(needsPreview({ ...base, file: file('docx'), previewDisabled: true })).toBe(false)
+  })
+})

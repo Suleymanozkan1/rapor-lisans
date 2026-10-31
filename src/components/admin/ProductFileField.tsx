@@ -13,6 +13,7 @@ type Props = {
   slug: string
   value: ProductFileValue
   preview: ProductPreview | null
+  previewDisabled: boolean
   storeKind: StoreKind
 }
 
@@ -98,17 +99,12 @@ async function uploadPrivate(
   return json
 }
 
-export function ProductFileField({ csrf, slug, value, preview, storeKind }: Props) {
+export function ProductFileField({ csrf, slug, value, preview, previewDisabled, storeKind }: Props) {
   const [file, setFile] = useState<ProductFileValue>(value)
   const [busy, setBusy] = useState(false)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
-  // PDF copy used only to render preview pages of a Word/Excel/PowerPoint/ZIP product.
-  const keptPdf = preview && value && value.contentType !== PDF && preview.source.pathname !== value.pathname ? preview.source.pathname : ''
-  const [previewPdf, setPreviewPdf] = useState<{ pathname: string; name: string } | null>(keptPdf ? { pathname: keptPdf, name: 'Mevcut önizleme PDF’i' } : null)
-  const [previewBusy, setPreviewBusy] = useState(false)
-  const [previewError, setPreviewError] = useState('')
-  const [previewOff, setPreviewOff] = useState(Boolean(value) && !preview)
+  const [previewOff, setPreviewOff] = useState(previewDisabled)
 
   async function onPick(f: File | undefined) {
     if (!f) return
@@ -131,27 +127,11 @@ export function ProductFileField({ csrf, slug, value, preview, storeKind }: Prop
     }
   }
 
-  async function onPickPreviewPdf(f: File | undefined) {
-    if (!f) return
-    setPreviewError('')
-    const problem = checkBeforeUpload(f, slug, 'pdf')
-    if (problem) {
-      setPreviewError(problem)
-      return
-    }
-    setPreviewBusy(true)
-    try {
-      const stored = await uploadPrivate(f, { csrf, slug, storeKind, prefix: 'onizleme-', onProgress: () => {} })
-      setPreviewPdf({ pathname: stored.pathname, name: f.name })
-    } catch (e) {
-      setPreviewError(e instanceof Error ? e.message : 'Yükleme başarısız.')
-    } finally {
-      setPreviewBusy(false)
-    }
-  }
-
   const isPdf = file?.contentType === PDF
-  const sameSource = Boolean(preview && file && (isPdf ? preview.source.pathname === file.pathname : previewPdf?.pathname === preview.source.pathname))
+  const ext = file ? extOf(file.pathname) : ''
+  const convertible = ['docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt'].includes(ext)
+  // The stored preview belongs to this file only if the file was not replaced in this form.
+  const current = preview && file && file.pathname === value?.pathname ? preview : null
 
   return (
     <>
@@ -198,57 +178,32 @@ export function ProductFileField({ csrf, slug, value, preview, storeKind }: Prop
             Sayfa, ürünü kaydederken bir kez seçilir; ziyaretçi sayfayı yenileyerek başka sayfa göremez. 3 sayfa veya daha kısa belgelerde yalnızca 1.
             sayfa gösterilir.
           </p>
-          <input type="hidden" name="previewPdfPathname" value={isPdf ? '' : (previewPdf?.pathname ?? '')} />
           <label className="choice">
             <input type="checkbox" name="previewOff" value="1" checked={previewOff} onChange={(e) => setPreviewOff(e.target.checked)} /> Önizleme
             gösterme
           </label>
           {previewOff ? null : isPdf ? (
-            <p className="field__help">Satılan PDF’ten otomatik oluşturulur.</p>
-          ) : (
-            <>
-              <p className="field__help" id="previewPdf-help">
-                Word, Excel ve PowerPoint dosyalarında sayfa düzenini programın kendisi belirler; bu yüzden önizleme için belgenin PDF hâlini de
-                yükleyin (programda <strong>Dosya › Farklı Kaydet › PDF</strong>). Bu PDF yayınlanmaz ve satılmaz; yalnızca seçilen sayfaların görseli
-                ürün sayfasında görünür.
+            current ? null : <p className="field__help">Kaydettiğinizde satılan PDF’ten oluşturulur.</p>
+          ) : convertible ? (
+            current ? null : (
+              <p className="field__help" role="status">
+                Word, Excel ve PowerPoint dosyalarının sayfaları kaydettikten sonra otomatik oluşturulur (LibreOffice ile, yaklaşık 2–4 dakika). Bu
+                sayfayı sonra yenileyerek görebilirsiniz.
               </p>
-              {previewPdf ? (
-                <p className="field__help" role="status">
-                  Önizleme kaynağı: <strong>{previewPdf.name}</strong>
-                </p>
-              ) : null}
-              {storeKind === 'none' ? null : (
-                <>
-                  <label htmlFor="previewPdf">{previewPdf ? 'Önizleme PDF’ini değiştir' : 'Önizleme için PDF seç'}</label>
-                  <input
-                    id="previewPdf"
-                    type="file"
-                    accept=".pdf,application/pdf"
-                    disabled={previewBusy}
-                    onChange={(e) => onPickPreviewPdf(e.target.files?.[0])}
-                    aria-describedby="previewPdf-help"
-                  />
-                </>
-              )}
-              {previewBusy ? <p className="field__help">Yükleniyor…</p> : null}
-              {previewError ? (
-                <p className="field__error" role="alert">
-                  {previewError}
-                </p>
-              ) : null}
-              {!previewPdf && !previewBusy ? <p className="field__help">PDF yüklenmezse ürün sayfasında önizleme gösterilmez.</p> : null}
-            </>
+            )
+          ) : (
+            <p className="field__help">ZIP arşivlerinde sayfa olmadığı için önizleme gösterilmez.</p>
           )}
-          {!previewOff && preview && sameSource ? (
+          {!previewOff && current ? (
             <>
               <div className="preview-field__pages">
-                {preview.images.map((img) => (
+                {current.images.map((img) => (
                   // eslint-disable-next-line @next/next/no-img-element -- committed files; may not be deployed yet
-                  <img key={img.src} src={img.src} width={img.width} height={img.height} alt={`Sayfa ${img.page} / ${preview.pages}`} loading="lazy" />
+                  <img key={img.src} src={img.src} width={img.width} height={img.height} alt={`Sayfa ${img.page} / ${current.pages}`} loading="lazy" />
                 ))}
               </div>
               <p className="field__help">
-                Gösterilen sayfalar: {preview.images.map((i) => i.page).join(' ve ')} ({preview.pages} sayfa). Yeni görseller sitede yaklaşık bir
+                Gösterilen sayfalar: {current.images.map((i) => i.page).join(' ve ')} ({current.pages} sayfa). Yeni görseller sitede yaklaşık bir
                 dakika sonra görünür.
               </p>
               <label className="choice">

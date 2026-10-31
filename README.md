@@ -210,13 +210,20 @@ Satış ancak aşağıdakilerin hepsi tamamlanınca açılır; eksikler panelde 
   Görsel seçilmezse sarı-siyah marka kapağı çizilir.
 - **Önizleme sayfaları:** ürün sayfasında belgenin **1. sayfası** ve **ortadan rastgele bir
   sayfası** görsel olarak gösterilir (3 sayfa veya daha kısa belgelerde yalnızca 1. sayfa). Sayfa
-  ürün kaydedilirken bir kez seçilir ve saklanır; ziyaretçi sayfayı yenileyerek belgenin geri
-  kalanını göremez. PDF ürünlerde görseller satılan dosyadan otomatik çizilir. Word, Excel,
-  PowerPoint ve ZIP ürünlerde sayfa düzenini programın kendisi belirlediği için belgenin PDF
-  hâlini de yükleyin (Dosya › Farklı Kaydet › PDF); bu PDF yayınlanmaz, yalnızca seçilen
-  sayfaların görseli `public/uploads/urunler/<ürün>/` altına commit edilir. "Kaydederken ortadan
-  başka bir sayfa seç" yeni bir sayfa seçer; "Önizleme gösterme" görselleri kaldırır.
-  Çizim sunucuda pdf.js ve Skia (`@napi-rs/canvas`) ile yapılır.
+  bir kez seçilir ve saklanır; ziyaretçi sayfayı yenileyerek belgenin geri kalanını göremez.
+  - **PDF:** görseller ürün kaydedilirken sunucuda çizilir (pdf.js + `@napi-rs/canvas`).
+  - **Word, Excel, PowerPoint (.docx/.doc, .xlsx/.xls, .pptx/.ppt):** ek bir şey yüklemeniz
+    gerekmez. Kayıt GitHub'a commit edilince **Ürün önizlemeleri** iş akışı
+    (`.github/workflows/urun-onizleme.yml`) dosyayı LibreOffice ile PDF'e çevirir, sayfaları
+    çizer ve görselleri commit eder; önizleme yaklaşık 2–4 dakika sonra sitede görünür. İş akışı
+    dosyayı sitenin `/api/onizleme-kaynagi/<ürün>` adresinden alır; kim olduğunu GitHub'ın
+    verdiği OpenID Connect belirteciyle kanıtlar (yalnızca bu deponun `main` dalındaki bu iş
+    akışı kabul edilir), GitHub'da saklanan bir anahtar yoktur. Alan adı değişirse GitHub'da
+    depo değişkeni `SITE_URL` tanımlayın (Settings › Secrets and variables › Actions ›
+    Variables).
+  - **ZIP:** sayfası olmadığı için önizleme yok.
+  - "Kaydederken ortadan başka bir sayfa seç" yeni bir sayfa seçer; "Önizleme gösterme"
+    görselleri kaldırır. Görseller `public/uploads/urunler/<ürün>/` altındadır.
 - **Sipariş akışı:** alıcı bilgileri ve üç onay (ön bilgilendirme, sözleşme, anında teslim ve
   cayma hakkı istisnası) > iyzico ödeme sayfası > site, iyzico'dan **imzalı** sonucu sorgular;
   yalnızca imzası doğru, tutarı ve sipariş numarası eşleşen ve risk kontrolünden geçmiş

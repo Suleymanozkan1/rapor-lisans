@@ -1,5 +1,6 @@
 import { test, expect, type Page, type APIRequestContext } from '@playwright/test'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
 import path from 'node:path'
 
 const work = path.resolve(import.meta.dirname, '../../.e2e')
@@ -388,44 +389,73 @@ test('admin pages are usable at phone width', async ({ browser }) => {
   await ctx.close()
 })
 
-test('Word product: preview pages come from an uploaded PDF copy; first page plus one middle page', async ({ page }) => {
+test('Word product: pages are rendered from the file itself by the preview job; first page plus one middle page', async ({ page }) => {
   await login(page)
   await page.goto('/admin/urunler/yeni')
   await page.getByLabel('Ürün adı').fill('Acil durum plani sablonu')
-  // A .docx is a ZIP container; only the signature is checked on upload.
-  await page.getByLabel('Dosya seç').setInputFiles({ name: 'acil-durum.docx', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', buffer: Buffer.concat([Buffer.from('PK\x03\x04'), Buffer.alloc(64)]) })
-  await expect(page.getByRole('status').filter({ hasText: 'acil-durum.docx' })).toBeVisible()
-  await expect(page.locator('main')).toContainText('Farklı Kaydet › PDF')
-  await page.getByLabel('Önizleme için PDF seç').setInputFiles(path.resolve(import.meta.dirname, '../fixtures/onizleme-12-sayfa.pdf'))
-  await expect(page.getByRole('status').filter({ hasText: 'onizleme-12-sayfa.pdf' })).toBeVisible()
+  await page.getByLabel('Dosya seç').setInputFiles(path.resolve(import.meta.dirname, '../fixtures/liste-14-sayfa.docx'))
+  await expect(page.getByRole('status').filter({ hasText: 'liste-14-sayfa.docx' })).toBeVisible()
+  // No PDF copy is asked for any more.
+  await expect(page.getByLabel('Önizleme için PDF seç')).toHaveCount(0)
+  await expect(page.locator('main')).toContainText('kaydettikten sonra otomatik oluşturulur')
   await page.getByLabel('Fiyat (TL)').fill('59')
   await page.getByRole('button', { name: 'Kaydet', exact: true }).click()
   await expect(page).toHaveURL(/\/admin\/urunler\/acil-durum-plani-sablonu\?durum=urun-kaydedildi$/)
 
   const file = path.join(work, 'content/products/acil-durum-plani-sablonu.md')
+  expect(readFileSync(file, 'utf8')).not.toContain('preview')
+
+  // What the GitHub Actions job does after the commit (LibreOffice + pdf.js), against the e2e folders.
+  const job = spawnSync('npx', ['tsx', 'scripts/urun-onizleme.ts'], {
+    cwd: path.resolve(import.meta.dirname, '../..'),
+    env: { ...process.env, CONTENT_DIR: path.join(work, 'content'), UPLOADS_DIR: path.join(work, 'uploads'), PREVIEW_SOURCE_DIR: path.join(work, 'private') },
+    encoding: 'utf8',
+    timeout: 120_000,
+  })
+  expect(job.status, job.stderr).toBe(0)
+  expect(job.stdout).toContain('acil-durum-plani-sablonu: 14 sayfa')
   const saved = readFileSync(file, 'utf8')
-  expect(saved).toMatch(/source:\n {4}pathname: urunler\/acil-durum-plani-sablonu\/onizleme-onizleme-12-sayfa-[0-9a-f]{8}\.pdf/)
-  expect(saved).toContain('pages: 12')
+  expect(saved).toMatch(/source:\n {4}pathname: urunler\/acil-durum-plani-sablonu\/liste-14-sayfa-[0-9a-f]{8}\.docx/)
+  expect(saved).toContain('pages: 14')
   const pages = [...saved.matchAll(/page: (\d+)/g)].map((m) => Number(m[1]))
   expect(pages[0]).toBe(1)
-  expect(pages[1]).toBeGreaterThanOrEqual(3)
-  expect(pages[1]).toBeLessThanOrEqual(9)
+  expect(pages[1]).toBeGreaterThanOrEqual(4)
+  expect(pages[1]).toBeLessThanOrEqual(10)
   const dir = path.join(work, 'uploads/urunler/acil-durum-plani-sablonu')
   expect(readdirSync(dir)).toHaveLength(2)
-  const jpg = readFileSync(path.join(dir, readdirSync(dir)[0]))
-  expect(jpg.subarray(0, 3)).toEqual(Buffer.from([0xff, 0xd8, 0xff]))
+  expect(readFileSync(path.join(dir, readdirSync(dir)[0])).subarray(0, 3)).toEqual(Buffer.from([0xff, 0xd8, 0xff]))
 
-  // Saving again keeps the same pages; the PDF copy stays attached.
+  // A second run has nothing to do; saving again keeps the same pages.
+  const again = spawnSync('npx', ['tsx', 'scripts/urun-onizleme.ts'], {
+    cwd: path.resolve(import.meta.dirname, '../..'),
+    env: { ...process.env, CONTENT_DIR: path.join(work, 'content'), UPLOADS_DIR: path.join(work, 'uploads'), PREVIEW_SOURCE_DIR: path.join(work, 'private') },
+    encoding: 'utf8',
+  })
+  expect(again.stdout).toContain('Önizlemesi eksik ürün yok.')
+  // A clean URL: the "saved" banner of the previous save must not satisfy the next wait.
+  const editUrl = '/admin/urunler/acil-durum-plani-sablonu'
+  await page.goto(editUrl)
   await expect(page.locator('main')).toContainText('Gösterilen sayfalar: 1 ve')
   await page.getByLabel('Kısa açıklama').fill('Şablon')
   await page.getByRole('button', { name: 'Kaydet', exact: true }).click()
   await expect(page.locator('main').getByRole('status').filter({ hasText: 'Ürün kaydedildi' })).toBeVisible()
   expect([...readFileSync(file, 'utf8').matchAll(/page: (\d+)/g)].map((m) => Number(m[1]))).toEqual(pages)
 
-  // Turning the preview off removes its images.
+  // Turning the preview off removes its images, and the job leaves the product alone.
+  await page.goto(editUrl)
   await page.getByLabel('Önizleme gösterme').check()
   await page.getByRole('button', { name: 'Kaydet', exact: true }).click()
   await expect(page.locator('main').getByRole('status').filter({ hasText: 'Ürün kaydedildi' })).toBeVisible()
   expect(readFileSync(file, 'utf8')).not.toContain('preview:')
+  expect(readFileSync(file, 'utf8')).toContain('previewDisabled: true')
   expect(readdirSync(dir)).toEqual([])
+  await expect(page.getByLabel('Önizleme gösterme')).toBeChecked()
+})
+
+test('the preview source endpoint never serves a file without a GitHub Actions identity', async ({ request }) => {
+  for (const headers of [{} as Record<string, string>, { Authorization: 'Bearer abc.def.ghi' }]) {
+    const res = await request.get('/api/onizleme-kaynagi/test-kontrol-listesi', { headers })
+    expect([401, 403, 503]).toContain(res.status())
+    expect(res.headers()['content-type']).toContain('application/json')
+  }
 })

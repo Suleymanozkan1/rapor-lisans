@@ -105,12 +105,12 @@ export const productFileSchema = z
 
 /**
  * Page images shown on the product page before purchase (first page plus one
- * random middle page), rendered from a PDF when the product is saved. For
- * Word, Excel, PowerPoint and ZIP products the admin uploads a PDF copy that
- * is used only for this and never published.
+ * random middle page). A PDF is rendered when the product is saved; Word,
+ * Excel and PowerPoint files are converted to PDF with LibreOffice by the
+ * GitHub Actions job `urun-onizleme` (scripts/urun-onizleme.ts).
  */
 export const productPreviewSchema = z.object({
-  /** The private PDF the images were rendered from (the sold file itself when it is a PDF). */
+  /** The sold file the images were rendered from; a new file means a new preview. */
   source: z.object({
     pathname: productFileSchema.shape.pathname,
     sha256: z.string().regex(/^[0-9a-f]{64}$/),
@@ -145,6 +145,8 @@ export const productFrontmatterSchema = z.object({
   price: z.number().min(1).max(1_000_000).multipleOf(0.01).optional(),
   file: productFileSchema.optional(),
   preview: productPreviewSchema.optional(),
+  /** The admin turned the preview off; the conversion job leaves the product alone. */
+  previewDisabled: z.boolean().optional(),
   /** Short description of what is delivered, e.g. "PDF, 24 sayfa". */
   format: z.string().trim().max(80).optional(),
   features: z.array(z.string().trim().min(2).max(160)).max(12).default([]),

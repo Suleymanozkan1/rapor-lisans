@@ -196,33 +196,24 @@ export async function saveProductAction(_prev: ActionState, fd: FormData): Promi
       file = productFileSchema.parse({ pathname: filePathname, name: fileName, size: meta.size, contentType: meta.contentType, sha256 })
     }
 
-    // Preview pages: rendered from the sold PDF, or from a PDF copy for Word/Excel/PowerPoint/ZIP.
+    // Preview pages. A PDF is rendered here and now; Word, Excel and PowerPoint files are
+    // converted by the GitHub Actions job (LibreOffice), which fills in `preview` a few
+    // minutes after this commit. Kept as long as the file is unchanged.
     const originalSlug = str(fd, 'originalSlug', 100) || null
     const previous = originalSlug ? (await getAdminProduct(originalSlug))?.preview : undefined
-    let source: ProductPreview['source'] | null = null
-    if (file && str(fd, 'previewOff') !== '1') {
-      if (file.contentType === PRODUCT_FILE_TYPES.pdf) {
-        source = { pathname: file.pathname, sha256: file.sha256! }
-      } else {
-        const pdfPathname = str(fd, 'previewPdfPathname', 300)
-        if (pdfPathname && pdfPathname === previous?.source.pathname) {
-          source = previous.source
-        } else if (pdfPathname) {
-          const meta = await headFile(pdfPathname)
-          const head = meta && extensionOf(pdfPathname) === 'pdf' ? await readFileHead(pdfPathname) : null
-          if (!head || !matchesSignature(head, 'pdf')) return { error: 'Önizleme dosyası bulunamadı ya da PDF değil. Önizleme PDF’ini yeniden yükleyin.' }
-          source = { pathname: pdfPathname, sha256: (await hashFile(pdfPathname))! }
-        }
-      }
-    }
+    const previewDisabled = Boolean(file) && str(fd, 'previewOff') === '1'
+    const regen = str(fd, 'previewRegen') === '1'
     let preview: ProductPreview | undefined
     let previewChanges: Change[] = []
-    if (!source) {
+    if (!file || previewDisabled) {
       previewChanges = previewFileChanges(previous)
-    } else if (previous && previous.source.sha256 === source.sha256 && str(fd, 'previewRegen') !== '1') {
-      preview = { ...previous, source }
+    } else if (previous && previous.source.sha256 === file.sha256 && !regen) {
+      preview = { ...previous, source: { pathname: file.pathname, sha256: file.sha256! } }
+    } else if (file.contentType === PRODUCT_FILE_TYPES.pdf) {
+      ;({ preview, changes: previewChanges } = await buildPreview({ slug, source: { pathname: file.pathname, sha256: file.sha256! }, previous }))
     } else {
-      ;({ preview, changes: previewChanges } = await buildPreview({ slug, source, previous }))
+      // Left empty: the conversion job picks up products whose preview is missing or stale.
+      previewChanges = previewFileChanges(previous)
     }
 
     await saveProduct(
@@ -239,6 +230,7 @@ export async function saveProductAction(_prev: ActionState, fd: FormData): Promi
           price,
           file,
           preview,
+          previewDisabled: previewDisabled || undefined,
           format: str(fd, 'format', 80).trim() || undefined,
           features: str(fd, 'features', 3000)
             .split('\n')
