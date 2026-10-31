@@ -10,12 +10,14 @@ tags:
   - İş kazası bildirimi
   - SGK
   - Olay yeri
+cover:
+  src: /uploads/2026/is-kazasi-nedir-neden-ortaya-cikar-ve-nasil-onleni-mvwvnx0h.webp
+  alt: iş kazası nedir
 references:
   - title: 6331 sayılı İş Sağlığı ve Güvenliği Kanunu, madde 14
     url: https://www.mevzuat.gov.tr/mevzuatmetin/1.5.6331.pdf
   - title: 5510 sayılı Sosyal Sigortalar ve Genel Sağlık Sigortası Kanunu, madde 13
-revision: 1
-sample: true
+revision: 2
 ---
 
 Bir iş kazasından sonraki ilk saatler hem yaralının sağlığı hem de olayın doğru anlaşılması için belirleyicidir. Bu yazıdaki sıra genel bir çerçevedir; işyerinizin acil durum planı ve ilk yardım prosedürü her zaman önceliklidir.
